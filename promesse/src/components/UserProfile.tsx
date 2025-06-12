@@ -1,8 +1,18 @@
 
 import React from 'react';
-import { User, Settings, Camera, Award, TrendingUp } from 'lucide-react';
+import { User, Settings, Camera, Award, TrendingUp, Mail } from 'lucide-react'; // Added Mail icon
 
-const UserProfile = () => {
+// Interface for User prop based on AuthContext's User interface
+interface UserProfileProps {
+  user: {
+    id: string; // Assuming id is string from AuthContext
+    username: string;
+    email: string;
+    // Add other fields if present, e.g., bio, profileImageUrl
+  };
+}
+
+const UserProfile = ({ user: userData }: UserProfileProps) => { // Renamed prop to userData to avoid conflict with Lucide User icon
   return (
     <div className="min-h-screen bg-gradient-to-br from-owis-cream to-owis-mint dark:from-owis-charcoal-dark to-owis-midnight-blue pt-20 p-6">
       <div className="max-w-4xl mx-auto">
@@ -18,13 +28,17 @@ const UserProfile = () => {
             </div>
             
             <div className="text-center md:text-left">
-              <h1 className="text-3xl font-heading font-bold text-owis-charcoal dark:text-owis-cream mb-2">
-                Sarah Johnson
+              <h1 className="text-3xl font-heading font-bold text-owis-charcoal dark:text-owis-cream mb-1">
+                {userData.username}
               </h1>
+              <div className="flex items-center justify-center md:justify-start text-owis-charcoal/70 dark:text-owis-cream/70 mb-2">
+                <Mail size={14} className="mr-2 text-owis-sage" />
+                <span>{userData.email}</span>
+              </div>
               <p className="text-owis-charcoal/70 dark:text-owis-cream/70 mb-2">
-                Fashion enthusiast & sustainable style advocate
+                Fashion enthusiast & sustainable style advocate {/* This can be made dynamic if a bio field is added to user model */}
               </p>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 justify-center md:justify-start">
                 <div className="flex items-center gap-2">
                   <Award className="text-owis-gold" size={16} />
                   <span className="text-sm text-owis-charcoal dark:text-owis-cream">Style Expert</span>

@@ -2,6 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { AuthProvider } from '@/contexts/AuthContext'; // Added AuthProvider import
 import IndexPage from './pages/IndexPage';
 import DashboardPage from './pages/DashboardPage';
 import WardrobePage from './pages/WardrobePage';
@@ -16,9 +17,10 @@ import AIStudioPage from './pages/AIStudioPage';
 function App() {
   return (
     <ThemeProvider>
-      <Router>
-        <div className="min-h-screen bg-background">
-          <Header />
+      <AuthProvider> {/* Added AuthProvider wrapper */}
+        <Router>
+          <div className="min-h-screen bg-background">
+            <Header />
           <main className="pt-16">
             <Routes>
               <Route path="/" element={<IndexPage />} />
@@ -34,6 +36,7 @@ function App() {
           </main>
         </div>
       </Router>
+      </AuthProvider> {/* Closed AuthProvider wrapper */}
     </ThemeProvider>
   );
 }

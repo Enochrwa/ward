@@ -3,49 +3,64 @@ import React, { useState } from 'react';
 import { X, Upload, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast'; // Corrected path for ShadCN UI
+import { WardrobeItemCreate } from './WardrobeManager'; // Import the interface
 
 export interface AddItemModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newItem: any) => void;
+  onSave: (newItem: WardrobeItemCreate) => void; // Use imported interface
 }
 
 const AddItemModal = ({ isOpen, onClose, onSave }: AddItemModalProps) => {
   const [itemData, setItemData] = useState({
     name: '',
     brand: '',
-    category: 'Shirts',
+    category: 'Shirts', // Default category
     size: '',
     price: '',
     material: '',
-    season: 'All Seasons',
-    image: '',
-    tags: ''
+    season: 'All Seasons', // Default season
+    image_url: '', // Changed from image to image_url
+    tags: '',
+    color: '', // Added optional field
+    notes: '', // Added optional field
   });
-  const { toast } = useToast();
+  const { toast } = useToast(); // Standard toast, not from hooks
 
-  const categories = ['Shirts', 'Pants', 'Dresses', 'Shoes', 'Accessories', 'Jackets', 'Sweaters'];
+  const categories = ['Shirts', 'Pants', 'Dresses', 'Shoes', 'Accessories', 'Jackets', 'Sweaters', 'Other'];
   const seasons = ['Spring', 'Summer', 'Fall', 'Winter', 'All Seasons'];
+  // Optional: Define some common colors or allow free text
+  // const commonColors = ['Red', 'Blue', 'Green', 'Black', 'White', 'Yellow', 'Pink', 'Purple', 'Orange', 'Brown', 'Gray', 'Beige'];
+
 
   const handleSave = () => {
-    if (!itemData.name || !itemData.brand) {
+    if (!itemData.name || !itemData.brand || !itemData.category) { // Added category check
       toast({
-        title: "Missing Information",
-        description: "Please fill in at least the name and brand.",
-        variant: "destructive"
+        title: "Missing Required Fields",
+        description: "Please fill in Name, Brand, and Category.",
+        variant: "destructive",
       });
       return;
     }
 
-    const newItem = {
-      ...itemData,
-      price: parseFloat(itemData.price) || 0,
+    const newItem: WardrobeItemCreate = {
+      name: itemData.name,
+      brand: itemData.brand,
+      category: itemData.category,
+      size: itemData.size,
+      price: parseFloat(itemData.price) || 0, // Ensure price is a number
+      material: itemData.material,
+      season: itemData.season,
+      image_url: itemData.image_url || undefined, // Send undefined if empty, backend might handle default
       tags: itemData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
-      image: itemData.image || 'https://images.unsplash.com/photo-1618354691373-d851c5c3441b?w=300'
+      color: itemData.color || undefined,
+      notes: itemData.notes || undefined,
     };
 
-    onSave(newItem);
+    onSave(newItem); // This will now call WardrobeManager's handleSaveItem
+
+    // Reset form and close. Toast is handled by WardrobeManager after API call.
     setItemData({
       name: '',
       brand: '',
@@ -54,15 +69,13 @@ const AddItemModal = ({ isOpen, onClose, onSave }: AddItemModalProps) => {
       price: '',
       material: '',
       season: 'All Seasons',
-      image: '',
-      tags: ''
+      image_url: '',
+      tags: '',
+      color: '',
+      notes: '',
     });
     onClose();
-    
-    toast({
-      title: "Item Added!",
-      description: "Your new wardrobe item has been added successfully.",
-    });
+    // Toast is removed from here, will be shown by WardrobeManager
   };
 
   if (!isOpen) return null;
@@ -170,14 +183,25 @@ const AddItemModal = ({ isOpen, onClose, onSave }: AddItemModalProps) => {
               </select>
             </div>
 
-            <div className="sm:col-span-1">
+            <div>
               <label className="block text-xs xs:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 xs:mb-2">
                 Image URL
               </label>
               <Input
-                value={itemData.image}
-                onChange={(e) => setItemData({...itemData, image: e.target.value})}
+                value={itemData.image_url}
+                onChange={(e) => setItemData({...itemData, image_url: e.target.value})}
                 placeholder="https://example.com/image.jpg"
+                className="bg-white/80 border-owis-sage/30 text-sm xs:text-base h-10 xs:h-11"
+              />
+            </div>
+            <div>
+              <label className="block text-xs xs:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 xs:mb-2">
+                Color (optional)
+              </label>
+              <Input
+                value={itemData.color}
+                onChange={(e) => setItemData({...itemData, color: e.target.value})}
+                placeholder="e.g., Blue, Multi-color"
                 className="bg-white/80 border-owis-sage/30 text-sm xs:text-base h-10 xs:h-11"
               />
             </div>
@@ -194,6 +218,20 @@ const AddItemModal = ({ isOpen, onClose, onSave }: AddItemModalProps) => {
               className="bg-white/80 border-owis-sage/30 text-sm xs:text-base h-10 xs:h-11"
             />
           </div>
+
+          <div>
+            <label className="block text-xs xs:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 xs:mb-2">
+              Notes (optional)
+            </label>
+            <textarea
+              value={itemData.notes}
+              onChange={(e) => setItemData({...itemData, notes: e.target.value})}
+              placeholder="e.g., Purchased for wedding, very comfortable"
+              rows={2}
+              className="w-full p-2 xs:p-3 text-sm xs:text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
+            />
+          </div>
+
 
           <div className="flex flex-col xs:flex-row gap-2 xs:gap-3 pt-3 xs:pt-4">
             <Button variant="outline" onClick={onClose} className="flex-1 h-10 xs:h-11 text-sm xs:text-base">

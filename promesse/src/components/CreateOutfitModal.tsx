@@ -206,7 +206,8 @@ const CreateOutfitModal = ({ isOpen, onClose, wardrobeItems, onSave }: CreateOut
           </Button>
         </div>
       </div>
-    </div>
+      </div>
+      </div>
   );
 };
 

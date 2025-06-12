@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -95,14 +94,14 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Enhanced OWIS Brand Colors with gradients and dynamic variations
+				// Enhanced OWIS Brand Colors with pleasant non-yellow alternatives
 				owis: {
 					forest: '#1a4a3a',
 					'forest-light': '#2a5a4a',
 					'forest-dark': '#0a3a2a',
-					gold: '#d4af37',
-					'gold-light': '#e4bf47',
-					'gold-dark': '#c49f27',
+					gold: '#8b7355', // Changed from gold to warm taupe
+					'gold-light': '#9b8365', // Lighter taupe
+					'gold-dark': '#7b6345', // Darker taupe
 					cream: '#faf7f2',
 					'cream-warm': '#fcf9f4',
 					'cream-cool': '#f8f5f0',
@@ -113,9 +112,9 @@ export default {
 					'charcoal-light': '#3d4758',
 					'charcoal-dark': '#1d2738',
 					pearl: '#f7fafc',
-					bronze: '#b7791f',
-					'bronze-light': '#c7892f',
-					'bronze-dark': '#a7690f',
+					bronze: '#a0785a', // Changed from bronze to warm brown
+					'bronze-light': '#b0886a', // Lighter warm brown
+					'bronze-dark': '#90684a', // Darker warm brown
 					mint: '#e6fffa',
 					'mint-light': '#f0fffb',
 					'mint-dark': '#dcfff9',
@@ -255,10 +254,10 @@ export default {
 				},
 				'pulse-glow': {
 					'0%, 100%': {
-						boxShadow: '0 0 20px rgba(212, 175, 55, 0.3)'
+						boxShadow: '0 0 20px rgba(139, 115, 85, 0.3)' // Changed from gold to taupe
 					},
 					'50%': {
-						boxShadow: '0 0 40px rgba(212, 175, 55, 0.6)'
+						boxShadow: '0 0 40px rgba(139, 115, 85, 0.6)' // Changed from gold to taupe
 					}
 				},
 				'shimmer': {
@@ -339,8 +338,8 @@ export default {
 				'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
 				'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 30px -5px rgba(0, 0, 0, 0.05)',
 				'large': '0 10px 40px -15px rgba(0, 0, 0, 0.1), 0 20px 50px -10px rgba(0, 0, 0, 0.05)',
-				'glow': '0 0 30px rgba(212, 175, 55, 0.3)',
-				'glow-lg': '0 0 50px rgba(212, 175, 55, 0.4)',
+				'glow': '0 0 30px rgba(139, 115, 85, 0.3)', // Changed from gold to taupe
+				'glow-lg': '0 0 50px rgba(139, 115, 85, 0.4)', // Changed from gold to taupe
 				'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
 				'2xs': '0 1px 1px 0 rgba(0, 0, 0, 0.05)'
 			},

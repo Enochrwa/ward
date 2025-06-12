@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea'; // Assuming Textarea compon
 import { useToast } from '@/components/ui/use-toast';
 import apiClient from '@/lib/apiClient';
 import { useAuth } from '@/hooks/useAuth';
-import { LoadingSpinner } from '@/components/ui/loading';
+import  LoadingSpinner  from '@/components/ui/loading';
 import { Occasion, OccasionCreate } from '@/types/occasionTypes';
 
 interface OccasionPlannerProps {

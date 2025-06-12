@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import UserProfile from '@/components/UserProfile';
-import { LoadingSpinner } from '@/components/ui/loading'; // Assuming a loading spinner component exists
+import  LoadingSpinner  from '@/components/ui/loading'; // Assuming a loading spinner component exists
 
 const ProfilePage = () => {
   const { user, isLoading, token } = useAuth(); // Destructure directly for convenience

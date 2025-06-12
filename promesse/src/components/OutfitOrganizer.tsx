@@ -10,7 +10,7 @@ import { WardrobeItem } from './WardrobeManager'; // Import WardrobeItem for pro
 import apiClient from '@/lib/apiClient';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
-import { LoadingSpinner } from '@/components/ui/loading';
+import  LoadingSpinner  from '@/components/ui/loading';
 import EditOutfitModal from './EditOutfitModal'; // Import EditOutfitModal
 
 interface OutfitOrganizerProps {

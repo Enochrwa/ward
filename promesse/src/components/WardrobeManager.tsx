@@ -9,7 +9,7 @@ import EditItemModal from './EditItemModal'; // Added EditItemModal import
 import apiClient from '@/lib/apiClient'; // Added apiClient
 import { useAuth } from '@/hooks/useAuth'; // Added useAuth
 import { useToast } from "@/components/ui/use-toast"; // Added useToast
-import { LoadingSpinner } from '@/components/ui/loading'; // Added LoadingSpinner
+import  LoadingSpinner  from '@/components/ui/loading'; // Added LoadingSpinner
 import CreateOutfitModal from './CreateOutfitModal';
 import { OutfitCreate } from '../types/outfitTypes'; // Added OutfitCreate import
 import PlanWeekModal from './PlanWeekModal';

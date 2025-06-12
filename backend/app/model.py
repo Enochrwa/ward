@@ -1,8 +1,8 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float, Boolean, ForeignKey, Table, Text
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float, Boolean, ForeignKey, Table, Text, JSON
 from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+#from sqlalchemy.ext.declarative import declarative_base # Base is imported, declarative_base not directly used
 from datetime import datetime
-import json # For JSON type in List fields
+#import json # SQLAlchemy's JSON type handles serialization
 
 from .db.database import Base # Import Base from the new database.py
 
@@ -26,6 +26,7 @@ class User(Base):
     weekly_plans = relationship("WeeklyPlan", back_populates="owner")
     occasions = relationship("Occasion", back_populates="owner")
     style_history_entries = relationship("StyleHistory", back_populates="user")
+    profile = relationship("UserProfile", uselist=False, back_populates="owner", cascade="all, delete-orphan")
 
 
 class WardrobeItem(Base):
@@ -143,6 +144,32 @@ class StyleHistory(Base):
     user = relationship("User", back_populates="style_history_entries")
     item_worn = relationship("WardrobeItem", back_populates="style_history_entries")
     outfit_worn = relationship("Outfit", back_populates="style_history_entries")
+
+
+class UserProfile(Base):
+    __tablename__ = "user_profiles"
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True, index=True)
+    preferred_styles = Column(JSON, nullable=True)  # Stores List[str]
+    preferred_colors = Column(JSON, nullable=True)  # Stores List[str]
+    avoided_colors = Column(JSON, nullable=True)  # Stores List[str]
+    sizes = Column(JSON, nullable=True)  # Stores Dict[str, str]
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    owner = relationship("User", back_populates="profile")
+
+
+class Feedback(Base):
+    __tablename__ = "feedbacks"
+    id = Column(Integer, primary_key=True, index=True)
+    outfit_id = Column(Integer, ForeignKey("outfits.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False) # User who gave the feedback
+    feedback_text = Column(Text, nullable=True)
+    rating = Column(Integer, nullable=True) # e.g., 1-5 stars
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    outfit = relationship("Outfit", back_populates="feedbacks")
+    commenter = relationship("User") # Relationship to the user who made the comment
+
 
 # Example usage for creating tables (typically in main.py or a setup script)
 # if __name__ == "__main__":

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Camera, Plus, Filter, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import FeedbackSection from './FeedbackSection'; // Import the new component
 
 interface Post {
   id: string;
@@ -401,6 +402,10 @@ const CommunityFeed = () => {
                     </p>
                   </div>
                 </div>
+
+                {/* Feedback Section Integration */}
+                <FeedbackSection outfitId={post.id} />
+
               </CardContent>
             </Card>
           ))}

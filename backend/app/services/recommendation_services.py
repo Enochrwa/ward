@@ -28,6 +28,8 @@ except Exception as e:
 # Instantiate services needed
 outfit_matcher = OutfitMatchingService()
 
+from .weather_service import get_weather_data # For weather-based recommendations
+import asyncio # For running async weather_service call if needed, or make the main function async
 
 # Helper function to find matching outfits based on simple criteria (OLD - to be replaced)
 # New AI-driven helper function for occasion matching
@@ -177,10 +179,60 @@ async def recommend_outfits_for_occasion_service(
 async def get_wardrobe_recommendations_service(
     db: Session,
     user: schemas.User,
-    num_recommendations: int = 5 # Max number of new outfit ideas
+    num_recommendations: int = 5, # Max number of new outfit ideas
+    latitude: Optional[float] = None,
+    longitude: Optional[float] = None
 ) -> schemas.PersonalizedWardrobeSuggestions:
 
-    user_items = db.query(models.WardrobeItem).filter(models.WardrobeItem.user_id == user.id).all()
+    weather_conditions: Optional[Dict[str, Any]] = None
+    if latitude is not None and longitude is not None:
+        # Assuming get_weather_data is async
+        weather_conditions = await get_weather_data(latitude=latitude, longitude=longitude)
+        # If get_weather_data is not async, call it directly:
+        # weather_conditions = get_weather_data(latitude=latitude, longitude=longitude)
+
+    user_items_query = db.query(models.WardrobeItem).filter(models.WardrobeItem.user_id == user.id)
+
+    # Initial filtering based on very basic weather conditions if available
+    # This is a simple approach. More advanced would involve scoring items.
+    if weather_conditions:
+        temp = weather_conditions.get("temperature_celsius")
+        condition = weather_conditions.get("condition", "").lower()
+
+        if temp is not None:
+            if temp < 10: # Cold
+                # Prioritize warmer clothes, allow layers
+                # This example prioritizes by category or season, could also use tags
+                user_items_query = user_items_query.filter(
+                    or_(
+                        models.WardrobeItem.category.in_(["Sweater", "Coat", "Jacket", "Outerwear", "Knitwear", "Hoodie", "Long-Sleeve"]),
+                        models.WardrobeItem.season.in_(["Winter", "Autumn"]),
+                        # Add tag-based filtering here if tags are well-defined for warmth
+                    )
+                )
+            elif temp > 25: # Hot
+                user_items_query = user_items_query.filter(
+                    or_(
+                        models.WardrobeItem.category.in_(["T-Shirt", "Shorts", "Tank Top", "Dress", "Skirt"]),
+                        models.WardrobeItem.season.in_(["Summer", "Spring"]),
+                    )
+                )
+
+        if "rain" in condition:
+            # Further prioritize or filter for rain-proof items
+            # This assumes 'Raincoat' category or a 'waterproof' tag exists
+            # For simplicity, this example doesn't add a separate mandatory filter for rain anorak
+            # but one could add an additional filter or boost scores of rain-appropriate items.
+            pass # Placeholder for more specific rain logic, e.g. boosting raincoats
+
+        if "snow" in condition:
+            # Similar to cold, but could be more specific for snow gear
+            user_items_query = user_items_query.filter(
+                models.WardrobeItem.category.in_(["Winter Coat", "Insulated Jacket", "Boots", "Snow Pants"])
+            )
+
+
+    user_items = user_items_query.all()
 
     # Process items to ensure they have AI features (mocked if not present)
     processed_user_items: List[Dict[str, Any]] = []

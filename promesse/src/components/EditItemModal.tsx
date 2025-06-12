@@ -5,15 +5,21 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { WardrobeItem, WardrobeItemCreate } from './WardrobeManager'; // Import interfaces
 
+import { Upload } from 'lucide-react'; // Added Upload icon
+
 export interface EditItemModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (itemId: string, updatedData: Partial<WardrobeItemCreate>) => void;
+  // Update onUpdate to pass imageFile and removeImage flag
+  onUpdate: (itemId: string, updatedData: Partial<Omit<WardrobeItemCreate, 'image_url'>>, imageFile?: File, removeCurrentImage?: boolean) => void;
   item: WardrobeItem | null;
 }
 
 const EditItemModal = ({ isOpen, onClose, onUpdate, item }: EditItemModalProps) => {
-  const [formData, setFormData] = useState<Partial<WardrobeItemCreate>>({});
+  const [formData, setFormData] = useState<Partial<Omit<WardrobeItemCreate, 'image_url' | 'tags' | 'price'>> & { tags: string[] | string; price?: number | string; image_url?: string | null }>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [removeCurrentImage, setRemoveCurrentImage] = useState(false);
   const { toast } = useToast();
 
   const categories = ['Shirts', 'Pants', 'Dresses', 'Shoes', 'Accessories', 'Jackets', 'Sweaters', 'Other'];
@@ -29,11 +35,14 @@ const EditItemModal = ({ isOpen, onClose, onUpdate, item }: EditItemModalProps) 
         price: item.price,
         material: item.material,
         season: item.season,
-        image_url: item.image_url || '',
-        tags: item.tags || [], // Ensure tags is an array
+        image_url: item.image_url || null, // Keep existing or set to null
+        tags: Array.isArray(item.tags) ? item.tags : [], // Ensure tags is an array
         color: item.color || '',
         notes: item.notes || '',
       });
+      setImagePreview(item.image_url || null); // Set initial preview
+      setImageFile(null); // Reset any selected file
+      setRemoveCurrentImage(false); // Reset remove flag
     }
   }, [item]);
 
@@ -68,15 +77,47 @@ const EditItemModal = ({ isOpen, onClose, onUpdate, item }: EditItemModalProps) 
     }
 
     // Ensure tags are correctly formatted as an array of strings
-    const finalData: Partial<WardrobeItemCreate> = {
-        ...formData,
-        price: typeof formData.price === 'string' ? parseFloat(formData.price) : formData.price,
-        tags: Array.isArray(formData.tags) ? formData.tags.filter(Boolean) : (typeof formData.tags === 'string' ? formData.tags.split(',').map(tag => tag.trim()).filter(Boolean) : []),
+    // Prepare data for submission
+    const { image_url, ...dataToSubmit } = formData; // Exclude image_url from main data if file is handled
+
+    const updatedItemData: Partial<Omit<WardrobeItemCreate, 'image_url'>> = {
+      ...dataToSubmit,
+      price: typeof formData.price === 'string' ? parseFloat(formData.price) : formData.price,
+      tags: Array.isArray(formData.tags) ? formData.tags.filter(Boolean) : (typeof formData.tags === 'string' ? formData.tags.split(',').map(tag => tag.trim()).filter(Boolean) : []),
     };
 
-    onUpdate(item.id, finalData);
-    onClose();
+    // If removeCurrentImage is true, ensure image_url is explicitly set to null in the data sent to backend
+    // (if imageFile is not also being uploaded, which would override)
+    if (removeCurrentImage && !imageFile) {
+        (updatedItemData as any).image_url = null;
+    }
+
+
+    onUpdate(item.id, updatedItemData, imageFile || undefined, removeCurrentImage);
+    onClose(); // Consider moving onClose to WardrobeManager after successful update
   };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setRemoveCurrentImage(false); // If new file is selected, don't remove existing one based on checkbox
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImageClick = () => {
+    setRemoveCurrentImage(true);
+    setImageFile(null);
+    setImagePreview(null);
+    // Also update formData to reflect that image_url should be null if saved now without new file
+    setFormData(prev => ({ ...prev, image_url: null }));
+  };
+
 
   if (!isOpen || !item) return null;
 
@@ -124,10 +165,36 @@ const EditItemModal = ({ isOpen, onClose, onUpdate, item }: EditItemModalProps) 
                 {seasons.map(s => (<option key={s} value={s}>{s}</option>))}
               </select>
             </div>
-            <div>
-              <label htmlFor="image_url" className="block text-xs xs:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 xs:mb-2">Image URL</label>
-              <Input id="image_url" name="image_url" value={formData.image_url || ''} onChange={handleChange} placeholder="https://example.com/image.jpg" className="bg-white/80 border-owis-sage/30 text-sm xs:text-base h-10 xs:h-11" />
+            {/* Image Upload Field */}
+            <div className="sm:col-span-2">
+              <label className="block text-xs xs:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 xs:mb-2">
+                Item Image
+              </label>
+              <div className="mt-1 flex items-center gap-4">
+                <span className="inline-block h-16 w-16 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-700">
+                  {imagePreview ? (
+                    <img src={imagePreview.startsWith('data:') ? imagePreview : `http://localhost:8000${imagePreview}`} alt="Preview" className="h-full w-full object-cover" />
+                  ) : (
+                    <Upload className="h-full w-full text-gray-300 dark:text-gray-500 p-4" />
+                  )}
+                </span>
+                <div className="flex flex-col gap-2">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="text-sm file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:bg-owis-mint/20 file:text-owis-forest hover:file:bg-owis-mint/40"
+                  />
+                  { (imagePreview || formData.image_url) && !removeCurrentImage && ( // Show remove only if there's an image to remove
+                    <Button variant="link" size="sm" onClick={handleRemoveImageClick} className="text-red-500 p-0 h-auto">
+                      Remove current image
+                    </Button>
+                  )}
+                  { removeCurrentImage && <p className="text-xs text-red-500">Image will be removed upon saving.</p>}
+                </div>
+              </div>
             </div>
+            {/* End Image Upload Field */}
             <div>
               <label htmlFor="color" className="block text-xs xs:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 xs:mb-2">Color</label>
               <Input id="color" name="color" value={formData.color || ''} onChange={handleChange} placeholder="e.g., Blue, Multi-color" className="bg-white/80 border-owis-sage/30 text-sm xs:text-base h-10 xs:h-11" />

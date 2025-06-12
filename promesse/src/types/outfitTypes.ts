@@ -13,6 +13,7 @@ export interface Outfit {
   tags?: string[];
   image_url?: string;
   items?: WardrobeItem[]; // For frontend display, populated after fetching item details if needed
+  feedbacks?: Feedback[]; // Added for displaying feedback
 }
 
 export interface OutfitCreate {
@@ -20,4 +21,19 @@ export interface OutfitCreate {
   item_ids: string[];
   tags?: string[];
   image_url?: string;
+}
+
+export interface Feedback {
+  id: number; // Assuming backend uses number for ID
+  outfit_id: number; // Assuming backend uses number for ID
+  user_id: number; // Assuming backend uses number for ID
+  commenter_username?: string;
+  feedback_text?: string;
+  rating?: number; // 1-5
+  created_at: string; // ISO date string
+}
+
+export interface FeedbackCreate {
+  feedback_text?: string;
+  rating?: number;
 }

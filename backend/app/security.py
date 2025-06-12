@@ -3,6 +3,11 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 from typing import Optional
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from . import schemas
+# from .. import database # This would be for a real DB
+from .routers.auth import fake_users_db # Import from auth.py - HACK for fake DB
 
 # Password Hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -21,19 +26,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 class TokenData(BaseModel):
     username: Optional[str] = None
 
-# Imports needed for get_current_user
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from .. import schemas # Assuming schemas.py is one level up then down into schemas
-# Placeholder for database interactions if get_current_user needs them directly
-# from .. import database # This would be for a real DB
 
 # Imports needed for get_current_user
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from .. import schemas
-# from .. import database # This would be for a real DB
-from ..routers.auth import fake_users_db # Import from auth.py - HACK for fake DB
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login") # tokenUrl is relative to the app root
 

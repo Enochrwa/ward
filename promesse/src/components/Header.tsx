@@ -1,8 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Menu, X, User, Settings, LogOut, Sparkles, Heart, Calendar, BarChart3, Wand2, Eye, Brain } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, Sparkles, Heart, Calendar, BarChart3, Wand2, Eye, Brain, LogIn } from 'lucide-react'; // Added LogIn
 import { Link, useLocation } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
+import { useAuth } from '../hooks/useAuth'; // Added useAuth
+import { AuthModal } from './AuthModal'; // Added AuthModal
+import { Button } from './ui/button'; // Added Button
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -16,7 +19,9 @@ import { cn } from "@/lib/utils";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false); // Added AuthModal state
   const location = useLocation();
+  const { user, logout } = useAuth(); // Consumed AuthContext
 
   const navigation = [
     { name: 'Home', href: '/', icon: Sparkles },
@@ -262,40 +267,65 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             <ThemeToggle />
             
-            {/* Profile Dropdown */}
-            <div className="relative profile-dropdown">
-              <button
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center space-x-2 p-2 rounded-xl bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 hover:from-purple-200 hover:to-pink-200 dark:hover:from-purple-900/50 dark:hover:to-pink-900/50 transition-all duration-200 shadow-md hover:shadow-lg"
-              >
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-inner">
-                  <User size={16} className="text-white" />
-                </div>
-              </button>
+            {/* Profile Dropdown / Login Button */}
+            {user ? (
+              <div className="relative profile-dropdown">
+                <button
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center space-x-2 p-2 rounded-xl bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 hover:from-purple-200 hover:to-pink-200 dark:hover:from-purple-900/50 dark:hover:to-pink-900/50 transition-all duration-200 shadow-md hover:shadow-lg"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-inner">
+                    {/* Optionally display user initial or avatar here */}
+                    <User size={16} className="text-white" />
+                  </div>
+                  {/* <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-200">{user.username}</span> */}
+                </button>
 
-              {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white/95 dark:bg-gray-800/95 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 py-2 animate-fade-in backdrop-blur-md">
-                  <Link
-                    to="/profile"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-200"
-                  >
-                    <User size={16} className="mr-3" />
-                    Profile
-                  </Link>
-                  <Link
-                    to="/settings"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-200"
-                  >
-                    <Settings size={16} className="mr-3" />
-                    Settings
-                  </Link>
-                  <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-50 hover:to-orange-50 dark:hover:from-red-900/20 dark:hover:to-orange-900/20 transition-all duration-200">
-                    <LogOut size={16} className="mr-3" />
-                    Sign Out
-                  </button>
-                </div>
-              )}
-            </div>
+                {isProfileOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white/95 dark:bg-gray-800/95 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 py-2 animate-fade-in backdrop-blur-md">
+                    <div className="px-4 py-2 border-b border-gray-200/50 dark:border-gray-700/50">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.username}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+                    </div>
+                    <Link
+                      to="/profile"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-200"
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      <User size={16} className="mr-3" />
+                      Profile
+                    </Link>
+                    <Link
+                      to="/settings"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-200"
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      <Settings size={16} className="mr-3" />
+                      Settings
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsProfileOpen(false);
+                      }}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-red-50 hover:to-orange-50 dark:hover:from-red-900/20 dark:hover:to-orange-900/20 transition-all duration-200"
+                    >
+                      <LogOut size={16} className="mr-3" />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Button
+                onClick={() => setIsAuthModalOpen(true)}
+                variant="outline"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 flex items-center space-x-2"
+              >
+                <LogIn size={16} className="mr-1" />
+                Login / Register
+              </Button>
+            )}
 
             {/* Mobile menu button */}
             <button
@@ -311,6 +341,7 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 animate-fade-in mobile-menu">
             <nav className="space-y-2">
+              {/* Add Login/Register to mobile menu if not logged in? For now, focus on desktop */}
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href || 
@@ -336,6 +367,7 @@ const Header = () => {
           </div>
         )}
       </div>
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </header>
   );
 };

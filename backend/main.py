@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import uvicorn
-
+import os
+import tensorflow as tf
 from app.db import database
 from app.db.database import Base 
 from app import models # Assuming models.py is in backend/app/
@@ -16,7 +17,7 @@ from app.routers import (
     ai_analyzer, # Or whatever you named the AI router file
     recommendations, # Or whatever you named it
 )
-
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 Base.metadata.create_all(bind=database.engine) # This creates tables if they don't exist
 app = FastAPI()
 

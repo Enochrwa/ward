@@ -1,0 +1,294 @@
+
+
+DECLARATION OF ORIGINALITY
+
+I hereby declare that this work is my original creation and has been completed with integrity and adherence to academic and ethical principal. The content presented in this document is the result or my independent research. creativity, and analysis.
+Any information, data, ideas or materials sourced from other individuals, research papers, book, or digital platforms have been properly acknowledge and a cited following appropriate referencing guideline.
+I confirm that this work has not been previously submitted for evaluation or publication in any academic institution or platform. Take full responsibility for its authenticity and originality.
+The candidate's name: IGISUBIZO Marie Promesse
+Signature of candidate: ............................................
+Date of submission: ....................../.............../...2025
+                        
+
+
+
+
+
+
+
+
+
+	
+APPROVAL
+
+This is to certify that this dissertation work entitled "mobile and web app for managing digital wardrobe" is an original study conducted by IGISUBIZO Marie Promesse under supervision and guidance.
+The Supervisor name: NSENGIYUMVA Emmanuel
+Signature of the supervisor.........................................
+Submission date.....................................................
+                          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                     DEDICATION
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ACKNOWLEDGMENTS
+This project has been made possible through the contributions of several individuals and organizations who dedicated their time, expertise, and support to its development.
+First and foremost, I extend my heartfelt gratitude to my supervisor, Mr.NSENGIYUMVA Emmanuel and Co-supervisor for their invaluable guidance, encouragement, and insights throughout the development of this mobile and web application. Their expertise has been instrumental in shaping this project into a functional and user-friendly solution.
+I am also deeply thankful to my classmates for their support, collaboration, and insightful ideas, which have greatly enriched my academic journey.
+Above all, I give all glory and praise to the Almighty God, who has granted me the strength, courage, and good health to accomplish my studies at INES-Ruhengeri
+I also want to express my appreciation to the Chansen initiative, which paid for my tuition and helped me with my studies. I am incredibly grateful to God for giving me this chance through the project, as it has been crucial in enabling me to realize my goals.
+Special thanks go to my family and friends for their unwavering encouragement, belief in my vision, and moral support throughout this journey. Their continuous motivation has been a driving force behind this achievement.
+Lastly, I express my sincere gratitude to all those who have provided me with moral support and constant encouragement throughout this entire study. Your kindness and belief in me have been a great source of motivation. According to this format i want to work an acknowledgment by using mobile web app for managing digital ward robes.
+
+
+
+
+ABSTRACT
+This Development system for managing digital wardrobes is designed to provide a user-friendly platform that helps individuals efficiently organize their clothing, plan outfits, and make appropriate fashion choices for various occasions. The application enhances the wardrobe management experience by allowing users to catalog their clothing items, mix and match outfits, and receive style recommendations.
+Additionally, features are implemented to suggest outfit combinations based on available wardrobe items, ensuring users can effortlessly select suitable attire for different events such as weddings, church services, casual outings, and home wear. The system includes an intuitive interface, seamless navigation, and real-time clothing organization updates, aiming to improve accessibility and convenience while offering an engaging and enjoyable user experience.
+The methodology employed in this project is agile software development, which follows an iterative and incremental approach, allowing adaptation to evolving user's requirements. This process includes phases such as Requirement Gathering, System Design, Development, Testing, Deployment, and Review/Feedback to ensure a well-refined solution.
+This project utilizes programming languages such as HTML, CSS, Virtual Studio, JavaScript, PHP, and Android Studio, with MySQL, Python as the relational database management system to store and manage wardrobe data efficiently.
+
+Contents
+DECLARATION OF ORIGINALITY	ii
+APPROVAL	iii
+DEDICATION	iv
+ACKNOWLEDGMENTS	v
+ABSTRACT	vi
+CHAPTER1: GENERAL INTRODUCTION	ix
+1.1. Background of the study	ix
+1.2. Problem Statement	x
+1.3. Research Objectives	xi
+1.3.1. General Objective	xi
+1.3.2. Specific Objectives	xi
+1.4. Research Questions	xii
+1.5. Research Hypotheses	xiii
+1.6. Choice of the Study	xiv
+1.7. Significance of the study	xiv
+1.8. Delimitation of the study	xiv
+1.9. Research methodology	xv
+1.10. Organization of the study	xv
+CHAPTER 2: LITERATURE REVIEW	xvi
+2.1. General Introduction	xvi
+2.2. Related work	xvi
+2.2.1. Cladwell digital wardrobes application	xvi
+2.2.2. Smart Closet digital wardrobes application	xvii
+2.3.1. Definition of key term	xvii
+2.3.2 Mobile Development	xvii
+2.3.3. Web Application	xvii
+2.3.4. Java Script	xvii
+2.3.5. python	xviii
+2.3.6. Css	xviii
+2.3.7. PHP	xviii
+2.3.8. AI	xviii
+2.3.9. XAMPP	xviii
+2.3.10. Database	xix
+2.3.11. HTML	xix
+2.3.12. Machine Learning	xix
+2.3.13. Cloud Computing	xix
+2.3.14. User Experience (UX) Design	xix
+2.3.15. API (Application Programming Interface)	xix
+2.3.16. Data Security	xx
+CHAPTER 3: RESEARCH METHODOLOGY	xx
+3.1. General Introduction	xx
+3.2 Research Design	xx
+3.2. Data Collation Technique	xx
+3.2.1 Surveys and Questionnaires	xxi
+3.2.2Interview	xxi
+3.2.3 Observation	xxi
+3.2.4 Documentation	xxi
+3.3 System Development Methodology	xxii
+3.3.1 Agile Model	xxii
+3.3.2 Agile Software Development Sprint Planning	xxii
+
+
+
+
+
+CHAPTER1: GENERAL INTRODUCTION
+1.1. Background of the study
+Fashion and wardrobes management have always been integral as pets of daily life. With the increasing pace of modern living, people often struggle to organize their clothes select suitable outfits for various occasions, and keep track of what they own. Traditional methods of   managing wardrobes like keeping physical record or simply relying on memory are inefficient and phone error. (Choo et al., 2014)  
+In today's   digital era, technological solutions are transforming how individuals approach routine task. Digital wardrobe management system are emerging as a practical and efficient way to streamline clothing organization, outfit planning and fashion sharing. These application leverage cloud storage, machine learning, and mobile technologies to help users manage their wardrobes collection. Reduce decision making time, and even embrace sustainable fashion practices by tracking clothing usage. 
+This study focuses on the development on intuitive mobile and wabe-based application for wardrobe management. The solution aims to allow users to catalog clothing, plan outfits, and receive AI-powered style recommendations. By incorporating social features, users can share outfits ideas and engage with a fashion- minded community, making the process both productive and interactive. Furthermore, with environmental sustainability becoming a global priority, the proposed application can encourage mindful fashion choices by providing analytics on underused clothing items and promoting sustainable clothing practices. The implementation of features such as smart outfit suggestions based on weather and events, virtual outfit previews, and planning tools makes this project highly relevant in today's digital land scope. The application addresses the growing need for convenience, personalization, and sustainable wardrobe management, offering a sophisticated yet user-friendly solution.
+
+1.2. Problem Statement
+In daily life, people, often face challenges when deciding what  clothes to wear for event,school,or when at home,wedding.the lack of an easy and sufficient way to select suitable outfits leads to time time-consuming decision making and sometimes poor clothing choices.Additionally there are situations where someone may own a specific clothing item, such as a skirt, but struggle to find a matching blouse or other complementary attire. This often results in frustration or wearing outfits that do not match well, many people wish for a technology-driven solution that helps them quickly  and easily find matching clothes.(Akram et al., 2022)
+Traditional methods, such as relying on personal judgment or seeking advice from friends, are inadequate. There is no comprehensive platform where individuals can get reliable fashion recommendations tailored to weather conditions, event types, or casual home wear. This project aims to address these issues by developing a mobile and web-based application that will help users.
+i. Select appropriate outfits for different occasions and casual wear at home.
+ii. Identify complementary clothing item (such as finding a blouse that matches a specific skirt).
+iii. Receive smart recommendation based on events or weather conditions.
+Therefore, this project aims develop a mobile and web application that addresses these issues by providing a platform for users to catalog clothing, plan outfits, receive AI-based style recommendations, and connect with a fashion-focused community. The solution will promote efficient wardrobe usage, support sustainable fashion practices and enhance user convenience through smart technologies.
+
+1.3. Research Objectives
+1.3.1. General Objective
+The primary objective of this to develop an intuitive and user-friendly mobile and web-based application for  digital wardrobe managment.The application will assist users in organizing their clothing collection, selecting suitable outfits for various occasions or home wear, and identifying complementary clothing items  trough AI-poered  recommendation, thereby promoting efficient wardrobe   usage and enhancing  user convenience.
+1.3.2. Specific Objectives
+The following is the specific objectives of this project:
+Incorporating a feature that assists users in finding matching clothing items, such as pairing a blouse with a specific skirt, is a valuable addition to your wardrobe management app. This functionality can enhance user experience by simplifying outfit selection for various occasions, including home gatherings and formal events. To implement this feature effectively, consider the following specific objectives:
+i. To design an intelligent matching algorithm that suggests compatible clothing items based on factors like color, style, and occasion. This could involve utilizing machine learning techniques to analyze user preferences and provide personalized recommendations.
+ii. To develop a user-friendly search interface that allows users to input a specific item (e.g., a skirt) and receive suggestions for complementary pieces (e.g., blouses) within their digital wardrobe. This feature should be intuitive and efficient, enabling users to quickly find matching items.
+iii. To integrate a system for occasion-based outfit recommendations, offering suggestions tailored to different events, whether casual home gatherings or formal occasions. This could involve categorizing clothing items and associating them with appropriate events to guide users in their selection process.
+By focusing on these objectives, your app can provide users with practical tools to manage their wardrobes more effectively and make informed decisions when selecting outfits for various occasions.
+
+1.4. Research Questions
+Developing a mobile and web application for managing digital wardrobes involves exploring various aspects to ensure the app is user-friendly, efficient, and meets users' needs. Here are some research questions to guide your development process:
+a. User Needs and Preferences: What are the primary challenges users face in managing their physical wardrobes? Which features do users find most valuable in existing wardrobe management apps? How do users prefer to catalog and categorize their clothing items digitally?
+
+b. Feature Implementation: What algorithms can effectively suggest matching clothing items based on factors like color, style, and occasion?
+c. How can the app incorporate event-based outfit recommendations to assist users in selecting appropriate attire for various occasions? What search functionalities are most effective for helping users find specific items or outfit combinations within their digital wardrobe?
+
+d. Technology Integration: How can artificial intelligence and machine learning enhance personalized outfit suggestions? What are the best practices for integrating augmented reality features to allow virtual try-ons? How can the app utilize data analytics to provide users with insights into their wardrobe usage patterns?
+e. User Experience and Interface Design: What design elements contribute to an intuitive and engaging user interface for wardrobe management? How can the app ensure a seamless experience across both mobile and web platforms? What accessibility features are necessary to accommodate a diverse user base?
+f. Data Privacy and Security: What measures are necessary to protect user data and ensure privacy within the app? How can the app comply with relevant data protection regulations and standards? Sustainability and Ethical.
+g. Considerations: How can the app promote sustainable fashion choices and help users make environmentally conscious decisions? What ethical considerations should be taken into account when developing features that influence user purchasing behavior? By addressing these questions, you can develop a comprehensive understanding of the key factors involved in creating a successful digital wardrobe management application.
+1.5. Research Hypotheses
+
+i. Providing AI-powered outfit recommendations will reduce the time users spend selecting outfits compared to manual outfit planning.
+ii. A drag-and-drop interface for creating outfits will lead to higher user engagement compared to a traditional form-based approach.
+iii. Visual categorization of wardrobe items by type and color will improve the ease of use and navigation within the app.
+iv. Users who share outfit ideas with friends are more likely to become frequent app users.
+v. Receiving feedback on shared outfits will increase user engagement and satisfaction.
+vi. Personalized outfit recommendations based on user preferences will lead to higher satisfaction compared to generic suggestions.
+vii. Users who receive notifications reminding them of planned outfits will show improved app engagement.
+viii. Implementing gamification elements (e.g., badges for creative outfit combinations) will increase user engagement.
+ix. Tracking wardrobe usage will encourage users to wear a broader variety of their clothing, promoting sustainable fashion habits.
+
+1.6. Choice of the Study
+A. Measure user engagement, time savings, and satisfaction with the app's features.
+B. Evaluate variations in user behavior and satisfaction, apply descriptive statistics and inferential analysis (e.g., paired t-tests).
+C. Recognize user motives, experiences, and possible problems.
+D. Evaluate how well elements like AI suggestions and event-specific attire planning work.
+1.7. Significance of the study
+ It reveals how a digital wardrobe management app can ease outfit choosing, improve organization, and enhance personal style. The software saves users time and effort by providing suggestions for various events, including weddings, religious services, and informal home settings. By assisting customers in finding complementary outfit combinations and maximizing the sustainable use of their wardrobe, it also fosters fashion innovation. The findings will help to developments in fashion technology and digital lifestyle solutions.
+1.8. Delimitation of the study
+This study focuses on the development and checking of a digital wardrobe management app designed to assist users in selecting or choosing outfits for various occasions, such as weddings, church, home, and casual events. The research is limited to the app's features for cataloging clothing, providing outfit recommendations, and suggesting matching clothing items. It excludes aspects related to physical clothing production, retail integration, and advanced AI-driven personal stylist functionalities beyond basic matching and event-specific suggestions.
+
+1.9. Research methodology
+In the research methodology for the digital wardrobe management system, the initial phase involved observation, where user behavior related to clothing organization,oiutfits selection, and fashion preferences was studied in real-life scenarios. On-sites and visits and informal user interactions were conducted to gain insight into how individuals plan their daily outfits and manage their wardrobes manually. Documentation technique were employed to symmetrically record user habits,preferences,and pain points associated with managing clothing for different occasions. For data collection, information was gathered from a variety of sources, including fashion enthusiasts, everyday users, and online fashion communities. This data includes user wardrobes habits, style preferences, event-based outfits choices, and common wardrobe challenges, which will later support personalization and intelligent matching features within the app.To implement the project I used different language HTML,CSS and Java Scripts for building the front-end of the web and mobile interfaces, ensuring responsive and visually appealing user experience. On the back-end ,I use Python, PHP,MYSQL,and xampp were employed to manage server side logic, user account and  secure data storage. The development and testing were conducted on window 10 platforms , and the application is designed to operate on systems running the Windows Operating System. This technical stack provides a reliable environment for development, with flexibility for future scalability and deployment across both mobile and web platforms. By combining qualitative observations and structured data collection with practical implementation, the methodology ensures the app is user-centered and functionally robust. Continuous feedback and iterative development will further refine the application based on real-world usage.
+1.10. Organization of the study
+The project will be organized into five chapters:
+Chapter I. General Introduction, this chapter is focusing on the objectives of the project,
+the Problem statement, and Interest of the project, the hypothesis, and the methodology of
+the project.
+Chapter II.Literature Review, explores previous research and existing wardrobe applications, including their features,strength,and elimitation.fashion recommendation  system,artifical intelligence(AI)in  fashion,and users experience principle in mobile and web  applications.
+ChapterIII.Research methodology, The architecture, system components, user interface. It includes detail about data collection, system requirement analysis, user-centered design approach.
+ChapterIV.System design and implementation, it explain how the application helps users match clothing item and provide outfits suggestions.
+ChapterV.Conclusion and Recommendation, summarizes the key findings of the study, concludes by affirming the application's usefulness, and provides recommendations for future improvements, such as AI-driven outfit suggestions and enhanced social features for sharing fashion styles.
+CHAPTER 2: LITERATURE REVIEW
+2.1. General Introduction
+This chapter highlights the significance of understanding the current state of knowledge, research trends, and gaps in the field related to digital wardrobe management applications. It explores existing research on fashion technology, outfit recommendation systems, and the integration of artificial intelligence (AI) in personal styling. Additionally, this chapter identifies limitations in current applications and discusses how new technologies can enhance wardrobe management.
+2.2. Related work
+The intersection of fashion and technology has led to the development of digital wardrobe management applications, which aim to enhance personal styling, outfit planning, and clothing organization. These platforms offer users the ability to digitize their closets, plan outfits ahead of time, and receive personalized recommendations based on their preferences. With the increasing demand for convenience and personalization in fashion, digital wardrobe solutions have become essential tools for many users. These systems typically incorporate artificial intelligence and user data to suggest optimal outfit choices. As such, they contribute to more efficient wardrobe utilization and a better understanding of personal style. A number of notable applications have emerged in this space, each offering a unique approach to wardrobe management.
+2.2.1. Cladwell digital wardrobes application
+Cladwell is a well-known digital wardrobe application that allows users to create a virtual wardrobe by uploading images of their clothing items. Once the wardrobe is populated, the platform uses AI-powered algorithms to generate daily outfit suggestions. These suggestions are tailored not only to the user's personal style preferences but also to the current weather conditions in their location. This feature helps users make more practical and stylish choices when getting dressed each day. Cladwell aims to reduce decision fatigue by offering ready-to-wear outfit combinations from the user's own clothing collection. It also encourages sustainable fashion practices by maximizing the use of existing wardrobe items rather than promoting new purchases(Willi et al., 2024).
+2.2.2. Smart Closet digital wardrobes application
+Smart Closet is another digital wardrobe platform that offers users the ability to organize and plan their clothing effectively. It allows users to categorize their wardrobe items based on type, color, season, and more, making it easier to browse and select outfits. A standout feature of Smart Closet is its calendar integration, which enables users to schedule their outfits for specific dates and events. This is especially useful for planning travel wardrobes, formal occasions, or daily outfits in advance. The app also includes tools for generating outfit combinations, helping users explore different looks using the items they already own. By combining organization and planning features, Smart Closet helps users manage their wardrobe in a smart and efficient way(Klepp & Bjerck, 2014).
+
+2.3.1. Definition of key term
+2.3.2 Mobile Development
+Mobile development refers to the creation of applications for smartphones and tablets. Technologies like React Native and Flutter facilitate cross-platform wardrobe management applications, providing users with easy access to their virtual closet(Mbayen & Edgard, 2013)
+2.3.3. Web Application
+A web application is a software program that runs on a web server and is accessed through a web browser. It enables users to perform various tasks, such as organizing their wardrobe, planning outfits, and receiving fashion recommendations. Web applications use technologies like HTML, CSS, JavaScript, PHP, and Python to deliver interactive and dynamic experiences(Klepp & Bjerck, 2014).
+2.3.4. Java Script 
+Widely used in programming language for creating interactive web applications. In this project, JavaScript is essential for handling user interactions, implementing dynamic UI components, and enhancing the overall responsiveness of the application. It enables features such as drag-and-drop wardrobe organization and real-time outfit suggestions(Mikkonen & Taivalsaari, 2007).
+2.3.5. Python
+ Powerful programming language commonly used for backend development and artificial intelligence applications.  Python is utilized to implement machine learning models for AI-powered outfit recommendations, as well as handling data processing and user analytics.
+2.3.6. Css
+Css Cascading Style Sheets is used to represent the visual presentation of web application(Lie, 2005). It ensures a visually appealing and responsive user interface by controlling layout, colors, fonts, and spacing. can be leveraged to create a modern and mobile-friendly design.
+2.3.7. PHP
+PHP Hypertext Preprocessor is server-side scripting language that is useful for data stored, user authentication, and communication between the frontend and backend(Sciences, 2023). The  role is managing user accounts, storing wardrobe data, and processing user inputs for outfits suggestions.
+2.3.8. AI
+AI Artificial Intelligence enabling smart outfit recommendations based on user preferences, weather condition and wardrobe choices. Machine learning models help analyze clothing combination, suggest fashion trends and provide personalized recommendations to enhance the user experience(Shirkhani et al., 2023). By integration these technologies, the wardrobe management application will offer a seamless, intelligent and user-friendly experience, simplifying fashion organization and outfit selection.
+2.3.9. XAMPP
+XAMPP is an open-source server environment that facilitates local web development. It includes Apache, MySQL, PHP, and Perl, allowing developers to test and deploy wardrobe management applications(Sciences, 2023).
+2.3.10. Database
+A database is a structured data storage system that holds information such as clothing items, outfit history, and user preferences. MySQL, an example of a relational database management system, is commonly used to manage and organize wardrobe application data efficiently(Chaudhuri et al., 2001).
+2.3.11. HTML 
+HTML (Hypertext Markup Language) is the standard language for structuring and displaying content on the web. It defines the framework of digital wardrobe applications, enabling the creation of clothing catalogs, outfit planners, and interactive elements.
+2.3.12. Machine Learning
+Machine Learning is a subset of AI that enables systems to learn from data and make predictions. It is used in wardrobe management to analyze user preferences, predict outfit choices, and automate fashion recommendations based on historical trends(Learning et al., 2022).
+2.3.13. Cloud Computing
+Cloud computing refers to the delivery of computing services over the internet. In wardrobe applications, cloud storage allows users to access their virtual closet from multiple devices while ensuring scalability and data backup(Willi et al., 2024).
+2.3.14. User Experience (UX) Design
+User Experience (UX) Design focuses on optimizing the usability, accessibility, and overall satisfaction of an application. In wardrobe management, a well-designed UX ensures seamless navigation, intuitive outfit selection, and an engaging interface(Akhtar et al., 2021).
+2.3.15. API (Application Programming Interface)
+An API is a set of protocols that allow different software systems to communicate. In wardrobe applications, APIs enable integration with external fashion databases, weather services, and e-commerce platforms to enhance functionality.
+
+2.3.16. Data Security
+Data security involves protecting sensitive user information from unauthorized access or breaches. Wardrobe management applications must implement encryption, authentication protocols, and secure cloud storage to ensure privacy and safety(Akhtar et al., 2021).
+
+
+
+
+
+CHAPTER 3: RESEARCH METHODOLOGY
+3.1. General Introduction
+This chapter outlines the research methodology employed in the study, focusing on the approaches used for data collection techniques and system development. The methodology ensures a structured and systematic approach to designing an intuitive and AI-powered wardrobe management application. The technique chosen facilitate the collection of relevant data to support the development and evaluation of the system.
+3.2 Research Design
+A mixed-method research approach was adopted, combining both qualitative and quantitative research methodologies. The qualitative aspect involved user interviews and observations to understand wardrobe management challenges, while the quantitative aspect relied on surveys and system performance metrics. This approach ensured a comprehensive understanding of user needs and system functionality.
+3.2. Data Collation Technique
+To ensure the development of an effective wardrobe management application, a combination of qualitative and quantitative data collection techniques was used. These methods helped gather user requirements, evaluate system performance, and assess user satisfaction.
+3.2.1 Surveys and Questionnaires
+Structured surveys and questionnaires were distributed to potential users to gather insights on their clothing organization habits, outfit selection challenges, and desired application features. The survey included multiple-choice questions, Likert scale ratings, and open-ended responses to capture diverse user preferences.
+3.2.2Interview 
+Potential consumers, including professionals, fashionistas, and people who often organize their attire for different occasions, were interviewed. Opinions, expectations, and difficulties regarding the administration of digital wardrobes were gathered through semi-structured and organized interviews. Qualitative information from these interviews informed the functionality and usability improvements of the program.
+3.2.3 Observation 
+Observation was utilized to understand how individuals manage their wardrobes and select outfits for different occasions. By studying user behaviors in real-life scenarios, such as organizing clothing, selecting outfits, and matching items, valuable insights were gained regarding common pain points and user preferences. This observation was conducted both physically and digitally, tracking how users engage with existing wardrobe management solutions.
+3.2.4 Documentation 
+Documentation served as a means of collecting and analyzing written information relevant to wardrobe management applications. This involved reviewing existing applications, industry standards, research papers, and case studies. Additionally, project-specific documentation, such as user requirements, system specifications, and interface designs, was maintained to guide development.
+3.3 System Development Methodology 
+The agile model was chosen for the development of the digital wardrobe management application due to its iterative and flexible approach. Agile allows for continuous improvement, ensuring that user feedback is incorporated at every stage of development.
+3.3.1 Agile Model
+Agile methodology involves breaking down the project into manageable iterations, allowing incremental progress. The process is user-centric, focusing on adaptability and responsiveness to changing requirements. Each iteration produces a functional component of the application, ensuring steady progress.
+
+
+                Figure 1: Agile model
+3.3.2 Agile Software Development Sprint Planning consists of multiple phases, which evolve as the product develops. The following steps were followed:
+i. Requirement Gathering: The first phases involved identify all stakeholders', including end-users, fashion consultants, and technical team members. Interview and observation were conducted to understand specific wardrobes management needs, such as organizing clothes, planning for event, and sharing outfits. Stakeholder feedback was used to draft a comprehensive list of desired features and functional requirements. User personas were developed to better capture the goals and challenges faced by different types of users. Functional requirements such as outfit recommendation; wardrobe categorization and social interaction were prioritized. Final requirements document was created to guide the design and development phases.
+ii. System Design Phase: This phase started with designing user-friendly interfaces using figma to ensure an intuitive user experience. Several wireframes and interactive mockups were created to visualized the app flow and layout. Use case diagrams were developed to map out user interactions with the system for different scenarios like adding clothes, creating outfits. Data flow diagram it help to showed how data moves through the system structure, capturing entities such as clothes,users,event,and outfits, Design reviews were conducted with stakeholder's to ensure alignment with initial requirements.
+iii. Development Phase: Core functionalities were developed in interaction's, starting with the ability to add and categorize clothing items in the users digital wardrobes. The backend was implemented using python for efficient data handling and integration with intelligent algorithms. Frontend component were created using CSS, HTML, Java Scripts, and PHP to provide a seamless and responsive user experience. Advanced features like outfits planning for events intelligent matching based on color and style were integrated. The social sharing component allowed users to share outfits and get feedback from users within app.Continuous integration practices were adopted to maintain a stable development environment throughout the sprint.
+iv. Testing Phase: Functional testing was performed to evaluate that each features worked as expected under various condition. Automated tests were written for critical functionalities like clothing cataloging, outfit matching, and occasion-based recommendations. Manuel testing was also conducted to check user interface responsiveness and compatibility across devices. Test cases were derived from user stories and acceptance criteria to ensure full coverage. Bug and consistencies were logged and addressed in subsequent sprints. Usability testing sessions helped identify areas where the user experience could be further improved
+v. Deployment Phase:. After through, the application was first deployed on local machine to check its real-time performance. Internal users accessed the app in staging environment to identify any last-minutes issues. Once stability was confirmed, the app was prepared for web hosting and mobile store submission. Sever configurations and database to manage release cycles efficiently. Monitoring systems were put in place to track performance and gether user interaction data post-launch
+vi. Review/Feedback Phase: The deployed application was shared with a group of beta users representing the targeting audience. Feedback was collected through in -observation, interview, and analytics to assess usability and satisfaction. Users provided suggestion on improving interfaces design, features accessibility and outfit recommendation accuracy. Based on this feedback, features were refined a new refined and new enhancements were planned for future srints.regular review meeting were held with stakeholders to discuss and prioritize improvements. The iterative feedback loop ensured product evolved according to user needs and expectations.
+
+
+.
+
+
+
+
+
+
+
+
+
+
+
+
+

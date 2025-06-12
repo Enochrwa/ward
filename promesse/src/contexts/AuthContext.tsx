@@ -93,7 +93,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Login failed');
       }
-      const { token: newToken } = await response.json();
+      const { access_token: newToken } = await response.json();
       localStorage.setItem('token', newToken);
       setToken(newToken);
       await fetchUserData(newToken);
@@ -125,10 +125,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Assuming registration returns token and user or just a success message
       // If it returns token, we can auto-login:
       const responseData = await response.json();
-      if (responseData.token) {
-        localStorage.setItem('token', responseData.token);
-        setToken(responseData.token);
-        await fetchUserData(responseData.token);
+      if (responseData.access_token) {
+        localStorage.setItem('token', responseData.access_token);
+        setToken(responseData.access_token);
+        await fetchUserData(responseData.access_token);
       } else {
         // If no token, perhaps redirect to login or show a message
         // For now, we'll just clear loading and let user login manually

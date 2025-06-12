@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 import uvicorn
 
+from .app.db import database
+from .app import models # Assuming models.py is in backend/app/
+
 from app.routers import (
     auth,
     wardrobe,
@@ -9,8 +12,11 @@ from app.routers import (
     occasions,
     style_history,
     statistics,
+    ai_analyzer, # Or whatever you named the AI router file
+    recommendations, # Or whatever you named it
 )
 
+models.Base.metadata.create_all(bind=database.engine) # This creates tables if they don't exist
 app = FastAPI()
 
 # Register routers
@@ -21,6 +27,8 @@ app.include_router(weekly_plans.router, prefix="/api")
 app.include_router(occasions.router, prefix="/api")
 app.include_router(style_history.router, prefix="/api")
 app.include_router(statistics.router, prefix="/api")
+app.include_router(ai_analyzer.router, prefix="/api") # Assuming other routers also have /api prefix
+app.include_router(recommendations.router, prefix="/api")
 
 
 @app.get("/")

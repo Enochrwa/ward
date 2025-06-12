@@ -94,14 +94,14 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Enhanced OWIS Brand Colors with teal and emerald
+				// Enhanced OWIS Brand Colors with purple and teal
 				owis: {
 					forest: '#1a4a3a',
 					'forest-light': '#2a5a4a',
 					'forest-dark': '#0a3a2a',
-					teal: '#008080', // Replaced gold with teal
-					'teal-light': '#20B2AA', // Lighter teal
-					'teal-dark': '#006666', // Darker teal
+					purple: '#9333ea', // Replaced gold with purple
+					'purple-light': '#a855f7', // Lighter purple
+					'purple-dark': '#7c3aed', // Darker purple
 					cream: '#faf7f2',
 					'cream-warm': '#fcf9f4',
 					'cream-cool': '#f8f5f0',
@@ -123,7 +123,13 @@ export default {
 					'deep-emerald': '#0f5132',
 					'warm-ivory': '#fffef7',
 					'midnight-blue': '#191970',
-					'sunset-orange': '#ff6b35'
+					'sunset-orange': '#ff6b35',
+					teal: '#008080',
+					'teal-light': '#20B2AA',
+					'teal-dark': '#006666',
+					sage: '#87a96b',
+					'sage-light': '#9bb57b',
+					'sage-dark': '#75955b'
 				}
 			},
 			borderRadius: {
@@ -254,10 +260,10 @@ export default {
 				},
 				'pulse-glow': {
 					'0%, 100%': {
-						boxShadow: '0 0 20px rgba(0, 128, 128, 0.3)' // Changed to teal
+						boxShadow: '0 0 20px rgba(147, 51, 234, 0.3)' // Changed to purple
 					},
 					'50%': {
-						boxShadow: '0 0 40px rgba(0, 128, 128, 0.6)' // Changed to teal
+						boxShadow: '0 0 40px rgba(147, 51, 234, 0.6)' // Changed to purple
 					}
 				},
 				'shimmer': {
@@ -338,8 +344,8 @@ export default {
 				'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
 				'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 30px -5px rgba(0, 0, 0, 0.05)',
 				'large': '0 10px 40px -15px rgba(0, 0, 0, 0.1), 0 20px 50px -10px rgba(0, 0, 0, 0.05)',
-				'glow': '0 0 30px rgba(0, 128, 128, 0.3)', // Changed to teal
-				'glow-lg': '0 0 50px rgba(0, 128, 128, 0.4)', // Changed to teal
+				'glow': '0 0 30px rgba(147, 51, 234, 0.3)', // Changed to purple
+				'glow-lg': '0 0 50px rgba(147, 51, 234, 0.4)', // Changed to purple
 				'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
 				'2xs': '0 1px 1px 0 rgba(0, 0, 0, 0.05)'
 			},

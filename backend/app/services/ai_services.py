@@ -1,284 +1,241 @@
+# This module coordinates AI services for outfit analysis.
+# It now uses lightweight models for embedding, style detection (placeholder),
+# and item identification, or can operate in a demo mode with static data.
+
+import os
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
-from PIL import Image # For image processing
-import io # For handling byte streams
-import numpy as np # For numerical operations, image manipulation
-from typing import List, Optional # Added Optional for get_fashion_trends_service user
-import torch # For PyTorch models
-
-# For AI model loading and inference
-from transformers import pipeline, ViTFeatureExtractor, ViTModel
-from transformers import DetrFeatureExtractor, DetrForObjectDetection
+from PIL import Image
+import io
+import numpy as np
+from typing import List, Optional, Union, Any # Added Union, Any
 from sklearn.cluster import KMeans
 
-from .. import tables as schemas, model as models
+from .. import tables as schemas # models import removed as it wasn't used directly here
+# Import new lightweight AI modules
+from .ai_embedding import get_image_embedding
+from .ai_style import detect_style as lw_detect_style # Alias to avoid conflict if needed
+from .ai_recommender import identify_items as lw_identify_items, get_basic_recommendations
 
-# --- Load AI Models ---
-# These models are loaded globally when the module is imported.
-# For production, consider pre-downloading to the container/server.
-
-# Image Embeddings Model (ViT)
-try:
-    embedding_feature_extractor = ViTFeatureExtractor.from_pretrained('google/vit-base-patch16-224-in21k')
-    embedding_model = ViTModel.from_pretrained('google/vit-base-patch16-224-in21k')
-except Exception as e:
-    print(f"Error loading embedding models: {e}")
-    embedding_feature_extractor = None
-    embedding_model = None
-
-# Object Detection Model (DETR)
-try:
-    object_detection_feature_extractor = DetrFeatureExtractor.from_pretrained("facebook/detr-resnet-50")
-    object_detection_model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50")
-except Exception as e:
-    print(f"Error loading object detection models: {e}")
-    object_detection_feature_extractor = None
-    object_detection_model = None
-
-# Image Captioning Model (for style detection)
-try:
-    captioner = pipeline("image-to-text", model="nlpconnect/vit-gpt2-image-captioning")
-except Exception as e:
-    print(f"Error loading captioning model: {e}")
-    captioner = None
+# --- Global Configuration ---
+# DEMO_MODE can be triggered by an environment variable for easier configuration
+DEMO_MODE = os.getenv("AI_DEMO_MODE", "false").lower() == "true"
+if DEMO_MODE:
+    print("AI Services are running in DEMO MODE.")
 
 # --- AI Functions ---
 
-def extract_image_embedding(image: Image.Image) -> Optional[List[float]]:
-    """
-    Extracts image embedding using a pre-trained ViT model.
-    """
-    if embedding_model is None or embedding_feature_extractor is None:
-        print("Embedding models not loaded. Cannot extract embedding.")
-        return None
-    try:
-        inputs = embedding_feature_extractor(images=image, return_tensors="pt")
-        with torch.no_grad(): # Ensure no gradients are computed
-            outputs = embedding_model(**inputs)
-        # Use the pooler output for a fixed-size embedding
-        embedding = outputs.pooler_output.squeeze().tolist()
-        # Alternatively, use the last hidden state (flattened)
-        # embedding = outputs.last_hidden_state.flatten().tolist()
-        return embedding
-    except Exception as e:
-        print(f"Error during image embedding extraction: {e}")
-        return None
-
-# Replace mock_extract_colors with the actual implementation
+# extract_colors remains the same as it uses scikit-learn (considered lightweight enough)
 def extract_colors(image: Image.Image, num_colors=5) -> List[str]:
     """
     Extracts dominant colors from an image using KMeans clustering.
     """
     try:
-        # Resize image for performance. Smaller images process faster.
-        # Aspect ratio is preserved. Max dimension set to 100px.
-        image.thumbnail((100, 100))
+        image_work = image.copy() # Work on a copy
+        image_work.thumbnail((100, 100))
+        image_arr = np.array(image_work)
 
-        # Convert image to numpy array
-        image_arr = np.array(image)
-
-        # Ensure image is RGB (3 channels)
-        if image_arr.ndim == 2: # Grayscale image
-            # Convert grayscale to RGB by replicating the single channel
+        if image_arr.ndim == 2:
             image_arr = np.stack((image_arr,)*3, axis=-1)
-        elif image_arr.shape[2] == 4: # RGBA image
-            # Convert RGBA to RGB by discarding the alpha channel
+        elif image_arr.shape[2] == 4:
             image_arr = image_arr[:, :, :3]
 
-        # Reshape to (width*height, 3) array of pixels
-        pixels = image_arr.reshape(-1, 3)
+        if image_arr.shape[0] == 0 or image_arr.shape[1] == 0 : # Check for empty image after thumbnail
+             raise ValueError("Image became empty after thumbnailing, check input image.")
 
-        # Use KMeans to find dominant colors
-        # n_init='auto' is good for scikit-learn versions that support it
-        # For older versions, you might need to set n_init explicitly (e.g., 10)
+        pixels = image_arr.reshape(-1, 3)
+        if pixels.shape[0] < num_colors: # Not enough pixels for desired clusters
+            # Fallback: return fewer colors or a default palette
+            # For simplicity, returning a default if too few pixels
+            print(f"Warning: Not enough pixels to extract {num_colors} colors. Returning default.")
+            return ["#FFFFFF", "#000000", "#CCCCCC"]
+
+
         kmeans = KMeans(n_clusters=num_colors, random_state=0, n_init='auto').fit(pixels)
         dominant_colors = kmeans.cluster_centers_.astype(int)
-
-        # Convert colors to hex strings
         hex_colors = [f"#{r:02x}{g:02x}{b:02x}" for r, g, b in dominant_colors]
         return hex_colors
     except Exception as e:
         print(f"Error during color extraction: {e}")
-        # Fallback to some default colors if extraction fails
-        return ["#FFFFFF", "#000000", "#FF0000", "#00FF00", "#0000FF"]
-
-# Replace mock_detect_style with the actual implementation
-def detect_style(image: Image.Image) -> str:
-    """
-    Detects the style of an outfit in an image using image captioning.
-    The generated caption is used as a proxy for style.
-    """
-    if captioner is None:
-        print("Captioning model not loaded. Cannot detect style.")
-        return "Style detection model not available"
-    try:
-        # Ensure image is in a format compatible with the captioner if necessary
-        # Most Hugging Face pipelines handle PIL Images directly.
-        caption_result = captioner(image)
-        if caption_result and isinstance(caption_result, list) and len(caption_result) > 0:
-            caption = caption_result[0]['generated_text']
-            # Post-processing the caption can be done here if needed (e.g., keyword extraction)
-            # For now, returning the raw caption as the style.
-            return caption
-        else:
-            return "Could not generate caption"
-    except Exception as e:
-        print(f"Error during style detection: {e}")
-        return "Error in style detection"
-
-# Replace mock_identify_items with the actual implementation
-def identify_items(image: Image.Image) -> List[str]:
-    """
-    Identifies items in an image using a pre-trained object detection model (DETR).
-    """
-    if object_detection_model is None or object_detection_feature_extractor is None:
-        print("Object detection models not loaded. Cannot identify items.")
-        return ["Object detection model not available"]
-
-    try:
-        inputs = object_detection_feature_extractor(images=image, return_tensors="pt")
-        with torch.no_grad(): # Ensure no gradients are computed
-            outputs = object_detection_model(**inputs)
-
-        # Post-process the outputs
-        # Target sizes should be the original image size, in (height, width) format.
-        target_sizes = torch.tensor([image.size[::-1]])
-        results = object_detection_feature_extractor.post_process_object_detection(
-            outputs=outputs,
-            threshold=0.7, # Confidence threshold
-            target_sizes=target_sizes
-        )[0]
-
-        identified_labels = []
-        if 'labels' in results and 'scores' in results:
-            for score, label_id in zip(results['scores'], results['labels']):
-                label = object_detection_model.config.id2label[label_id.item()]
-                # Optional: Filter out common non-clothing items or items with low confidence
-                # Example filter:
-                # if label not in ["person", "background"] and score.item() > 0.7:
-                identified_labels.append(label)
-
-        if not identified_labels:
-            return ["No items identified with sufficient confidence"]
-
-        return identified_labels
-    except Exception as e:
-        print(f"Error during item identification: {e}")
-        return ["Error in item identification"]
+        return ["#EAEAEA", "#B0B0B0", "#505050", "#202020", "#F0F0F0"] # Default palette on error
 
 # --- Main Service Function ---
 
 async def analyze_outfit_image_service(
-    file: UploadFile, # Changed from image_data to UploadFile
-    db: Session,
-    user: schemas.User # Assuming schemas.User from get_current_user
-) -> schemas.OutfitAnalysisResponse: # Define this schema
+    file: UploadFile,
+    db: Session, # db and user are kept for potential future use (e.g., saving analysis)
+    user: schemas.User
+) -> schemas.OutfitAnalysisResponse:
     try:
         image_bytes = await file.read()
-        # Ensure image is converted to RGB after opening
+        if not image_bytes:
+            raise HTTPException(status_code=400, detail="No image data received.")
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid image file: {str(e)}")
 
-    # Perform AI analysis using the new functions
-    # Embedding is extracted but not directly returned in this response for now.
-    # It would typically be stored for later use (e.g., similarity searches).
-    image_embedding = extract_image_embedding(image.copy()) # Use a copy if image is used elsewhere
+    # --- DEMO MODE ---
+    if DEMO_MODE:
+        print(f"DEMO MODE: Analyzing {file.filename}")
+        # Static data for demo mode
+        demo_style = "Demo: Chic Casual"
+        demo_colors = ["#FFD700", "#4682B4", "#32CD32", "#FF69B4", "#FFFFFF"]
+        demo_items = [ # Simulating structure from identify_items
+            {"label": "Demo Blazer", "confidence": 0.9, "box_normalized": [0.1,0.1,0.5,0.5]},
+            {"label": "Demo White Shirt", "confidence": 0.85, "box_normalized": [0.15,0.15,0.45,0.45]},
+            {"label": "Demo Jeans", "confidence": 0.92, "box_normalized": [0.5,0.1,0.9,0.5]}
+        ]
+        # Extract item names for recommendations and response
+        demo_item_names = [item['label'] for item in demo_items]
+        demo_recommendations = get_basic_recommendations(demo_items) # Use recommender with demo items
+        demo_embedding_info = "Demo mode: Embeddings not generated."
 
-    # Actual AI function calls
-    extracted_colors = extract_colors(image.copy()) # Use a copy for functions that might modify it (like thumbnailing)
-    detected_style = detect_style(image.copy())
-    identified_items = identify_items(image.copy())
+        return schemas.OutfitAnalysisResponse(
+            fileName=file.filename,
+            contentType=file.content_type,
+            style=demo_style,
+            dominantColors=demo_colors,
+            # identifiedItems expects List[str] in the original schema based on usage.
+            # The new identify_items returns List[Dict]. We need to adapt.
+            # For now, let's extract labels for compatibility.
+            identifiedItems=demo_item_names,
+            occasionSuitability="Demo: Suitable for casual outings",
+            confidenceScore=0.90, # Static confidence for demo
+            recommendations=demo_recommendations,
+            # Embedding field is not in OutfitAnalysisResponse, so no need to pass demo_embedding_info to it.
+            # It was mentioned it's stored for later use, which is outside this function's direct return.
+            colorPalette=[{"color": c, "name": "Demo Color", "percentage": round(100/len(demo_colors),1)} for c in demo_colors],
+            styleInsights=[{"category": "Overall Style", "score": 85, "description": f"The outfit is a classic example of: {demo_style}"}],
+            debug_info=f"Analyzed with lightweight models (DEMO MODE). Embedding status: {demo_embedding_info}"
+        )
 
-    # Generic recommendations and insights until more advanced services are built
-    recommendations = [
-        "Ensure the outfit is comfortable and appropriate for the planned occasion.",
-        "Accessorize thoughtfully to enhance your look."
-    ]
-    if identified_items and "model not available" not in identified_items[0] and "Error in item identification" not in identified_items[0]:
-        recommendations.append(f"This outfit featuring {', '.join(identified_items[:2])} looks interesting.")
+    # --- REGULAR (Lightweight Models) MODE ---
+    print(f"Lightweight AI: Analyzing {file.filename}")
+    # 1. Extract Image Embedding (returns List[float] or error string)
+    # Not directly in OutfitAnalysisResponse, but could be logged or stored.
+    image_embedding_result = get_image_embedding(image.copy())
+    embedding_status_message = "Embedding extracted."
+    if isinstance(image_embedding_result, str): # Error occurred
+        embedding_status_message = image_embedding_result # Record the error/message
+        # No critical failure for the response, just noting embedding failed.
+
+    # 2. Extract Colors (already lightweight)
+    extracted_colors = extract_colors(image.copy())
+
+    # 3. Detect Style (lightweight placeholder)
+    # lw_detect_style returns a string (style description or error/placeholder message)
+    detected_style_result = lw_detect_style(image.copy())
+
+    # 4. Identify Items (lightweight EfficientDet-Lite0)
+    # lw_identify_items returns List[Dict] or error string
+    identified_items_result = lw_identify_items(image.copy())
+
+    # Prepare identified_items_for_response: List[str] as likely expected by original schema
+    # And identified_items_for_recommendations: List[Dict] for our get_basic_recommendations
+    final_identified_item_names: List[str] = []
+    processed_identified_items: Union[List[Dict[str, Any]], str] = [] # For recommendations
+
+    if isinstance(identified_items_result, str): # Error or "no items" message
+        final_identified_item_names = [identified_items_result] # Pass message as a list item
+        processed_identified_items = [] # No items for recommendations
+    elif isinstance(identified_items_result, list) and not identified_items_result: # Empty list (no items found)
+        final_identified_item_names = ["No specific items identified."]
+        processed_identified_items = []
+    elif isinstance(identified_items_result, list): # Successfully got list of dicts
+        # Filter out any non-string labels just in case, though model should give strings
+        final_identified_item_names = [str(item.get('label', 'Unknown Item')) for item in identified_items_result if isinstance(item, dict)]
+        if not final_identified_item_names: # If all items somehow lacked labels
+             final_identified_item_names = ["Items detected but labels are missing."]
+        processed_identified_items = identified_items_result
+
+
+    # 5. Get Recommendations (based on identified items)
+    recommendations = get_basic_recommendations(processed_identified_items if isinstance(processed_identified_items, list) else [])
+
+
+    # Constructing the response
+    # The schema for OutfitAnalysisResponse needs to be checked carefully.
+    # Specifically: identifiedItems: List[str] vs List[Dict], colorPalette structure.
+    # Assuming identifiedItems expects List[str] of item names.
+    # Assuming style expects a string.
+
+    # Confidence score can be an average or placeholder
+    # For now, a placeholder as individual models return different types of confidences or none.
+    overall_confidence = 0.65 # Placeholder for lightweight mode aggregate
+
+    # Color Palette: Ensure it's robust against empty extracted_colors
+    color_palette_resp = []
+    if extracted_colors and isinstance(extracted_colors, list) and not any("Error" in c for c in extracted_colors):
+        try:
+            # Prevent division by zero if extracted_colors is empty after filtering
+            num_valid_colors = len(extracted_colors)
+            if num_valid_colors > 0:
+                color_palette_resp = [
+                    {"color": c, "name": "Dominant Color",
+                      "percentage": round(100.0 / num_valid_colors, 1)}
+                    for c in extracted_colors
+                ]
+            else: # Handle case where extracted_colors might be empty or contain errors
+                color_palette_resp = [{"color": "#FFFFFF", "name": "Default", "percentage": 100.0}]
+        except ZeroDivisionError: # Should be caught by num_valid_colors > 0
+            color_palette_resp = [{"color": "#FFFFFF", "name": "ErrorCalculatingPalette", "percentage": 100.0}]
+    else: # Handle error case from extract_colors or empty list
+        color_palette_resp = [{"color": c, "name": "Color Extraction Issue", "percentage": 0} for c in (extracted_colors if isinstance(extracted_colors, list) else ["#Error"])]
+
+
+    # Style Insights: Based on detected_style_result (which is a string)
+    style_insights_resp = []
+    if detected_style_result and "under development" not in detected_style_result.lower() and "error" not in detected_style_result.lower():
+        style_insights_resp = [{"category": "Overall Style", "score": 60, "description": f"Style notes: {detected_style_result}."}]
     else:
-        recommendations.append("Could not identify specific items, but focus on fit and color coordination.")
+        style_insights_resp = [{"category": "Overall Style", "score": 0, "description": detected_style_result}]
 
-    # For demonstration, we're not saving the analysis to DB yet.
-    # In a real application, an OutfitAnalysis record might be created here,
-    # potentially storing the image_embedding as well.
 
     return schemas.OutfitAnalysisResponse(
         fileName=file.filename,
         contentType=file.content_type,
-        style=detected_style,
-        dominantColors=extracted_colors,
-        identifiedItems=identified_items,
-        occasionSuitability="To be determined", # Placeholder
-        confidenceScore=0.75, # Placeholder, actual confidence might come from models
+        style=str(detected_style_result), # Ensure it's a string
+        dominantColors=extracted_colors if isinstance(extracted_colors, list) else [str(extracted_colors)],
+        identifiedItems=final_identified_item_names, # List of strings
+        occasionSuitability="To be determined by user or future AI.", # Placeholder
+        confidenceScore=overall_confidence,
         recommendations=recommendations,
-        colorPalette=[{"color": c, "name": "Dominant Color", "percentage": round(100/len(extracted_colors),1) if extracted_colors and "model not available" not in extracted_colors[0] and "Error" not in extracted_colors[0] else 0} for c in extracted_colors],
-        styleInsights=[{"category": "Overall Style", "score": 75, "description": f"The outfit is described as: {detected_style}" if "model not available" not in detected_style and "Error" not in detected_style else "Style insights pending."}]
+        colorPalette=color_palette_resp,
+        styleInsights=style_insights_resp,
+        debug_info=f"Analyzed with lightweight models. Embedding status: {embedding_status_message}"
     )
 
-# Placeholder for trend forecasting service (will be in Step 4)
-# In backend/app/services/ai_services.py
-# Replace the existing placeholder for get_fashion_trends_service
-
-# ... (other imports and functions like analyze_outfit_image_service) ...
-from typing import Optional # Make sure Optional is imported from typing
-
+# --- get_fashion_trends_service remains unchanged (already mocked) ---
 async def get_fashion_trends_service(db: Session, user: Optional[schemas.User] = None) -> schemas.TrendForecastResponse:
-    # Mock implementation for now, structured like AITrendForecasting.tsx's mockForecast
-    # In a real scenario:
-    # - Fetch raw trend data (e.g., from social media, fashion articles, sales data).
-    # - Process with NLP (transformers) for text data.
-    # - Use time-series analysis (sklearn, tensorflow) for sales/popularity data.
-    # - Generate personalized recommendations based on user's wardrobe/style history if 'user' is provided.
-
+    # Mock implementation for now... (content is the same as before)
     mock_trends_data = [
         schemas.TrendDataItem(
-            id='1',
-            name='Neo-Cottagecore AI',
-            category='Aesthetic Movement (Backend)',
-            popularity=94,
-            growth=267,
+            id='1', name='Neo-Cottagecore AI', category='Aesthetic Movement (Backend)', popularity=94, growth=267,
             description='Backend AI: A futuristic take on cottagecore with sustainable tech fabrics and earthy tones.',
-            colors=['Sage Green', 'Mushroom Brown', 'Lavender', 'Cream'],
-            season='Spring 2025',
-            confidence=96,
+            colors=['Sage Green', 'Mushroom Brown', 'Lavender', 'Cream'], season='Spring 2025', confidence=96,
             outfitImages=['https://via.placeholder.com/150/A2D2A2/000000?text=NeoCottage1', 'https://via.placeholder.com/150/D2A2D2/000000?text=NeoCottage2'],
-            celebrities=['Celeb A (AI)', 'Celeb B (AI)'],
-            hashtags=['#NeoCottagecoreAI', '#SustainableFashionAI'],
-            priceRange='$100-$350',
-            occasion=['Casual AI', 'Work From Home AI']
+            celebrities=['Celeb A (AI)', 'Celeb B (AI)'], hashtags=['#NeoCottagecoreAI', '#SustainableFashionAI'],
+            priceRange='$100-$350', occasion=['Casual AI', 'Work From Home AI']
         ),
         schemas.TrendDataItem(
-            id='2',
-            name='Cyber-Minimalism AI',
-            category='Fashion Tech (Backend)',
-            popularity=89,
-            growth=189,
+            id='2', name='Cyber-Minimalism AI', category='Fashion Tech (Backend)', popularity=89, growth=189,
             description='Backend AI: Clean lines meet smart fabrics with embedded tech and holographic accents.',
-            colors=['Chrome Silver', 'Deep Black', 'Electric Blue', 'Pure White'],
-            season='Fall 2025',
-            confidence=92,
+            colors=['Chrome Silver', 'Deep Black', 'Electric Blue', 'Pure White'], season='Fall 2025', confidence=92,
             outfitImages=['https://via.placeholder.com/150/C0C0C0/FFFFFF?text=CyberMin1', 'https://via.placeholder.com/150/0000FF/FFFFFF?text=CyberMin2'],
-            celebrities=['Celeb C (AI)', 'Celeb D (AI)'],
-            hashtags=['#CyberMinimalAI', '#TechWearAI'],
-            priceRange='$180-$850',
-            occasion=['Night Out AI', 'Creative Events AI']
+            celebrities=['Celeb C (AI)', 'Celeb D (AI)'], hashtags=['#CyberMinimalAI', '#TechWearAI'],
+            priceRange='$180-$850', occasion=['Night Out AI', 'Creative Events AI']
         )
     ]
-
     mock_personalized_recommendations = schemas.PersonalizedRecommendations(
         mustHave=['AI: Smart casual blazer', 'AI: Sustainable denim'],
         avoid=['AI: Fast fashion basics', 'AI: Overly specific trends'],
         investIn=['AI: Quality tech outerwear', 'AI: Versatile pieces']
     )
-
     mock_seasonal_predictions = schemas.SeasonalPredictions(
         emerging=['AI: Biometric jewelry', 'AI: Climate-responsive clothing'],
         declining=['AI: Logo-heavy designs', 'AI: Single-use items'],
         stable=['AI: Classic denim', 'AI: White shirts (backend)']
     )
-
     return schemas.TrendForecastResponse(
         trends=mock_trends_data,
         personalizedRecommendations=mock_personalized_recommendations,

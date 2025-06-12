@@ -35,7 +35,7 @@ const AddItemModal = ({ isOpen, onClose, onSave }: AddItemModalProps) => {
   const categories = ['Shirts', 'Pants', 'Dresses', 'Shoes', 'Accessories', 'Jackets', 'Sweaters', 'Other'];
   const seasons = ['Spring', 'Summer', 'Fall', 'Winter', 'All Seasons'];
   // Optional: Define some common colors or allow free text
-  // const commonColors = ['Red', 'Blue', 'Green', 'Black', 'White', 'Yellow', 'Pink', 'Purple', 'Orange', 'Brown', 'Gray', 'Beige'];
+  // const commonColors = ['Red', 'Blue', 'Green', 'Black', 'White', 'Teal', 'Pink', 'Purple', 'Orange', 'Brown', 'Gray', 'Beige'];
 
 
   const handleSave = () => {
@@ -267,7 +267,7 @@ const AddItemModal = ({ isOpen, onClose, onSave }: AddItemModalProps) => {
             <Button variant="outline" onClick={onClose} className="flex-1 h-10 xs:h-11 text-sm xs:text-base">
               Cancel
             </Button>
-            <Button onClick={handleSave} className="flex-1 h-10 xs:h-11 text-sm xs:text-base bg-owis-gold hover:bg-owis-gold-dark text-owis-forest">
+            <Button onClick={handleSave} className="flex-1 h-10 xs:h-11 text-sm xs:text-base bg-owis-purple hover:bg-owis-purple-dark text-owis-forest">
               <Save size={14} className="xs:w-4 xs:h-4 mr-1 xs:mr-2" />
               Add Item
             </Button>

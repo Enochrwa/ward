@@ -19,7 +19,7 @@ const FeaturesSection = () => {
       icon: Calendar,
       title: "Smart Outfit Curation",
       description: "Get personalized outfit recommendations with stunning visual previews based on weather, occasion, and your unique style DNA.",
-      gradient: "from-owis-gold to-owis-bronze",
+      gradient: "from-owis-purple to-owis-bronze",
       accent: Zap
     },
     {
@@ -33,7 +33,7 @@ const FeaturesSection = () => {
       icon: Image,
       title: "Sustainability Insights",
       description: "Track your fashion footprint with elegant analytics, discover eco-friendly alternatives, and promote circular fashion through beautiful, actionable insights.",
-      gradient: "from-owis-bronze to-owis-gold",
+      gradient: "from-owis-bronze to-owis-purple",
       accent: Star
     }
   ];
@@ -80,8 +80,8 @@ const FeaturesSection = () => {
         {/* Enhanced Section Header */}
         <div className={`text-center mb-20 transition-all duration-1000 ${isVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-10'}`}>
           {/* Decorative Badge */}
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-owis-gold/10 to-owis-bronze/10 border border-owis-gold/20 rounded-full px-6 py-2 mb-6">
-            <Sparkles className="w-4 h-4 text-owis-gold animate-pulse" />
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-owis-purple/10 to-owis-bronze/10 border border-owis-purple/20 rounded-full px-6 py-2 mb-6">
+            <Sparkles className="w-4 h-4 text-owis-purple animate-pulse" />
             <span className="text-owis-charcoal text-sm font-medium">Revolutionary Features</span>
           </div>
 
@@ -115,7 +115,7 @@ const FeaturesSection = () => {
                   <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 shadow-glow`}>
                     <feature.icon className="h-8 w-8 text-white" />
                   </div>
-                  <feature.accent className="absolute -top-2 -right-2 w-6 h-6 text-owis-gold animate-pulse opacity-80" />
+                  <feature.accent className="absolute -top-2 -right-2 w-6 h-6 text-owis-purple animate-pulse opacity-80" />
                 </div>
                 
                 <h3 className="text-2xl font-display font-semibold text-owis-charcoal mb-4 group-hover:text-owis-forest transition-colors duration-300">
@@ -127,7 +127,7 @@ const FeaturesSection = () => {
                 </p>
                 
                 {/* Animated Progress Bar */}
-                <div className="h-1 w-0 bg-gradient-to-r from-owis-gold to-owis-bronze rounded-full group-hover:w-full transition-all duration-700 ease-out"></div>
+                <div className="h-1 w-0 bg-gradient-to-r from-owis-purple to-owis-bronze rounded-full group-hover:w-full transition-all duration-700 ease-out"></div>
                 
                 {/* Shimmer Effect */}
                 <div className="absolute inset-0 shimmer-effect opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -142,7 +142,7 @@ const FeaturesSection = () => {
             <div className="flex items-center justify-center mb-6">
               <div className="flex space-x-2">
                 {[Sparkles, Star, Heart].map((Icon, i) => (
-                  <Icon key={i} className="w-6 h-6 text-owis-gold animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
+                  <Icon key={i} className="w-6 h-6 text-owis-purple animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
                 ))}
               </div>
             </div>
@@ -161,7 +161,7 @@ const FeaturesSection = () => {
                 <span>Start Your Journey</span>
               </button>
               
-              <button className="border-2 border-owis-gold/30 text-owis-charcoal hover:bg-owis-gold/10 px-8 py-4 rounded-2xl text-lg font-semibold owis-interactive haptic-feedback transition-smooth">
+              <button className="border-2 border-owis-purple/30 text-owis-charcoal hover:bg-owis-purple/10 px-8 py-4 rounded-2xl text-lg font-semibold owis-interactive haptic-feedback transition-smooth">
                 Explore Features
               </button>
             </div>

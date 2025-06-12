@@ -12,7 +12,7 @@ const NotFoundPage = () => {
       </div>
       <div className="min-h-screen bg-gradient-to-br from-owis-cream to-owis-mint dark:from-owis-charcoal-dark to-owis-midnight-blue flex items-center justify-center p-6">
         <div className="owis-card rounded-3xl p-8 max-w-md text-center animate-fade-in">
-          <div className="w-24 h-24 bg-gradient-to-br from-owis-gold to-owis-bronze rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-24 h-24 bg-gradient-to-br from-owis-purple to-owis-bronze rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-4xl font-bold text-white">404</span>
           </div>
           
@@ -35,7 +35,7 @@ const NotFoundPage = () => {
             
             <button
               onClick={() => window.history.back()}
-              className="px-6 py-3 rounded-xl border border-owis-gold text-owis-gold hover:bg-owis-gold hover:text-owis-forest transition-all duration-300 flex items-center gap-2 justify-center"
+              className="px-6 py-3 rounded-xl border border-owis-purple text-owis-purple hover:bg-owis-purple hover:text-owis-forest transition-all duration-300 flex items-center gap-2 justify-center"
             >
               <ArrowLeft size={16} />
               Go Back

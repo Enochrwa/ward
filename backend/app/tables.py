@@ -86,7 +86,7 @@ class Outfit(BaseModel): # Actual definition of Outfit
     updated_at: Optional[datetime] = None
     tags: Optional[List[str]] = None
     image_url: Optional[str] = None
-    feedbacks: List[Feedback] = [] # Added feedbacks list
+    feedbacks: List['Feedback'] = [] # Added feedbacks list with forward reference
 
     class Config:
         from_attributes = True

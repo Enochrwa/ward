@@ -8,9 +8,9 @@ const WardrobePreview = () => {
     { id: 1, name: "Silk Blouse", category: "Tops", color: "Ivory", image: "bg-gradient-to-br from-gray-100 to-gray-200", uses: 12 },
     { id: 2, name: "Wool Blazer", category: "Outerwear", color: "Navy", image: "bg-gradient-to-br from-blue-900 to-blue-700", uses: 8 },
     { id: 3, name: "Midi Skirt", category: "Bottoms", color: "Forest", image: "bg-gradient-to-br from-green-800 to-green-600", uses: 15 },
-    { id: 4, name: "Cashmere Sweater", category: "Tops", color: "Cream", image: "bg-gradient-to-br from-yellow-100 to-yellow-200", uses: 20 },
+    { id: 4, name: "Cashmere Sweater", category: "Tops", color: "Cream", image: "bg-gradient-to-br from-purple-100 to-purple-200", uses: 20 },
     { id: 5, name: "Denim Jacket", category: "Outerwear", color: "Indigo", image: "bg-gradient-to-br from-indigo-600 to-indigo-800", uses: 25 },
-    { id: 6, name: "Leather Boots", category: "Shoes", color: "Brown", image: "bg-gradient-to-br from-amber-800 to-amber-900", uses: 18 }
+    { id: 6, name: "Leather Boots", category: "Shoes", color: "Brown", image: "bg-gradient-to-br from-purple-800 to-purple-900", uses: 18 }
   ];
 
   return (
@@ -50,7 +50,7 @@ const WardrobePreview = () => {
               <div className="flex items-center justify-between">
                 <div className={`h-1 flex-1 rounded-full ${
                   item.uses > 20 ? 'bg-green-500' : 
-                  item.uses > 10 ? 'bg-owis-gold' : 'bg-gray-300'
+                  item.uses > 10 ? 'bg-owis-purple' : 'bg-gray-300'
                 }`}></div>
                 <Button 
                   variant="ghost" 
@@ -77,7 +77,7 @@ const WardrobePreview = () => {
         {/* Stats Row */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
           <div className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
-            <div className="text-3xl font-bold text-owis-gold mb-2">127</div>
+            <div className="text-3xl font-bold text-owis-purple mb-2">127</div>
             <div className="text-sm text-muted-foreground">Total Items</div>
           </div>
           <div className="animate-fade-in" style={{ animationDelay: '0.7s' }}>

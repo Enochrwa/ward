@@ -101,7 +101,7 @@ const AITrendForecasting = () => {
             popularity: 76,
             growth: 234,
             description: 'Bold patterns, rich textures, and ornate details inspired by historical opulence',
-            colors: ['Royal Purple', 'Gold', 'Emerald', 'Burgundy'],
+            colors: ['Royal Purple', 'Purple', 'Emerald', 'Burgundy'],
             season: 'Year-round',
             confidence: 88,
             outfitImages: [
@@ -322,7 +322,7 @@ const AITrendForecasting = () => {
                     
                     {/* Celebrities */}
                     <div className="flex items-center gap-2">
-                      <Star size={14} className="text-yellow-500" />
+                      <Star size={14} className="text-purple-500" />
                       <span className="text-xs text-gray-600">{trend.celebrities.join(', ')}</span>
                     </div>
                     

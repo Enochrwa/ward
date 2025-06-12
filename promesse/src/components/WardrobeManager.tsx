@@ -250,7 +250,7 @@ const WardrobeManager = () => {
           <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             <Button 
               onClick={() => setIsAddModalOpen(true)}
-              className="flex-1 sm:flex-none bg-gradient-to-r from-owis-gold to-owis-bronze hover:from-owis-gold-dark hover:to-owis-bronze text-owis-forest"
+              className="flex-1 sm:flex-none bg-gradient-to-r from-owis-purple to-owis-bronze hover:from-owis-purple-dark hover:to-owis-bronze text-owis-forest"
             >
               <Plus size={16} className="mr-2" />
               <span className="hidden xs:inline">Add Item</span>
@@ -277,7 +277,7 @@ const WardrobeManager = () => {
             <Button 
               onClick={() => setShowSavedPlans(true)}
               variant="outline"
-              className="flex-1 sm:flex-none border-owis-gold text-owis-gold hover:bg-owis-gold hover:text-owis-forest"
+              className="flex-1 sm:flex-none border-owis-purple text-owis-purple hover:bg-owis-purple hover:text-owis-forest"
             >
               <Calendar size={16} className="mr-2" />
               <span className="hidden sm:inline">Saved Plans</span>
@@ -326,7 +326,7 @@ const WardrobeManager = () => {
                 placeholder="Search items by name, brand, tags..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white/80 border-owis-sage/30 focus:border-owis-gold"
+                className="pl-10 bg-white/80 border-owis-sage/30 focus:border-owis-purple"
                 disabled={isLoading || !!error}
               />
             </div>
@@ -340,7 +340,7 @@ const WardrobeManager = () => {
                 size="sm"
                 onClick={() => setSelectedCategory(category)}
                 className={selectedCategory === category 
-                  ? "bg-owis-gold text-owis-forest hover:bg-owis-gold-dark" 
+                  ? "bg-owis-purple text-owis-forest hover:bg-owis-purple-dark" 
                   : "border-owis-sage/30 text-owis-sage hover:bg-owis-sage hover:text-white"
                 }
                 disabled={isLoading || !!error}
@@ -399,7 +399,7 @@ const WardrobeManager = () => {
             {filteredItems.map((item) => (
               <Card
                 key={item.id}
-                className={`group hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm border-white/30 hover:border-owis-gold/50 ${
+                className={`group hover:shadow-lg transition-all duration-300 bg-white/90 backdrop-blur-sm border-white/30 hover:border-owis-purple/50 ${
                   viewMode === 'list' ? 'flex flex-row' : ''
                 }`}
               >
@@ -440,7 +440,7 @@ const WardrobeManager = () => {
                       <Badge variant="secondary" className="text-xs bg-owis-sage/10 text-owis-sage border-owis-sage/20">
                         {item.category}
                       </Badge>
-                      <Badge variant="outline" className="text-xs border-owis-gold/30 text-owis-gold">
+                      <Badge variant="outline" className="text-xs border-owis-purple/30 text-owis-purple">
                         ${item.price.toFixed(2)}
                       </Badge>
                     </div>

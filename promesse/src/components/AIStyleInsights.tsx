@@ -165,7 +165,7 @@ const AIStyleInsights = () => {
           confidence: 95,
           style: 'Business Chic',
           occasion: 'Important Meeting',
-          colors: ['Navy', 'White', 'Gold'],
+          colors: ['Navy', 'White', 'Purple'],
           pieces: ['Tailored blazer', 'Silk blouse', 'High-waisted trousers', 'Statement watch'],
           why: 'Perfect for commanding respect while maintaining elegance',
           shoppable: true
@@ -189,7 +189,7 @@ const AIStyleInsights = () => {
           confidence: 88,
           style: 'Sophisticated Glam',
           occasion: 'Dinner Date',
-          colors: ['Black', 'Gold', 'Deep Red'],
+          colors: ['Black', 'Purple', 'Deep Red'],
           pieces: ['Little black dress', 'Statement earrings', 'Heeled boots', 'Clutch'],
           why: 'Timeless elegance with modern edge',
           shoppable: true
@@ -246,7 +246,7 @@ const AIStyleInsights = () => {
   const getImpactColor = (impact: string) => {
     switch (impact) {
       case 'high': return 'text-red-600 bg-red-50';
-      case 'medium': return 'text-yellow-600 bg-yellow-50';
+      case 'medium': return 'text-purple-600 bg-purple-50';
       case 'low': return 'text-green-600 bg-green-50';
       default: return 'text-gray-600 bg-gray-50';
     }

@@ -128,7 +128,7 @@ const CreateOutfitModal = ({ isOpen, onClose, wardrobeItems, onSave }: CreateOut
                     size="sm"
                     onClick={() => setSelectedCategory(category)}
                     className={`text-xs xs:text-sm h-8 xs:h-9 px-2 xs:px-3 ${selectedCategory === category
-                    ? "bg-owis-gold text-owis-forest"
+                    ? "bg-owis-purple text-owis-forest"
                     : "border-owis-sage/30 text-owis-sage hover:bg-owis-sage hover:text-white"
                     }`}
                 >
@@ -148,7 +148,7 @@ const CreateOutfitModal = ({ isOpen, onClose, wardrobeItems, onSave }: CreateOut
                     <img
                       src={item.image_url} // Use image_url from WardrobeItem
                       alt={item.name}
-                      className="w-full h-16 xs:h-20 object-cover rounded-lg border-2 border-owis-gold"
+                      className="w-full h-16 xs:h-20 object-cover rounded-lg border-2 border-owis-purple"
                     />
                     <Button
                       variant="destructive"
@@ -175,7 +175,7 @@ const CreateOutfitModal = ({ isOpen, onClose, wardrobeItems, onSave }: CreateOut
                     key={item.id} 
                     className={`cursor-pointer rounded-lg border-2 p-1 xs:p-2 transition-all hover:shadow-lg ${
                       isSelected 
-                        ? 'border-owis-gold bg-owis-gold/10 dark:bg-owis-gold/20'
+                        ? 'border-owis-purple bg-owis-purple/10 dark:bg-owis-purple/20'
                         : 'border-gray-200 dark:border-gray-600 hover:border-owis-sage dark:hover:border-owis-mint'
                     }`}
                     onClick={() => toggleItemSelection(item)}
@@ -200,7 +200,7 @@ const CreateOutfitModal = ({ isOpen, onClose, wardrobeItems, onSave }: CreateOut
           <Button variant="outline" onClick={onClose} className="flex-1 h-10 xs:h-11 text-sm xs:text-base">
             Cancel
           </Button>
-          <Button onClick={handleSaveOutfit} className="flex-1 h-10 xs:h-11 text-sm xs:text-base bg-owis-gold hover:bg-owis-gold-dark text-owis-forest">
+          <Button onClick={handleSaveOutfit} className="flex-1 h-10 xs:h-11 text-sm xs:text-base bg-owis-purple hover:bg-owis-purple-dark text-owis-forest">
             <Save size={14} className="xs:w-4 xs:h-4 mr-1 xs:mr-2" />
             Save Outfit
           </Button>

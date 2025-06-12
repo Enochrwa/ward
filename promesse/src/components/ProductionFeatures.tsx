@@ -38,7 +38,7 @@ const ProductionFeatures = () => {
       icon: Zap,
       title: 'Lightning Fast AI',
       description: 'Sub-second outfit recommendations',
-      color: 'from-yellow-500 to-orange-500',
+      color: 'from-purple-500 to-orange-500',
       highlights: ['< 200ms response', 'Edge computing', '99.9% uptime']
     },
     {
@@ -158,14 +158,14 @@ const ProductionFeatures = () => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {awards.map((award, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20">
+              <Card key={index} className="text-center hover:shadow-lg transition-all duration-300 border-0 bg-gradient-to-br from-purple-50 to-purple-50 dark:from-purple-900/20 dark:to-purple-900/20">
                 <CardContent className="p-6">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full flex items-center justify-center">
                     <Award className="w-6 h-6 text-white" />
                   </div>
                   <div className="text-lg font-bold text-gray-900 dark:text-white mb-1">{award.title}</div>
                   <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">{award.org}</div>
-                  <div className="text-xs text-yellow-600 dark:text-yellow-400 font-semibold">{award.year}</div>
+                  <div className="text-xs text-purple-600 dark:text-purple-400 font-semibold">{award.year}</div>
                 </CardContent>
               </Card>
             ))}
@@ -183,7 +183,7 @@ const ProductionFeatures = () => {
                 <CardContent className="p-6">
                   <div className="flex space-x-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                      <Star key={i} className="w-4 h-4 text-purple-400 fill-current" />
                     ))}
                   </div>
                   <p className="text-gray-700 dark:text-gray-300 mb-4 italic">"{testimonial.content}"</p>

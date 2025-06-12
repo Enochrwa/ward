@@ -100,58 +100,92 @@ const AIOutfitAnalyzer = () => {
     setIsAnalyzing(true);
     setCurrentStep(1);
 
-    // Simulate AI analysis steps
-    const steps = [
-      "Processing images...",
-      "Analyzing color palette...",
-      "Detecting style elements...",
-      "Generating recommendations...",
-      "Finalizing analysis..."
-    ];
+    try {
+      // Prepare form data for API call
+      const formData = new FormData();
+      formData.append('file', selectedImages[0]); // Use first image for now
 
-    for (let i = 0; i < steps.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setCurrentStep(i + 1);
+      // Call the backend AI analysis API
+      const response = await fetch('/api/ai/analyze-outfit/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // Add auth if needed
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const apiResults = await response.json();
+
+      // Transform API response to match frontend interface
+      const transformedResults: AnalysisResult = {
+        style: apiResults.style || "Contemporary Style",
+        colors: apiResults.dominantColors || ["#2563EB", "#DC2626", "#059669", "#8B5CF6"],
+        occasion: apiResults.occasionSuitability || "Versatile for multiple occasions",
+        season: "All Seasons", // Could be enhanced based on analysis
+        confidence: Math.round((apiResults.confidenceScore || 0.65) * 100),
+        recommendations: apiResults.recommendations || ["Upload an image to get personalized recommendations"],
+        colorPalette: apiResults.colorPalette || [
+          { color: "#2563EB", name: "Royal Blue", percentage: 35 },
+          { color: "#DC2626", name: "Classic Red", percentage: 25 },
+          { color: "#059669", name: "Emerald Green", percentage: 20 },
+          { color: "#8B5CF6", name: "Royal Purple", percentage: 20 }
+        ],
+        styleInsights: apiResults.styleInsights || [
+          { category: "Style Analysis", score: 75, description: "AI-powered style analysis completed" }
+        ]
+      };
+
+      setAnalysisResults(transformedResults);
+      
       toast({
-        title: "🤖 AI Analysis",
-        description: steps[i],
+        title: "🎉 Analysis Complete",
+        description: "Your outfit analysis is ready!",
+      });
+
+    } catch (error) {
+      console.error('AI Analysis Error:', error);
+      
+      // Fallback to mock data if API fails
+      const fallbackResults: AnalysisResult = {
+        style: "Modern Casual",
+        colors: ["#2563EB", "#DC2626", "#059669", "#8B5CF6"],
+        occasion: "Business Casual",
+        season: "Spring/Summer",
+        confidence: 92,
+        recommendations: [
+          "Consider adding a statement accessory to elevate the look",
+          "The color combination works well for professional settings",
+          "Try incorporating more neutral tones for versatility",
+          "This style suits both casual and semi-formal occasions"
+        ],
+        colorPalette: [
+          { color: "#2563EB", name: "Royal Blue", percentage: 35 },
+          { color: "#DC2626", name: "Classic Red", percentage: 25 },
+          { color: "#059669", name: "Emerald Green", percentage: 20 },
+          { color: "#8B5CF6", name: "Royal Purple", percentage: 20 }
+        ],
+        styleInsights: [
+          { category: "Elegance", score: 88, description: "Sophisticated and refined appearance" },
+          { category: "Comfort", score: 95, description: "High comfort factor for daily wear" },
+          { category: "Versatility", score: 82, description: "Suitable for multiple occasions" },
+          { category: "Trend Factor", score: 90, description: "Aligns with current fashion trends" }
+        ]
+      };
+
+      setAnalysisResults(fallbackResults);
+      
+      toast({
+        title: "⚠️ Using Demo Mode",
+        description: "Connected to demo data. Backend API not available.",
+        variant: "destructive"
       });
     }
 
-    // Mock analysis results
-    const mockResults: AnalysisResult = {
-      style: "Modern Casual",
-      colors: ["#2563EB", "#DC2626", "#059669", "#F59E0B"],
-      occasion: "Business Casual",
-      season: "Spring/Summer",
-      confidence: 92,
-      recommendations: [
-        "Consider adding a statement accessory to elevate the look",
-        "The color combination works well for professional settings",
-        "Try incorporating more neutral tones for versatility",
-        "This style suits both casual and semi-formal occasions"
-      ],
-      colorPalette: [
-        { color: "#2563EB", name: "Royal Blue", percentage: 35 },
-        { color: "#DC2626", name: "Classic Red", percentage: 25 },
-        { color: "#059669", name: "Emerald Green", percentage: 20 },
-        { color: "#F59E0B", name: "Golden Yellow", percentage: 20 }
-      ],
-      styleInsights: [
-        { category: "Elegance", score: 88, description: "Sophisticated and refined appearance" },
-        { category: "Comfort", score: 95, description: "High comfort factor for daily wear" },
-        { category: "Versatility", score: 82, description: "Suitable for multiple occasions" },
-        { category: "Trend Factor", score: 90, description: "Aligns with current fashion trends" }
-      ]
-    };
-
-    setAnalysisResults(mockResults);
     setIsAnalyzing(false);
-    
-    toast({
-      title: "🎉 Analysis Complete",
-      description: "Your outfit analysis is ready!",
-    });
   };
 
   const resetAnalysis = () => {

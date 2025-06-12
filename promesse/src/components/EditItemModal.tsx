@@ -210,7 +210,7 @@ const EditItemModal = ({ isOpen, onClose, onUpdate, item }: EditItemModalProps) 
           </div>
           <div className="flex flex-col xs:flex-row gap-2 xs:gap-3 pt-3 xs:pt-4">
             <Button variant="outline" onClick={onClose} className="flex-1 h-10 xs:h-11 text-sm xs:text-base">Cancel</Button>
-            <Button onClick={handleSave} className="flex-1 h-10 xs:h-11 text-sm xs:text-base bg-owis-gold hover:bg-owis-gold-dark text-owis-forest">
+            <Button onClick={handleSave} className="flex-1 h-10 xs:h-11 text-sm xs:text-base bg-owis-purple hover:bg-owis-purple-dark text-owis-forest">
               <Save size={14} className="xs:w-4 xs:h-4 mr-1 xs:mr-2" />Save Changes
             </Button>
           </div>

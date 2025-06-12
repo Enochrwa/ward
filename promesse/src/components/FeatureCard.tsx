@@ -24,7 +24,7 @@ const FeatureCard = ({ icon: Icon, title, description, gradient = "from-owis-for
         {description}
       </p>
       
-      <div className="mt-4 h-1 w-0 bg-gradient-to-r from-owis-gold to-owis-bronze rounded-full group-hover:w-full transition-all duration-500"></div>
+      <div className="mt-4 h-1 w-0 bg-gradient-to-r from-owis-purple to-owis-bronze rounded-full group-hover:w-full transition-all duration-500"></div>
     </div>
   );
 };

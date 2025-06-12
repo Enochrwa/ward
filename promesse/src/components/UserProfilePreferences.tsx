@@ -125,7 +125,7 @@ const UserProfilePreferences: React.FC = () => {
               id="avoidedColors"
               value={avoidedColors}
               onChange={(e) => setAvoidedColors(e.target.value)}
-              placeholder="e.g., yellow, orange"
+              placeholder="e.g., purple, orange"
             />
           </div>
           <fieldset className="border p-4 rounded-md">

@@ -92,7 +92,7 @@ const AnalyticsModal = ({ isOpen, onClose, wardrobeItems }: AnalyticsModalProps)
   const categoryData: CategoryData[] = Object.entries(categoryCount).map(([name, value], index) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
     value: value as number,
-    color: ['#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#3B82F6'][index % 5]
+    color: ['#8B5CF6', '#10B981', '#8B5CF6', '#EF4444', '#3B82F6'][index % 5]
   }));
 
   const weeklyUsage: WeeklyUsage[] = [

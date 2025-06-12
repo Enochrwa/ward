@@ -94,7 +94,7 @@ const CommunityFeed = () => {
             image: '/placeholder.svg',
             tags: ['#MixedPrints', '#PatternMixing', '#BoldFashion'],
             outfit: {
-              items: ['Striped Blazer', 'Floral Midi Skirt', 'White Sneakers', 'Gold Jewelry'],
+              items: ['Striped Blazer', 'Floral Midi Skirt', 'White Sneakers', 'Purple Jewelry'],
               brands: ['H&M', 'Zara', 'Adidas', 'Local Boutique'],
               totalValue: 180
             }
@@ -223,7 +223,7 @@ const CommunityFeed = () => {
             onClick={() => setFilter(tab.id)}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all ${
               filter === tab.id
-                ? 'bg-gradient-to-r from-owis-gold to-owis-bronze text-white shadow-md'
+                ? 'bg-gradient-to-r from-owis-purple to-owis-bronze text-white shadow-md'
                 : 'text-owis-charcoal/70 dark:text-owis-cream/70 hover:bg-gray-50 dark:hover:bg-owis-charcoal-light'
             }`}
           >
@@ -266,7 +266,7 @@ const CommunityFeed = () => {
                     className="w-12 h-12 rounded-full object-cover"
                   />
                   {post.user.verified && (
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-owis-gold rounded-full flex items-center justify-center">
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-owis-purple rounded-full flex items-center justify-center">
                       <span className="text-white text-xs">✓</span>
                     </div>
                   )}
@@ -323,14 +323,14 @@ const CommunityFeed = () => {
                       </span>
                     </button>
                     
-                    <button className="flex items-center gap-2 text-owis-charcoal dark:text-owis-cream hover:text-owis-gold transition-colors">
+                    <button className="flex items-center gap-2 text-owis-charcoal dark:text-owis-cream hover:text-owis-purple transition-colors">
                       <MessageCircle size={20} />
                       <span className="text-sm font-medium">
                         {formatNumber(post.engagement.comments)}
                       </span>
                     </button>
                     
-                    <button className="flex items-center gap-2 text-owis-charcoal dark:text-owis-cream hover:text-owis-gold transition-colors">
+                    <button className="flex items-center gap-2 text-owis-charcoal dark:text-owis-cream hover:text-owis-purple transition-colors">
                       <Share2 size={20} />
                       <span className="text-sm font-medium">
                         {formatNumber(post.engagement.shares)}
@@ -342,8 +342,8 @@ const CommunityFeed = () => {
                     onClick={() => toggleSave(post.id)}
                     className={`transition-colors ${
                       post.engagement.saved 
-                        ? 'text-owis-gold' 
-                        : 'text-owis-charcoal dark:text-owis-cream hover:text-owis-gold'
+                        ? 'text-owis-purple' 
+                        : 'text-owis-charcoal dark:text-owis-cream hover:text-owis-purple'
                     }`}
                   >
                     <Bookmark size={20} fill={post.engagement.saved ? 'currentColor' : 'none'} />
@@ -359,7 +359,7 @@ const CommunityFeed = () => {
                   
                   <div className="flex flex-wrap gap-1 mb-3">
                     {post.content.tags.map((tag, i) => (
-                      <span key={i} className="text-owis-gold hover:underline cursor-pointer text-sm">
+                      <span key={i} className="text-owis-purple hover:underline cursor-pointer text-sm">
                         {tag}
                       </span>
                     ))}
@@ -398,7 +398,7 @@ const CommunityFeed = () => {
                   
                   <div className="mt-3 pt-3 border-t border-owis-charcoal/10 dark:border-owis-cream/10">
                     <p className="text-sm font-medium text-owis-charcoal dark:text-owis-cream">
-                      Total Outfit Value: <span className="text-owis-gold">${post.content.outfit.totalValue}</span>
+                      Total Outfit Value: <span className="text-owis-purple">${post.content.outfit.totalValue}</span>
                     </p>
                   </div>
                 </div>

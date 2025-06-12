@@ -30,7 +30,7 @@ const EnhancedHeroSection = () => {
         <div className="max-w-7xl mx-auto">
           {/* Award Badge - Responsive */}
           <div 
-            className={`inline-flex items-center space-x-2 xs:space-x-3 bg-gradient-to-r from-teal-400/20 to-amber-400/20 border border-teal-400/40 rounded-full px-4 xs:px-6 sm:px-8 py-2 xs:py-3 mb-6 xs:mb-8 backdrop-blur-sm transition-all duration-1000 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}
+            className={`inline-flex items-center space-x-2 xs:space-x-3 bg-gradient-to-r from-teal-400/20 to-purple-400/20 border border-teal-400/40 rounded-full px-4 xs:px-6 sm:px-8 py-2 xs:py-3 mb-6 xs:mb-8 backdrop-blur-sm transition-all duration-1000 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}
           >
             <Award className="w-4 h-4 xs:w-5 xs:h-5 text-teal-400 animate-pulse" />
             <span className="text-white text-xs xs:text-sm font-semibold tracking-wide">
@@ -118,7 +118,7 @@ const EnhancedHeroSection = () => {
             {[
               { icon: Users, title: '10M+ Users', desc: 'Trusted worldwide', color: 'from-blue-400 to-cyan-400' },
               { icon: TrendingUp, title: '98% Accuracy', desc: 'AI recommendations', color: 'from-green-400 to-emerald-400' },
-              { icon: Award, title: 'Award Winner', desc: '2024 Innovation Award', color: 'from-teal-400 to-amber-400' }
+              { icon: Award, title: 'Award Winner', desc: '2024 Innovation Award', color: 'from-teal-400 to-purple-400' }
             ].map((feature, index) => (
               <div 
                 key={feature.title}

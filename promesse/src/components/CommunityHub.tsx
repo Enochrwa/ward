@@ -25,7 +25,7 @@ const CommunityHub = () => {
           {posts.map((post) => (
             <div key={post.id} className="owis-card owis-interactive rounded-2xl p-6">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-owis-gold to-owis-bronze rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-owis-purple to-owis-bronze rounded-full flex items-center justify-center">
                   <Users className="text-white" size={20} />
                 </div>
                 <div>
@@ -39,15 +39,15 @@ const CommunityHub = () => {
               </div>
 
               <div className="flex items-center gap-6">
-                <button className="flex items-center gap-2 text-owis-charcoal dark:text-owis-cream hover:text-owis-gold transition-colors">
+                <button className="flex items-center gap-2 text-owis-charcoal dark:text-owis-cream hover:text-owis-purple transition-colors">
                   <Heart size={20} />
                   <span>{post.likes}</span>
                 </button>
-                <button className="flex items-center gap-2 text-owis-charcoal dark:text-owis-cream hover:text-owis-gold transition-colors">
+                <button className="flex items-center gap-2 text-owis-charcoal dark:text-owis-cream hover:text-owis-purple transition-colors">
                   <MessageCircle size={20} />
                   <span>{post.comments}</span>
                 </button>
-                <button className="flex items-center gap-2 text-owis-charcoal dark:text-owis-cream hover:text-owis-gold transition-colors">
+                <button className="flex items-center gap-2 text-owis-charcoal dark:text-owis-cream hover:text-owis-purple transition-colors">
                   <Share2 size={20} />
                   <span>Share</span>
                 </button>

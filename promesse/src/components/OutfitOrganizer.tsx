@@ -242,9 +242,9 @@ const OutfitOrganizer = ({ isOpen, onClose, wardrobeItemsForOutfitCreation }: Ou
                   <CardContent className={`p-4 flex flex-col justify-between ${viewMode === 'list' ? 'flex-1' : 'h-full'}`}>
                     <div>
                       <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-owis-gold transition-colors">{outfit.name}</h3>
+                        <h3 className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-owis-purple transition-colors">{outfit.name}</h3>
                         {/* Favorite button (functionality to be added if backend supports) */}
-                        {/* <Button variant="ghost" size="icon" className="ml-2 p-1 h-7 w-7 text-gray-400 hover:text-yellow-500">
+                        {/* <Button variant="ghost" size="icon" className="ml-2 p-1 h-7 w-7 text-gray-400 hover:text-purple-500">
                           <Star size={16} />
                         </Button> */}
                       </div>

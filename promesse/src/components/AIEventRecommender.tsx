@@ -59,8 +59,8 @@ const AIEventRecommender = ({ wardrobeItems }: AIEventRecommenderProps) => {
     { value: 'dinner_date', label: 'Dinner Date', icon: Heart, color: 'from-pink-500 to-red-600' },
     { value: 'wedding', label: 'Wedding', icon: Sparkles, color: 'from-purple-500 to-pink-600' },
     { value: 'job_interview', label: 'Job Interview', icon: TrendingUp, color: 'from-green-500 to-emerald-600' },
-    { value: 'cocktail_party', label: 'Cocktail Party', icon: Star, color: 'from-yellow-500 to-orange-600' },
-    { value: 'casual_brunch', label: 'Casual Brunch', icon: Sun, color: 'from-orange-400 to-yellow-500' },
+    { value: 'cocktail_party', label: 'Cocktail Party', icon: Star, color: 'from-purple-500 to-orange-600' },
+    { value: 'casual_brunch', label: 'Casual Brunch', icon: Sun, color: 'from-orange-400 to-purple-500' },
     { value: 'gallery_opening', label: 'Gallery Opening', icon: Eye, color: 'from-indigo-500 to-purple-600' },
     { value: 'family_gathering', label: 'Family Gathering', icon: Users, color: 'from-teal-500 to-cyan-600' },
   ];
@@ -147,14 +147,14 @@ const AIEventRecommender = ({ wardrobeItems }: AIEventRecommenderProps) => {
   const getScoreColor = (score: number) => {
     if (score >= 90) return 'text-green-600';
     if (score >= 80) return 'text-blue-600';
-    if (score >= 70) return 'text-yellow-600';
+    if (score >= 70) return 'text-purple-600';
     return 'text-red-600';
   };
 
   const getScoreBg = (score: number) => {
     if (score >= 90) return 'from-green-500 to-emerald-600';
     if (score >= 80) return 'from-blue-500 to-indigo-600';
-    if (score >= 70) return 'from-yellow-500 to-orange-600';
+    if (score >= 70) return 'from-purple-500 to-orange-600';
     return 'from-red-500 to-pink-600';
   };
 

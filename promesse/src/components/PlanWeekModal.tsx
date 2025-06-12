@@ -56,7 +56,7 @@ const PlanWeekModal = ({ isOpen, onClose }: PlanWeekModalProps) => {
     { id: '2', name: 'White Shirt', image: '/api/placeholder/150/150', value: 50, category: 'top' },
     { id: '3', name: 'Black Trousers', image: '/api/placeholder/150/150', value: 80, category: 'bottom' },
     { id: '4', name: 'Leather Shoes', image: '/api/placeholder/150/150', value: 150, category: 'shoes' },
-    { id: '5', name: 'Gold Watch', image: '/api/placeholder/150/150', value: 300, category: 'accessories' },
+    { id: '5', name: 'Purple Watch', image: '/api/placeholder/150/150', value: 300, category: 'accessories' },
     { id: '6', name: 'Silk Dress', image: '/api/placeholder/150/150', value: 180, category: 'top' },
     { id: '7', name: 'Denim Jacket', image: '/api/placeholder/150/150', value: 90, category: 'outerwear' },
     { id: '8', name: 'Sneakers', image: '/api/placeholder/150/150', value: 120, category: 'shoes' }
@@ -66,10 +66,10 @@ const PlanWeekModal = ({ isOpen, onClose }: PlanWeekModalProps) => {
 
   const getWeatherIcon = (condition: string) => {
     switch (condition.toLowerCase()) {
-      case 'sunny': return <Sun className="w-3 h-3 xs:w-4 xs:h-4 text-yellow-500" />;
+      case 'sunny': return <Sun className="w-3 h-3 xs:w-4 xs:h-4 text-purple-500" />;
       case 'cloudy': return <Cloud className="w-3 h-3 xs:w-4 xs:h-4 text-gray-500" />;
       case 'rainy': return <CloudRain className="w-3 h-3 xs:w-4 xs:h-4 text-blue-500" />;
-      default: return <Sun className="w-3 h-3 xs:w-4 xs:h-4 text-yellow-500" />;
+      default: return <Sun className="w-3 h-3 xs:w-4 xs:h-4 text-purple-500" />;
     }
   };
 
@@ -342,7 +342,7 @@ const PlanWeekModal = ({ isOpen, onClose }: PlanWeekModalProps) => {
                         
                         <div className="flex items-center justify-between text-xs">
                           <div className="flex items-center gap-1">
-                            <Star size={10} className="xs:w-3 xs:h-3 text-yellow-500" />
+                            <Star size={10} className="xs:w-3 xs:h-3 text-purple-500" />
                             <span className="text-gray-600 dark:text-gray-400">
                               {dayPlan.confidence}%
                             </span>
@@ -380,7 +380,7 @@ const PlanWeekModal = ({ isOpen, onClose }: PlanWeekModalProps) => {
                             <span>{weekPlan[selectedDay].weather.temp} • {weekPlan[selectedDay].weather.condition}</span>
                           </div>
                           <div className="flex items-center gap-1 xs:gap-2 text-xs xs:text-sm">
-                            <Star size={12} className="xs:w-4 xs:h-4 text-yellow-500" />
+                            <Star size={12} className="xs:w-4 xs:h-4 text-purple-500" />
                             <span>{weekPlan[selectedDay].confidence}% Style Match</span>
                           </div>
                           <div className="flex items-center gap-1 xs:gap-2 text-xs xs:text-sm">

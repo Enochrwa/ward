@@ -167,7 +167,7 @@ const SavedWeeklyPlans = ({ isOpen, onClose }: SavedWeeklyPlansProps) => {
                       
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-1">
-                          <Star size={10} className="xs:w-3 xs:h-3 text-yellow-500" />
+                          <Star size={10} className="xs:w-3 xs:h-3 text-purple-500" />
                           <span className="text-gray-600 dark:text-gray-400">
                             {dayPlan.confidence}% match
                           </span>

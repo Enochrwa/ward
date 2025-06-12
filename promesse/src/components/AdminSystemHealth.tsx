@@ -63,7 +63,7 @@ const AdminSystemHealth = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'healthy': return 'bg-green-500';
-      case 'warning': return 'bg-yellow-500';
+      case 'warning': return 'bg-purple-500';
       case 'critical': return 'bg-red-500';
       default: return 'bg-gray-500';
     }
@@ -136,7 +136,7 @@ const AdminSystemHealth = () => {
                   <div className={`w-3 h-3 ${getStatusColor(component.status)} rounded-full`}></div>
                   <StatusIcon size={16} className={
                     component.status === 'healthy' ? 'text-green-600' :
-                    component.status === 'warning' ? 'text-yellow-600' : 'text-red-600'
+                    component.status === 'warning' ? 'text-purple-600' : 'text-red-600'
                   } />
                 </div>
               </div>

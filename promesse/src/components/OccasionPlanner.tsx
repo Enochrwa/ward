@@ -143,7 +143,7 @@ const OccasionPlanner = ({ isOpen, onClose }: OccasionPlannerProps) => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Your Occasions</h3>
-        <Button onClick={() => { setCurrentView('create'); setNewOccasionData({ name: '', date: undefined, notes: '' }); }} className="bg-owis-gold hover:bg-owis-gold-dark text-owis-forest">
+        <Button onClick={() => { setCurrentView('create'); setNewOccasionData({ name: '', date: undefined, notes: '' }); }} className="bg-owis-purple hover:bg-owis-purple-dark text-owis-forest">
           <Plus size={18} className="mr-2" /> Create New
         </Button>
       </div>

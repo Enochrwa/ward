@@ -34,28 +34,28 @@ const CommunityContainer = () => {
           <TabsList className="bg-white/70 dark:bg-owis-charcoal/70 backdrop-blur-md rounded-2xl p-2 shadow-lg">
             <TabsTrigger 
               value="feed"
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-owis-gold data-[state=active]:to-owis-bronze data-[state=active]:text-white rounded-xl px-6 py-3"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-owis-purple data-[state=active]:to-owis-bronze data-[state=active]:text-white rounded-xl px-6 py-3"
             >
               <Heart size={16} />
               Style Feed
             </TabsTrigger>
             <TabsTrigger 
               value="challenges"
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-owis-gold data-[state=active]:to-owis-bronze data-[state=active]:text-white rounded-xl px-6 py-3"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-owis-purple data-[state=active]:to-owis-bronze data-[state=active]:text-white rounded-xl px-6 py-3"
             >
               <Trophy size={16} />
               Challenges
             </TabsTrigger>
             <TabsTrigger 
               value="communities"
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-owis-gold data-[state=active]:to-owis-bronze data-[state=active]:text-white rounded-xl px-6 py-3"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-owis-purple data-[state=active]:to-owis-bronze data-[state=active]:text-white rounded-xl px-6 py-3"
             >
               <Users size={16} />
               Communities
             </TabsTrigger>
             <TabsTrigger 
               value="lookbook"
-              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-owis-gold data-[state=active]:to-owis-bronze data-[state=active]:text-white rounded-xl px-6 py-3"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-owis-purple data-[state=active]:to-owis-bronze data-[state=active]:text-white rounded-xl px-6 py-3"
             >
               <Camera size={16} />
               Lookbook

@@ -21,14 +21,14 @@ const PremiumWardrobeCard = ({ item, onToggleFavorite, onWearItem, onSelect, isS
     bottoms: 'from-green-500 to-emerald-600',
     dresses: 'from-pink-500 to-rose-600',
     outerwear: 'from-purple-500 to-violet-600',
-    accessories: 'from-yellow-500 to-orange-600',
+    accessories: 'from-purple-500 to-orange-600',
     shoes: 'from-red-500 to-pink-600'
   };
 
   const getWearFrequency = (timesWorn: number) => {
     if (timesWorn >= 20) return { label: 'Favorite', color: 'green' };
     if (timesWorn >= 10) return { label: 'Regular', color: 'blue' };
-    if (timesWorn >= 5) return { label: 'Occasional', color: 'yellow' };
+    if (timesWorn >= 5) return { label: 'Occasional', color: 'purple' };
     return { label: 'Rarely worn', color: 'red' };
   };
 
@@ -38,7 +38,7 @@ const PremiumWardrobeCard = ({ item, onToggleFavorite, onWearItem, onSelect, isS
     <Card 
       className={`group relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] cursor-pointer border-2 ${
         isSelected 
-          ? 'border-yellow-400 shadow-xl ring-4 ring-yellow-400/30 bg-yellow-50/50 dark:bg-yellow-900/20' 
+          ? 'border-purple-400 shadow-xl ring-4 ring-purple-400/30 bg-purple-50/50 dark:bg-purple-900/20' 
           : 'border-transparent hover:border-white/50 bg-white/80 dark:bg-gray-800/80'
       } backdrop-blur-lg rounded-3xl animate-fade-in`}
       onMouseEnter={() => setIsHovered(true)}
@@ -107,7 +107,7 @@ const PremiumWardrobeCard = ({ item, onToggleFavorite, onWearItem, onSelect, isS
           {/* Selection Indicator */}
           {isSelected && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-yellow-400 text-gray-900 rounded-full p-2 shadow-2xl border-4 border-white">
+              <div className="bg-purple-400 text-gray-900 rounded-full p-2 shadow-2xl border-4 border-white">
                 <Star className="fill-gray-900" size={24} />
               </div>
             </div>

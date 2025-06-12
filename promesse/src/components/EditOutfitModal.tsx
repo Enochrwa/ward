@@ -113,7 +113,7 @@ const EditOutfitModal = ({ isOpen, onClose, onUpdate, outfitToEdit, allWardrobeI
                 <div className="flex flex-wrap gap-2">
                     {availableCategories.map(cat => (
                         <Button key={cat} variant={itemCategoryFilter === cat ? "default" : "outline"} size="xs" onClick={() => setItemCategoryFilter(cat)}
-                            className={`${itemCategoryFilter === cat ? "bg-owis-gold text-owis-forest" : "border-owis-sage/30 text-owis-sage hover:bg-owis-sage hover:text-white"}`}
+                            className={`${itemCategoryFilter === cat ? "bg-owis-purple text-owis-forest" : "border-owis-sage/30 text-owis-sage hover:bg-owis-sage hover:text-white"}`}
                         >
                             {cat}
                         </Button>
@@ -129,7 +129,7 @@ const EditOutfitModal = ({ isOpen, onClose, onUpdate, outfitToEdit, allWardrobeI
                     key={item.id}
                     onClick={() => handleItemSelection(item.id)}
                     className={`cursor-pointer rounded-lg border-2 p-2 transition-all hover:shadow-md ${
-                      isSelected ? 'border-owis-gold bg-owis-gold/10 dark:bg-owis-gold/20' : 'border-gray-200 dark:border-gray-600 hover:border-owis-sage dark:hover:border-owis-mint'
+                      isSelected ? 'border-owis-purple bg-owis-purple/10 dark:bg-owis-purple/20' : 'border-gray-200 dark:border-gray-600 hover:border-owis-sage dark:hover:border-owis-mint'
                     }`}
                   >
                     <img src={item.image_url || 'https://via.placeholder.com/150?text=No+Image'} alt={item.name} className="w-full h-20 object-cover rounded-md mb-1.5" />
@@ -145,7 +145,7 @@ const EditOutfitModal = ({ isOpen, onClose, onUpdate, outfitToEdit, allWardrobeI
 
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3 shrink-0">
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave} className="bg-owis-gold hover:bg-owis-gold-dark text-owis-forest">
+          <Button onClick={handleSave} className="bg-owis-purple hover:bg-owis-purple-dark text-owis-forest">
             <Save size={16} className="mr-2" />Save Changes
           </Button>
         </div>

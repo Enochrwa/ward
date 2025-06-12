@@ -17,13 +17,13 @@ const EnhancedButton: React.FC<EnhancedButtonProps> = ({
   children,
   ...props
 }) => {
-  const baseClasses = "relative overflow-hidden font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-owis-gold/30";
+  const baseClasses = "relative overflow-hidden font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-owis-purple/30";
   
   const variants = {
-    luxury: "bg-gradient-to-r from-owis-gold to-owis-bronze text-owis-forest hover:from-owis-gold-light hover:to-owis-bronze-light transform hover:scale-105 shadow-lg hover:shadow-xl",
+    luxury: "bg-gradient-to-r from-owis-purple to-owis-bronze text-owis-forest hover:from-owis-purple-light hover:to-owis-bronze-light transform hover:scale-105 shadow-lg hover:shadow-xl",
     premium: "bg-gradient-to-r from-owis-forest to-owis-sage text-white hover:from-owis-forest-light hover:to-owis-sage-light transform hover:scale-105 shadow-lg hover:shadow-xl",
     elegant: "bg-white/10 backdrop-blur-lg border border-white/20 text-owis-charcoal dark:text-white hover:bg-white/20 shadow-soft hover:shadow-medium",
-    minimal: "bg-transparent border-2 border-owis-gold text-owis-gold hover:bg-owis-gold hover:text-owis-forest"
+    minimal: "bg-transparent border-2 border-owis-purple text-owis-purple hover:bg-owis-purple hover:text-owis-forest"
   };
 
   const sizes = {

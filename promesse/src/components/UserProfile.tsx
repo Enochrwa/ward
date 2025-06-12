@@ -19,7 +19,7 @@ const UserProfile = ({ user: userData }: UserProfileProps) => { // Renamed prop 
         <div className="owis-card rounded-3xl p-8 mb-8 animate-fade-in">
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative">
-              <div className="w-32 h-32 bg-gradient-to-br from-owis-gold to-owis-bronze rounded-full flex items-center justify-center">
+              <div className="w-32 h-32 bg-gradient-to-br from-owis-purple to-owis-bronze rounded-full flex items-center justify-center">
                 <User className="text-white" size={48} />
               </div>
               <button className="absolute bottom-0 right-0 w-10 h-10 bg-owis-sage rounded-full flex items-center justify-center border-4 border-white dark:border-gray-800">
@@ -40,7 +40,7 @@ const UserProfile = ({ user: userData }: UserProfileProps) => { // Renamed prop 
               </p>
               <div className="flex items-center gap-4 justify-center md:justify-start">
                 <div className="flex items-center gap-2">
-                  <Award className="text-owis-gold" size={16} />
+                  <Award className="text-owis-purple" size={16} />
                   <span className="text-sm text-owis-charcoal dark:text-owis-cream">Style Expert</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -75,7 +75,7 @@ const UserProfile = ({ user: userData }: UserProfileProps) => { // Renamed prop 
             <h3 className="font-semibold text-owis-charcoal dark:text-owis-cream mb-4">Achievements</h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-owis-gold rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-owis-purple rounded-full flex items-center justify-center">
                   <Award className="text-white" size={14} />
                 </div>
                 <span className="text-sm text-owis-charcoal dark:text-owis-cream">Style Pioneer</span>
@@ -92,7 +92,7 @@ const UserProfile = ({ user: userData }: UserProfileProps) => { // Renamed prop 
           <div className="owis-card rounded-2xl p-6">
             <h3 className="font-semibold text-owis-charcoal dark:text-owis-cream mb-4">Quick Actions</h3>
             <div className="space-y-3">
-              <button className="w-full text-left p-3 bg-white/50 dark:bg-black/20 rounded-xl hover:bg-owis-gold/20 transition-colors">
+              <button className="w-full text-left p-3 bg-white/50 dark:bg-black/20 rounded-xl hover:bg-owis-purple/20 transition-colors">
                 <div className="flex items-center gap-3">
                   <Settings className="text-owis-charcoal dark:text-owis-cream" size={16} />
                   <span className="text-sm text-owis-charcoal dark:text-owis-cream">Edit Profile</span>

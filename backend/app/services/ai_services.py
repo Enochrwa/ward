@@ -152,6 +152,14 @@ async def analyze_outfit_image_service(
     # 5. Get Recommendations (based on identified items)
     recommendations = get_basic_recommendations(processed_identified_items if isinstance(processed_identified_items, list) else [])
 
+    # 6. Occasion Suitability Analysis (using new service)
+    from .occasion_analysis import determine_occasion_suitability
+    occasion_suitability = determine_occasion_suitability(
+        style=str(detected_style_result),
+        colors=extracted_colors if isinstance(extracted_colors, list) else [],
+        identified_items=final_identified_item_names
+    )
+
 
     # Constructing the response
     # The schema for OutfitAnalysisResponse needs to be checked carefully.
@@ -197,7 +205,7 @@ async def analyze_outfit_image_service(
         style=str(detected_style_result), # Ensure it's a string
         dominantColors=extracted_colors if isinstance(extracted_colors, list) else [str(extracted_colors)],
         identifiedItems=final_identified_item_names, # List of strings
-        occasionSuitability="To be determined by user or future AI.", # Placeholder
+        occasionSuitability=occasion_suitability,
         confidenceScore=overall_confidence,
         recommendations=recommendations,
         colorPalette=color_palette_resp,

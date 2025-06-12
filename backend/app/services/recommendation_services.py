@@ -14,16 +14,18 @@ from ..services.outfit_matching_service import OutfitMatchingService
 # from ..services.ai_services import analyze_outfit_image_service # Not directly used if AI features are mocked/pre-stored
 
 # For sentence embeddings for occasion matching
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
+try:
+    from sentence_transformers import SentenceTransformer
+    from sklearn.metrics.pairwise import cosine_similarity
+    sentence_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+except ImportError:
+    print("Warning: sentence_transformers not available. Occasion matching will use fallback logic.")
+    sentence_model = None
+    cosine_similarity = None
 
 
 # --- Load Models ---
-try:
-    sentence_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-except Exception as e:
-    print(f"Error loading SentenceTransformer model: {e}")
-    sentence_model = None
+# Models are loaded in the import section above
 
 # Instantiate services needed
 outfit_matcher = OutfitMatchingService()

@@ -107,7 +107,7 @@ const Dashboard = () => {
   const trendingStyles = [
     { name: 'Cottagecore', popularity: 94, color: 'from-green-400 to-emerald-500' },
     { name: 'Y2K Revival', popularity: 87, color: 'from-pink-400 to-purple-500' },
-    { name: 'Dark Academia', popularity: 76, color: 'from-amber-400 to-orange-500' },
+    { name: 'Dark Academia', popularity: 76, color: 'from-purple-400 to-orange-500' },
     { name: 'Minimalist', popularity: 82, color: 'from-gray-400 to-slate-500' }
   ];
 

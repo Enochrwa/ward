@@ -21,15 +21,15 @@ const ThemeToggle = () => {
           className={`
             relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300
             ${theme === key 
-              ? 'bg-owis-gold text-owis-forest shadow-lg scale-110' 
-              : 'text-owis-charcoal/70 dark:text-owis-cream/70 hover:text-owis-gold hover:bg-white/20 dark:hover:bg-white/10'
+              ? 'bg-owis-purple text-owis-forest shadow-lg scale-110' 
+              : 'text-owis-charcoal/70 dark:text-owis-cream/70 hover:text-owis-purple hover:bg-white/20 dark:hover:bg-white/10'
             }
           `}
           title={label}
         >
           <Icon size={18} />
           {theme === key && (
-            <div className="absolute inset-0 bg-owis-gold/20 rounded-xl animate-pulse-glow"></div>
+            <div className="absolute inset-0 bg-owis-purple/20 rounded-xl animate-pulse-glow"></div>
           )}
         </button>
       ))}

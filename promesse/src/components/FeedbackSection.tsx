@@ -112,7 +112,7 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({ outfitId }) => {
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
-                className={`cursor-pointer ${newFeedbackRating >= star ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-600'}`}
+                className={`cursor-pointer ${newFeedbackRating >= star ? 'text-purple-400 fill-purple-400' : 'text-gray-300 dark:text-gray-600'}`}
                 onClick={() => setNewFeedbackRating(star === newFeedbackRating ? 0 : star)} // Click again to clear rating
               />
             ))}
@@ -136,7 +136,7 @@ const FeedbackSection: React.FC<FeedbackSectionProps> = ({ outfitId }) => {
                 {fb.rating && fb.rating > 0 && (
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={14} className={i < fb.rating! ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-gray-500'} />
+                      <Star key={i} size={14} className={i < fb.rating! ? 'text-purple-400 fill-purple-400' : 'text-gray-300 dark:text-gray-500'} />
                     ))}
                   </div>
                 )}

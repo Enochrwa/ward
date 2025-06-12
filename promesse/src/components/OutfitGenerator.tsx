@@ -169,8 +169,8 @@ const OutfitGenerator = () => {
                     onClick={() => setSelectedOccasion(occasion.id)}
                     className={`p-3 md:p-4 rounded-lg md:rounded-xl border-2 transition-all duration-300 flex flex-col items-center justify-center text-center ${
                       selectedOccasion === occasion.id
-                        ? 'border-owis-gold bg-owis-gold/10 text-owis-forest shadow-lg scale-105'
-                        : 'border-gray-200 bg-white/50 hover:border-owis-gold/50 hover:bg-white/80'
+                        ? 'border-owis-purple bg-owis-purple/10 text-owis-forest shadow-lg scale-105'
+                        : 'border-gray-200 bg-white/50 hover:border-owis-purple/50 hover:bg-white/80'
                     }`}
                   >
                     <span className="text-xl md:text-2xl mb-1 md:mb-2">{occasion.icon}</span>
@@ -235,7 +235,7 @@ const OutfitGenerator = () => {
               size="lg"
               onClick={handleGenerateOutfit}
               disabled={isLoadingRecommendations || (useCurrentLocation && geoIsLoading)}
-              className="w-full bg-gradient-to-r from-owis-gold to-owis-bronze hover:from-owis-gold-dark hover:to-owis-bronze-dark text-owis-forest font-semibold py-3 md:py-4 text-base md:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              className="w-full bg-gradient-to-r from-owis-purple to-owis-bronze hover:from-owis-purple-dark hover:to-owis-bronze-dark text-owis-forest font-semibold py-3 md:py-4 text-base md:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
               {isLoadingRecommendations ? <LoadingSpinner className="mr-2" /> : <Sparkles className="w-5 h-5 mr-2" />}
               Generate Outfit Ideas

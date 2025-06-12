@@ -260,26 +260,26 @@ const Lookbook = () => {
             placeholder="Search looks, styles, or tags..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 focus-ring bg-white dark:bg-owis-charcoal border-owis-gold/30"
+            className="pl-10 focus-ring bg-white dark:bg-owis-charcoal border-owis-purple/30"
           />
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline" className="flex items-center gap-2 border-owis-gold text-owis-gold hover:bg-owis-gold hover:text-white">
+          <Button variant="outline" className="flex items-center gap-2 border-owis-purple text-owis-purple hover:bg-owis-purple hover:text-white">
             <Filter size={16} />
             Filter
           </Button>
           
-          <div className="flex bg-white dark:bg-owis-charcoal rounded-lg border border-owis-gold/30">
+          <div className="flex bg-white dark:bg-owis-charcoal rounded-lg border border-owis-purple/30">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-l-lg transition-colors ${viewMode === 'grid' ? 'bg-owis-gold text-white' : 'text-owis-charcoal dark:text-owis-cream hover:bg-owis-cream dark:hover:bg-owis-charcoal-light'}`}
+              className={`p-2 rounded-l-lg transition-colors ${viewMode === 'grid' ? 'bg-owis-purple text-white' : 'text-owis-charcoal dark:text-owis-cream hover:bg-owis-cream dark:hover:bg-owis-charcoal-light'}`}
             >
               <Grid size={20} />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-r-lg transition-colors ${viewMode === 'list' ? 'bg-owis-gold text-white' : 'text-owis-charcoal dark:text-owis-cream hover:bg-owis-cream dark:hover:bg-owis-charcoal-light'}`}
+              className={`p-2 rounded-r-lg transition-colors ${viewMode === 'list' ? 'bg-owis-purple text-white' : 'text-owis-charcoal dark:text-owis-cream hover:bg-owis-cream dark:hover:bg-owis-charcoal-light'}`}
             >
               <List size={20} />
             </button>
@@ -301,8 +301,8 @@ const Lookbook = () => {
               onClick={() => setSelectedCategory(category.id)}
               className={`px-4 py-2 rounded-xl whitespace-nowrap transition-all ${
                 selectedCategory === category.id
-                  ? 'bg-gradient-to-r from-owis-gold to-owis-bronze text-white shadow-md'
-                  : 'bg-white dark:bg-owis-charcoal text-owis-charcoal dark:text-owis-cream hover:bg-owis-cream dark:hover:bg-owis-charcoal-light border border-owis-gold/20'
+                  ? 'bg-gradient-to-r from-owis-purple to-owis-bronze text-white shadow-md'
+                  : 'bg-white dark:bg-owis-charcoal text-owis-charcoal dark:text-owis-cream hover:bg-owis-cream dark:hover:bg-owis-charcoal-light border border-owis-purple/20'
               }`}
             >
               {category.label}
@@ -330,7 +330,7 @@ const Lookbook = () => {
           {/* Featured Looks */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-owis-charcoal dark:text-owis-cream">
-              <Sparkles className="text-owis-gold" />
+              <Sparkles className="text-owis-purple" />
               Featured Looks
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -338,8 +338,8 @@ const Lookbook = () => {
                 .filter(entry => entry.featured)
                 .slice(0, 3)
                 .map(entry => (
-                  <Card key={entry.id} className="owis-card owis-interactive relative ring-2 ring-owis-gold shadow-glow">
-                    <div className="absolute top-4 right-4 bg-gradient-to-r from-owis-gold to-owis-bronze text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 z-10">
+                  <Card key={entry.id} className="owis-card owis-interactive relative ring-2 ring-owis-purple shadow-glow">
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-owis-purple to-owis-bronze text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 z-10">
                       <Sparkles size={10} />
                       Featured
                     </div>
@@ -365,11 +365,11 @@ const Lookbook = () => {
                           <img 
                             src={entry.user.avatar} 
                             alt={entry.user.name}
-                            className="w-6 h-6 rounded-full object-cover border border-owis-gold/30"
+                            className="w-6 h-6 rounded-full object-cover border border-owis-purple/30"
                           />
                           <span className="text-sm font-medium text-owis-charcoal dark:text-owis-cream">{entry.user.name}</span>
                           {entry.user.verified && (
-                            <div className="w-4 h-4 bg-owis-gold rounded-full flex items-center justify-center">
+                            <div className="w-4 h-4 bg-owis-purple rounded-full flex items-center justify-center">
                               <span className="text-white text-xs">✓</span>
                             </div>
                           )}
@@ -380,7 +380,7 @@ const Lookbook = () => {
                         
                         <div className="flex flex-wrap gap-1 mb-3">
                           {entry.tags.slice(0, 3).map((tag, i) => (
-                            <span key={i} className="px-2 py-1 bg-owis-cream/80 dark:bg-owis-charcoal-light/80 text-owis-charcoal dark:text-owis-cream rounded text-xs border border-owis-gold/20">
+                            <span key={i} className="px-2 py-1 bg-owis-cream/80 dark:bg-owis-charcoal-light/80 text-owis-charcoal dark:text-owis-cream rounded text-xs border border-owis-purple/20">
                               {tag}
                             </span>
                           ))}
@@ -400,7 +400,7 @@ const Lookbook = () => {
                               <span className="text-sm">{formatNumber(entry.engagement.likes)}</span>
                             </button>
                             
-                            <button className="flex items-center gap-1 text-owis-charcoal dark:text-owis-cream hover:text-owis-gold transition-colors">
+                            <button className="flex items-center gap-1 text-owis-charcoal dark:text-owis-cream hover:text-owis-purple transition-colors">
                               <Share2 size={16} />
                               <span className="text-sm">{formatNumber(entry.engagement.shares)}</span>
                             </button>
@@ -410,8 +410,8 @@ const Lookbook = () => {
                             onClick={() => toggleSave(entry.id)}
                             className={`transition-colors ${
                               entry.engagement.saved 
-                                ? 'text-owis-gold' 
-                                : 'text-owis-charcoal dark:text-owis-cream hover:text-owis-gold'
+                                ? 'text-owis-purple' 
+                                : 'text-owis-charcoal dark:text-owis-cream hover:text-owis-purple'
                             }`}
                           >
                             <Bookmark size={16} fill={entry.engagement.saved ? 'currentColor' : 'none'} />
@@ -453,11 +453,11 @@ const Lookbook = () => {
                         <img 
                           src={entry.user.avatar} 
                           alt={entry.user.name}
-                          className="w-6 h-6 rounded-full object-cover border border-owis-gold/30"
+                          className="w-6 h-6 rounded-full object-cover border border-owis-purple/30"
                         />
                         <span className="text-sm font-medium text-owis-charcoal dark:text-owis-cream">{entry.user.name}</span>
                         {entry.user.verified && (
-                          <div className="w-4 h-4 bg-owis-gold rounded-full flex items-center justify-center">
+                          <div className="w-4 h-4 bg-owis-purple rounded-full flex items-center justify-center">
                             <span className="text-white text-xs">✓</span>
                           </div>
                         )}
@@ -468,7 +468,7 @@ const Lookbook = () => {
                       
                       <div className="flex flex-wrap gap-1 mb-3">
                         {entry.tags.slice(0, 3).map((tag, i) => (
-                          <span key={i} className="px-2 py-1 bg-owis-cream/80 dark:bg-owis-charcoal-light/80 text-owis-charcoal dark:text-owis-cream rounded text-xs border border-owis-gold/20">
+                          <span key={i} className="px-2 py-1 bg-owis-cream/80 dark:bg-owis-charcoal-light/80 text-owis-charcoal dark:text-owis-cream rounded text-xs border border-owis-purple/20">
                             {tag}
                           </span>
                         ))}
@@ -488,7 +488,7 @@ const Lookbook = () => {
                             <span className="text-sm">{formatNumber(entry.engagement.likes)}</span>
                           </button>
                           
-                          <button className="flex items-center gap-1 text-owis-charcoal dark:text-owis-cream hover:text-owis-gold transition-colors">
+                          <button className="flex items-center gap-1 text-owis-charcoal dark:text-owis-cream hover:text-owis-purple transition-colors">
                             <Share2 size={16} />
                             <span className="text-sm">{formatNumber(entry.engagement.shares)}</span>
                           </button>
@@ -498,8 +498,8 @@ const Lookbook = () => {
                           onClick={() => toggleSave(entry.id)}
                           className={`transition-colors ${
                             entry.engagement.saved 
-                              ? 'text-owis-gold' 
-                              : 'text-owis-charcoal dark:text-owis-cream hover:text-owis-gold'
+                              ? 'text-owis-purple' 
+                              : 'text-owis-charcoal dark:text-owis-cream hover:text-owis-purple'
                           }`}
                         >
                           <Bookmark size={16} fill={entry.engagement.saved ? 'currentColor' : 'none'} />

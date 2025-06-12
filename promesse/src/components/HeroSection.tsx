@@ -84,11 +84,11 @@ const HeroSection = () => {
             animationDuration: `${element.duration}s`,
           }}
         >
-          {element.id % 4 === 0 && <Sparkles className="w-full h-full text-owis-gold" />}
+          {element.id % 4 === 0 && <Sparkles className="w-full h-full text-owis-purple" />}
           {element.id % 4 === 1 && <Star className="w-full h-full text-white" />}
-          {element.id % 4 === 2 && <Heart className="w-full h-full text-owis-gold" />}
+          {element.id % 4 === 2 && <Heart className="w-full h-full text-owis-purple" />}
           {element.id % 4 === 3 && (
-            <div className="w-full h-full bg-owis-gold rounded-full opacity-80"></div>
+            <div className="w-full h-full bg-owis-purple rounded-full opacity-80"></div>
           )}
         </div>
       ))}
@@ -98,11 +98,11 @@ const HeroSection = () => {
         <div className={`transition-all duration-1000 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}>
           {/* Animated Badge */}
           <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-6 py-2 mb-8 owis-interactive">
-            <Sparkles className="w-4 h-4 text-owis-gold animate-pulse" />
+            <Sparkles className="w-4 h-4 text-owis-purple animate-pulse" />
             <span className="text-white font-medium text-sm">
               Aesthetic & Dynamic Masterpiece
             </span>
-            <div className="w-2 h-2 bg-owis-gold rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-owis-purple rounded-full animate-pulse"></div>
           </div>
 
           {/* Main Heading with Text Reveal Animation */}
@@ -117,7 +117,7 @@ const HeroSection = () => {
               Reimagined
             </span>
             <span 
-              className={`block text-owis-gold text-animate-in ${isVisible ? '' : 'opacity-0'}`}
+              className={`block text-owis-purple text-animate-in ${isVisible ? '' : 'opacity-0'}`}
               style={{ animationDelay: '0.6s' }}
             >
               Beautifully
@@ -169,9 +169,9 @@ const HeroSection = () => {
             style={{ animationDelay: '1.5s' }}
           >
             {[
-              { value: '100M+', label: 'Global Users', color: 'text-owis-gold', icon: Heart },
+              { value: '100M+', label: 'Global Users', color: 'text-owis-purple', icon: Heart },
               { value: '90%', label: 'AI Accuracy', color: 'text-white', icon: Sparkles },
-              { value: '$2B', label: 'Market Impact', color: 'text-owis-gold', icon: Star }
+              { value: '$2B', label: 'Market Impact', color: 'text-owis-purple', icon: Star }
             ].map((stat, index) => (
               <div 
                 key={stat.label}

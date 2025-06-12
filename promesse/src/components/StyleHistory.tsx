@@ -150,7 +150,7 @@ const StyleHistory = ({ isOpen, onClose }: StyleHistoryProps) => {
               <CardContent className="p-4 text-center">
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-2xl font-bold text-green-600">{stats.avgRating}</span>
-                  <Star className="w-5 h-5 text-yellow-500 fill-current" />
+                  <Star className="w-5 h-5 text-purple-500 fill-current" />
                 </div>
                 <div className="text-sm text-green-700 dark:text-green-300">Average Rating</div>
               </CardContent>
@@ -227,7 +227,7 @@ const StyleHistory = ({ isOpen, onClose }: StyleHistoryProps) => {
                           <Star 
                             key={i} 
                             size={16} 
-                            className={i < entry.rating ? "text-yellow-500 fill-current" : "text-gray-300"} 
+                            className={i < entry.rating ? "text-purple-500 fill-current" : "text-gray-300"} 
                           />
                         ))}
                       </div>
@@ -286,7 +286,7 @@ const StyleHistory = ({ isOpen, onClose }: StyleHistoryProps) => {
 
                       <div className="flex flex-wrap gap-1">
                         {entry.tags.map((tag, i) => (
-                          <Badge key={i} className="text-xs bg-owis-gold/10 text-owis-gold">
+                          <Badge key={i} className="text-xs bg-owis-purple/10 text-owis-purple">
                             #{tag}
                           </Badge>
                         ))}

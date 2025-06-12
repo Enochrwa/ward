@@ -235,10 +235,10 @@ const StyleCommunities = () => {
             placeholder="Search communities..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 focus-ring bg-white dark:bg-owis-charcoal border-owis-gold/30"
+            className="pl-10 focus-ring bg-white dark:bg-owis-charcoal border-owis-purple/30"
           />
         </div>
-        <Button variant="outline" className="flex items-center gap-2 border-owis-gold text-owis-gold hover:bg-owis-gold hover:text-white">
+        <Button variant="outline" className="flex items-center gap-2 border-owis-purple text-owis-purple hover:bg-owis-purple hover:text-white">
           <Filter size={16} />
           Filters
         </Button>
@@ -257,8 +257,8 @@ const StyleCommunities = () => {
               onClick={() => setSelectedCategory(category.id)}
               className={`px-4 py-2 rounded-xl whitespace-nowrap transition-all ${
                 selectedCategory === category.id
-                  ? 'bg-gradient-to-r from-owis-gold to-owis-bronze text-white shadow-md'
-                  : 'bg-white dark:bg-owis-charcoal text-owis-charcoal dark:text-owis-cream hover:bg-owis-cream dark:hover:bg-owis-charcoal-light border border-owis-gold/20'
+                  ? 'bg-gradient-to-r from-owis-purple to-owis-bronze text-white shadow-md'
+                  : 'bg-white dark:bg-owis-charcoal text-owis-charcoal dark:text-owis-cream hover:bg-owis-cream dark:hover:bg-owis-charcoal-light border border-owis-purple/20'
               }`}
             >
               {category.label}
@@ -284,7 +284,7 @@ const StyleCommunities = () => {
           {/* Featured Communities */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-owis-charcoal dark:text-owis-cream">
-              <Star className="text-owis-gold" />
+              <Star className="text-owis-purple" />
               Featured Communities
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -292,8 +292,8 @@ const StyleCommunities = () => {
                 .filter(community => community.featured)
                 .slice(0, 3)
                 .map(community => (
-                  <Card key={community.id} className="owis-card owis-interactive relative ring-2 ring-owis-gold shadow-glow">
-                    <div className="absolute top-4 right-4 bg-gradient-to-r from-owis-gold to-owis-bronze text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                  <Card key={community.id} className="owis-card owis-interactive relative ring-2 ring-owis-purple shadow-glow">
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-owis-purple to-owis-bronze text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
                       <Crown size={10} />
                       Featured
                     </div>
@@ -324,7 +324,7 @@ const StyleCommunities = () => {
                           </p>
                         </div>
                         {community.isPrivate && (
-                          <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-full text-xs">
+                          <div className="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-1 rounded-full text-xs">
                             Private
                           </div>
                         )}
@@ -336,7 +336,7 @@ const StyleCommunities = () => {
 
                       <div className="flex flex-wrap gap-1 mb-4">
                         {community.tags.map((tag, i) => (
-                          <span key={i} className="px-2 py-1 bg-owis-cream/80 dark:bg-owis-charcoal-light/80 text-owis-charcoal dark:text-owis-cream rounded text-xs border border-owis-gold/20">
+                          <span key={i} className="px-2 py-1 bg-owis-cream/80 dark:bg-owis-charcoal-light/80 text-owis-charcoal dark:text-owis-cream rounded text-xs border border-owis-purple/20">
                             {tag}
                           </span>
                         ))}
@@ -399,7 +399,7 @@ const StyleCommunities = () => {
                         </p>
                       </div>
                       {community.isPrivate && (
-                        <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-full text-xs">
+                        <div className="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-1 rounded-full text-xs">
                           Private
                         </div>
                       )}
@@ -411,7 +411,7 @@ const StyleCommunities = () => {
 
                     <div className="flex flex-wrap gap-1 mb-4">
                       {community.tags.map((tag, i) => (
-                        <span key={i} className="px-2 py-1 bg-owis-cream/80 dark:bg-owis-charcoal-light/80 text-owis-charcoal dark:text-owis-cream rounded text-xs border border-owis-gold/20">
+                        <span key={i} className="px-2 py-1 bg-owis-cream/80 dark:bg-owis-charcoal-light/80 text-owis-charcoal dark:text-owis-cream rounded text-xs border border-owis-purple/20">
                           {tag}
                         </span>
                       ))}
@@ -452,7 +452,7 @@ const StyleCommunities = () => {
                         <img 
                           src={post.user.avatar} 
                           alt={post.user.name}
-                          className="w-10 h-10 rounded-full object-cover border-2 border-owis-gold/30"
+                          className="w-10 h-10 rounded-full object-cover border-2 border-owis-purple/30"
                         />
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
@@ -475,7 +475,7 @@ const StyleCommunities = () => {
                               <Heart size={14} />
                               <span>{post.likes}</span>
                             </button>
-                            <button className="flex items-center gap-1 hover:text-owis-gold transition-colors">
+                            <button className="flex items-center gap-1 hover:text-owis-purple transition-colors">
                               <MessageCircle size={14} />
                               <span>{post.comments}</span>
                             </button>

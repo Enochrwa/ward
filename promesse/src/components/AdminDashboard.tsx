@@ -22,7 +22,7 @@ const AdminDashboard = () => {
   const deviceData = [
     { name: 'Mobile', value: 65, color: '#8B5CF6' },
     { name: 'Desktop', value: 30, color: '#06B6D4' },
-    { name: 'Tablet', value: 5, color: '#F59E0B' }
+    { name: 'Tablet', value: 5, color: '#8B5CF6' }
   ];
 
   const regionData = [
@@ -354,12 +354,12 @@ const AdminDashboard = () => {
               <span className="text-green-600 font-semibold">Operational</span>
             </div>
             
-            <div className="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
                 <span className="font-medium">AI Processing</span>
               </div>
-              <span className="text-yellow-600 font-semibold">High Load</span>
+              <span className="text-purple-600 font-semibold">High Load</span>
             </div>
             
             <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">

@@ -34,8 +34,8 @@ const WardrobeStats = ({ items }: WardrobeStatsProps) => {
       label: 'Favorites',
       value: favoriteItems,
       icon: Star,
-      color: 'yellow',
-      bgColor: 'from-yellow-500 to-orange-600'
+      color: 'purple',
+      bgColor: 'from-purple-500 to-orange-600'
     },
     {
       label: 'Avg Wears',

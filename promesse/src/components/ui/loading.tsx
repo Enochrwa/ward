@@ -26,7 +26,7 @@ const Loading: React.FC<LoadingProps> = ({
   return (
     <div className={containerClasses}>
       <div className="flex flex-col items-center space-y-4">
-        <Loader2 className={`${sizeClasses[size]} animate-spin text-owis-gold`} />
+        <Loader2 className={`${sizeClasses[size]} animate-spin text-owis-purple`} />
         {text && (
           <p className="text-sm text-owis-charcoal/70 dark:text-owis-cream/70 font-medium">
             {text}

@@ -4,56 +4,167 @@ from PIL import Image # For image processing
 import io # For handling byte streams
 import numpy as np # For numerical operations, image manipulation
 from typing import List, Optional # Added Optional for get_fashion_trends_service user
+import torch # For PyTorch models
 
-# Placeholder for actual model loading and inference
-# from transformers import pipeline # Example: if using Hugging Face transformers
-# import tensorflow as tf # Example: if using TensorFlow
-# from sklearn.cluster import KMeans # Example: for color quantization
+# For AI model loading and inference
+from transformers import pipeline, ViTFeatureExtractor, ViTModel
+from transformers import DetrFeatureExtractor, DetrForObjectDetection
+from sklearn.cluster import KMeans
 
 from .. import tables as schemas, model as models
 
-# --- Mock/Placeholder AI Functions ---
-# These will be replaced or augmented with real model calls.
+# --- Load AI Models ---
+# These models are loaded globally when the module is imported.
+# For production, consider pre-downloading to the container/server.
 
-def mock_extract_colors(image: Image.Image, num_colors=5) -> List[str]:
-    # Simplified: Resize, get dominant colors (mocked)
-    # In a real scenario, use KMeans or similar on pixel data
-    # For now, return fixed mock colors based on image size or a random selection
-    width, height = image.size
-    if width > 500:
-        return ["#2563EB", "#DC2626", "#059669", "#F59E0B", "#EF4444"] # Brighter
-    else:
-        return ["#374151", "#4B5563", "#6B7280", "#9CA3AF", "#D1D5DB"] # Muted
-    # Real implementation would involve:
-    # image_arr = np.array(image.resize((100, 100))) # Resize for performance
-    # pixels = image_arr.reshape(-1, 3)
-    # kmeans = KMeans(n_clusters=num_colors, random_state=0, n_init='auto').fit(pixels)
-    # dominant_colors = kmeans.cluster_centers_.astype(int)
-    # return [f"#{r:02x}{g:02x}{b:02x}" for r, g, b in dominant_colors]
+# Image Embeddings Model (ViT)
+try:
+    embedding_feature_extractor = ViTFeatureExtractor.from_pretrained('google/vit-base-patch16-224-in21k')
+    embedding_model = ViTModel.from_pretrained('google/vit-base-patch16-224-in21k')
+except Exception as e:
+    print(f"Error loading embedding models: {e}")
+    embedding_feature_extractor = None
+    embedding_model = None
 
-def mock_detect_style(image: Image.Image) -> str:
-    # Mock: Based on image aspect ratio or some simple feature
-    width, height = image.size
-    if width > height:
-        return "Casual Landscape"
-    elif height > width:
-        return "Formal Portrait"
-    else:
-        return "Modern Square"
-    # Real implementation: Use an image classification model (e.g., ResNet, ViT)
-    # trained on fashion styles.
-    # captioner = pipeline("image-to-text", model="nlpconnect/vit-gpt2-image-captioning")
-    # caption = captioner(image)[0]['generated_text']
-    # return caption # Or further process caption to extract style
+# Object Detection Model (DETR)
+try:
+    object_detection_feature_extractor = DetrFeatureExtractor.from_pretrained("facebook/detr-resnet-50")
+    object_detection_model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50")
+except Exception as e:
+    print(f"Error loading object detection models: {e}")
+    object_detection_feature_extractor = None
+    object_detection_model = None
 
-def mock_identify_items(image: Image.Image) -> List[str]:
-    # Mock: return fixed items
-    # Real implementation: Use an object detection model (e.g., YOLO, Faster R-CNN)
-    # trained on clothing items.
-    # object_detector = pipeline("object-detection", model="facebook/detr-resnet-50")
-    # objects = object_detector(image)
-    # return [obj['label'] for obj in objects if obj['score'] > 0.8] # Filter by confidence
-    return ["Mock T-Shirt", "Mock Jeans", "Mock Sneakers"]
+# Image Captioning Model (for style detection)
+try:
+    captioner = pipeline("image-to-text", model="nlpconnect/vit-gpt2-image-captioning")
+except Exception as e:
+    print(f"Error loading captioning model: {e}")
+    captioner = None
+
+# --- AI Functions ---
+
+def extract_image_embedding(image: Image.Image) -> Optional[List[float]]:
+    """
+    Extracts image embedding using a pre-trained ViT model.
+    """
+    if embedding_model is None or embedding_feature_extractor is None:
+        print("Embedding models not loaded. Cannot extract embedding.")
+        return None
+    try:
+        inputs = embedding_feature_extractor(images=image, return_tensors="pt")
+        with torch.no_grad(): # Ensure no gradients are computed
+            outputs = embedding_model(**inputs)
+        # Use the pooler output for a fixed-size embedding
+        embedding = outputs.pooler_output.squeeze().tolist()
+        # Alternatively, use the last hidden state (flattened)
+        # embedding = outputs.last_hidden_state.flatten().tolist()
+        return embedding
+    except Exception as e:
+        print(f"Error during image embedding extraction: {e}")
+        return None
+
+# Replace mock_extract_colors with the actual implementation
+def extract_colors(image: Image.Image, num_colors=5) -> List[str]:
+    """
+    Extracts dominant colors from an image using KMeans clustering.
+    """
+    try:
+        # Resize image for performance. Smaller images process faster.
+        # Aspect ratio is preserved. Max dimension set to 100px.
+        image.thumbnail((100, 100))
+
+        # Convert image to numpy array
+        image_arr = np.array(image)
+
+        # Ensure image is RGB (3 channels)
+        if image_arr.ndim == 2: # Grayscale image
+            # Convert grayscale to RGB by replicating the single channel
+            image_arr = np.stack((image_arr,)*3, axis=-1)
+        elif image_arr.shape[2] == 4: # RGBA image
+            # Convert RGBA to RGB by discarding the alpha channel
+            image_arr = image_arr[:, :, :3]
+
+        # Reshape to (width*height, 3) array of pixels
+        pixels = image_arr.reshape(-1, 3)
+
+        # Use KMeans to find dominant colors
+        # n_init='auto' is good for scikit-learn versions that support it
+        # For older versions, you might need to set n_init explicitly (e.g., 10)
+        kmeans = KMeans(n_clusters=num_colors, random_state=0, n_init='auto').fit(pixels)
+        dominant_colors = kmeans.cluster_centers_.astype(int)
+
+        # Convert colors to hex strings
+        hex_colors = [f"#{r:02x}{g:02x}{b:02x}" for r, g, b in dominant_colors]
+        return hex_colors
+    except Exception as e:
+        print(f"Error during color extraction: {e}")
+        # Fallback to some default colors if extraction fails
+        return ["#FFFFFF", "#000000", "#FF0000", "#00FF00", "#0000FF"]
+
+# Replace mock_detect_style with the actual implementation
+def detect_style(image: Image.Image) -> str:
+    """
+    Detects the style of an outfit in an image using image captioning.
+    The generated caption is used as a proxy for style.
+    """
+    if captioner is None:
+        print("Captioning model not loaded. Cannot detect style.")
+        return "Style detection model not available"
+    try:
+        # Ensure image is in a format compatible with the captioner if necessary
+        # Most Hugging Face pipelines handle PIL Images directly.
+        caption_result = captioner(image)
+        if caption_result and isinstance(caption_result, list) and len(caption_result) > 0:
+            caption = caption_result[0]['generated_text']
+            # Post-processing the caption can be done here if needed (e.g., keyword extraction)
+            # For now, returning the raw caption as the style.
+            return caption
+        else:
+            return "Could not generate caption"
+    except Exception as e:
+        print(f"Error during style detection: {e}")
+        return "Error in style detection"
+
+# Replace mock_identify_items with the actual implementation
+def identify_items(image: Image.Image) -> List[str]:
+    """
+    Identifies items in an image using a pre-trained object detection model (DETR).
+    """
+    if object_detection_model is None or object_detection_feature_extractor is None:
+        print("Object detection models not loaded. Cannot identify items.")
+        return ["Object detection model not available"]
+
+    try:
+        inputs = object_detection_feature_extractor(images=image, return_tensors="pt")
+        with torch.no_grad(): # Ensure no gradients are computed
+            outputs = object_detection_model(**inputs)
+
+        # Post-process the outputs
+        # Target sizes should be the original image size, in (height, width) format.
+        target_sizes = torch.tensor([image.size[::-1]])
+        results = object_detection_feature_extractor.post_process_object_detection(
+            outputs=outputs,
+            threshold=0.7, # Confidence threshold
+            target_sizes=target_sizes
+        )[0]
+
+        identified_labels = []
+        if 'labels' in results and 'scores' in results:
+            for score, label_id in zip(results['scores'], results['labels']):
+                label = object_detection_model.config.id2label[label_id.item()]
+                # Optional: Filter out common non-clothing items or items with low confidence
+                # Example filter:
+                # if label not in ["person", "background"] and score.item() > 0.7:
+                identified_labels.append(label)
+
+        if not identified_labels:
+            return ["No items identified with sufficient confidence"]
+
+        return identified_labels
+    except Exception as e:
+        print(f"Error during item identification: {e}")
+        return ["Error in item identification"]
 
 # --- Main Service Function ---
 
@@ -64,48 +175,46 @@ async def analyze_outfit_image_service(
 ) -> schemas.OutfitAnalysisResponse: # Define this schema
     try:
         image_bytes = await file.read()
+        # Ensure image is converted to RGB after opening
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid image file: {str(e)}")
 
-    # Simulate AI processing steps
-    # In a real application, these would involve calls to ML models/pipelines
-    # For Transformers, Scikit-learn, TensorFlow:
-    # 1. Color Analysis: Use scikit-learn's KMeans for color quantization from image pixels.
-    # 2. Style Detection: Use a pre-trained image classification model from TensorFlow Hub or a Hugging Face Transformer (e.g., ViT - Vision Transformer) fine-tuned on fashion styles.
-    # 3. Item Identification: Use an object detection model from TensorFlow Hub (e.g., Faster R-CNN, SSD) or a Hugging Face Transformer (e.g., DETR) fine-tuned on clothing items.
-    # 4. Occasion Appropriateness: Could be rule-based initially, or a text classifier on combined item/style info if enough data.
+    # Perform AI analysis using the new functions
+    # Embedding is extracted but not directly returned in this response for now.
+    # It would typically be stored for later use (e.g., similarity searches).
+    image_embedding = extract_image_embedding(image.copy()) # Use a copy if image is used elsewhere
 
-    # Using mock functions for now as per "little time" constraint for initial setup
-    # These would be replaced by actual model inference calls
-    extracted_colors = mock_extract_colors(image)
-    detected_style = mock_detect_style(image)
-    identified_items = mock_identify_items(image)
+    # Actual AI function calls
+    extracted_colors = extract_colors(image.copy()) # Use a copy for functions that might modify it (like thumbnailing)
+    detected_style = detect_style(image.copy())
+    identified_items = identify_items(image.copy())
 
-    # Mock recommendations and insights
+    # Generic recommendations and insights until more advanced services are built
     recommendations = [
-        "Consider adding a statement accessory.",
-        "This style is great for casual Fridays.",
+        "Ensure the outfit is comfortable and appropriate for the planned occasion.",
+        "Accessorize thoughtfully to enhance your look."
     ]
-    if "Mock T-Shirt" in identified_items:
-        recommendations.append("A patterned t-shirt could be more expressive.")
+    if identified_items and "model not available" not in identified_items[0] and "Error in item identification" not in identified_items[0]:
+        recommendations.append(f"This outfit featuring {', '.join(identified_items[:2])} looks interesting.")
+    else:
+        recommendations.append("Could not identify specific items, but focus on fit and color coordination.")
 
-    # For demonstration, we're not saving the analysis to DB yet, but one might
-    # create an OutfitAnalysis model and store results linked to the user.
+    # For demonstration, we're not saving the analysis to DB yet.
+    # In a real application, an OutfitAnalysis record might be created here,
+    # potentially storing the image_embedding as well.
 
     return schemas.OutfitAnalysisResponse(
         fileName=file.filename,
         contentType=file.content_type,
         style=detected_style,
-        dominantColors=extracted_colors, # Renamed from colors
+        dominantColors=extracted_colors,
         identifiedItems=identified_items,
-        occasionSuitability="General Casual", # Mocked
-        confidenceScore=0.85, # Mocked
+        occasionSuitability="To be determined", # Placeholder
+        confidenceScore=0.75, # Placeholder, actual confidence might come from models
         recommendations=recommendations,
-        # colorPalette and styleInsights from frontend mock can be added if needed
-        colorPalette=[{"color": c, "name": "Color " + c, "percentage": round(100/len(extracted_colors),1)} for c in extracted_colors],
-        styleInsights=[{"category": "Overall", "score": 85, "description": f"The outfit leans towards {detected_style}."}]
-
+        colorPalette=[{"color": c, "name": "Dominant Color", "percentage": round(100/len(extracted_colors),1) if extracted_colors and "model not available" not in extracted_colors[0] and "Error" not in extracted_colors[0] else 0} for c in extracted_colors],
+        styleInsights=[{"category": "Overall Style", "score": 75, "description": f"The outfit is described as: {detected_style}" if "model not available" not in detected_style and "Error" not in detected_style else "Style insights pending."}]
     )
 
 # Placeholder for trend forecasting service (will be in Step 4)

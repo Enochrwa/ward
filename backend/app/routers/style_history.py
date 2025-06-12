@@ -3,7 +3,8 @@ from typing import List
 from datetime import datetime
 from sqlalchemy.orm import Session, joinedload
 
-from .. import schemas, models
+from .. import tables as schemas
+from .. import model as models
 from ..security import get_current_user # get_current_user returns schemas.User
 from ..db.database import get_db
 

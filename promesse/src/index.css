@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
 @tailwind base;
 @tailwind components;
@@ -24,7 +23,7 @@
     --muted: 247 250 252;
     --muted-foreground: 100 116 139;
 
-    --accent: 212 175 55;
+    --accent: 20 184 166;
     --accent-foreground: 255 255 255;
 
     --destructive: 239 68 68;
@@ -56,7 +55,7 @@
     --popover: 45 55 72;
     --popover-foreground: 247 250 252;
 
-    --primary: 212 175 55;
+    --primary: 20 184 166;
     --primary-foreground: 26 74 58;
 
     --secondary: 51 65 85;
@@ -65,7 +64,7 @@
     --muted: 51 65 85;
     --muted-foreground: 148 163 184;
 
-    --accent: 212 175 55;
+    --accent: 20 184 166;
     --accent-foreground: 26 74 58;
 
     --destructive: 239 68 68;
@@ -73,16 +72,16 @@
 
     --border: 51 65 85;
     --input: 51 65 85;
-    --ring: 212 175 55;
+    --ring: 20 184 166;
 
     --sidebar-background: 45 55 72;
     --sidebar-foreground: 247 250 252;
-    --sidebar-primary: 212 175 55;
+    --sidebar-primary: 20 184 166;
     --sidebar-primary-foreground: 26 74 58;
     --sidebar-accent: 51 65 85;
     --sidebar-accent-foreground: 247 250 252;
     --sidebar-border: 51 65 85;
-    --sidebar-ring: 212 175 55;
+    --sidebar-ring: 20 184 166;
   }
 }
 
@@ -104,7 +103,12 @@
     background-attachment: fixed;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-heading;
     font-feature-settings: "kern" 1, "liga" 1;
   }
@@ -126,21 +130,21 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: rgba(212, 175, 55, 0.1);
+    background: rgba(20, 184, 166, 0.1);
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #d4af37, #b7791f);
+    background: linear-gradient(135deg, #14b8a6, #0d9488);
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #e4bf47, #c7892f);
+    background: linear-gradient(135deg, #0f766e, #115e59);
   }
 
   .dark ::-webkit-scrollbar-track {
-    background: rgba(212, 175, 55, 0.2);
+    background: rgba(20, 184, 166, 0.2);
   }
 
   /* Extreme Responsiveness Base */
@@ -153,23 +157,23 @@
     .container {
       @apply px-1;
     }
-    
+
     h1 {
       @apply text-xl leading-tight;
     }
-    
+
     h2 {
       @apply text-lg leading-tight;
     }
-    
+
     h3 {
       @apply text-base leading-tight;
     }
-    
+
     .card-compact {
       @apply p-2;
     }
-    
+
     .button-compact {
       @apply px-2 py-1 text-xs;
     }
@@ -180,11 +184,11 @@
     .grid-responsive {
       @apply grid-cols-2 gap-2;
     }
-    
+
     .flex-responsive {
       @apply flex-col space-y-2;
     }
-    
+
     .text-responsive {
       @apply text-sm;
     }
@@ -195,11 +199,11 @@
     .grid-responsive {
       @apply grid-cols-3 gap-3;
     }
-    
+
     .flex-responsive {
       @apply flex-row space-x-3 space-y-0;
     }
-    
+
     .text-responsive {
       @apply text-base;
     }
@@ -210,7 +214,7 @@
     .grid-responsive {
       @apply grid-cols-4 gap-4;
     }
-    
+
     .container-large {
       @apply max-w-6xl;
     }
@@ -221,11 +225,11 @@
     .grid-responsive {
       @apply grid-cols-6 gap-6;
     }
-    
+
     .container-large {
       @apply max-w-7xl;
     }
-    
+
     .text-xl-responsive {
       @apply text-2xl;
     }
@@ -234,8 +238,15 @@
 
 /* Enhanced Keyframes */
 @keyframes gradient-flow {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 @keyframes fade-in {
@@ -243,6 +254,7 @@
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -254,6 +266,7 @@
     opacity: 0;
     transform: scale(0.8);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -261,29 +274,47 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(20, 184, 166, 0.5);
   }
+
   50% {
-    box-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
+    box-shadow: 0 0 30px rgba(20, 184, 166, 0.8);
   }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 @keyframes morph {
-  0%, 100% {
+
+  0%,
+  100% {
     border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
     transform: translate3d(0, 0, 0) rotateZ(0deg);
   }
+
   50% {
     border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
     transform: translate3d(0, -50px, 0) rotateZ(180deg);
@@ -291,15 +322,16 @@
 }
 
 @layer components {
+
   /* Enhanced OWIS Design System with extreme responsiveness */
   .owis-gradient {
-    @apply bg-gradient-to-br from-owis-forest via-owis-sage to-owis-gold;
+    @apply bg-gradient-to-br from-owis-forest via-owis-sage to-owis-emerald;
     background-size: 400% 400%;
     animation: gradient-flow 6s ease infinite;
   }
-  
-  .owis-gradient-gold {
-    @apply bg-gradient-to-br from-owis-gold via-owis-bronze to-owis-gold-dark;
+
+  .owis-gradient-emerald {
+    @apply bg-gradient-to-br from-owis-emerald via-owis-teal to-owis-emerald-dark;
     background-size: 200% 200%;
     animation: gradient-flow 4s ease infinite;
   }
@@ -309,16 +341,16 @@
     background-size: 200% 200%;
     animation: gradient-flow 5s ease infinite;
   }
-  
+
   .owis-card {
     @apply bg-white/90 dark:bg-owis-charcoal/90 backdrop-blur-md border border-white/30 dark:border-white/20 shadow-soft;
     @apply p-3 xs:p-4 sm:p-5 md:p-6;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 
+    box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.1),
-      0 2px 8px rgba(212, 175, 55, 0.1),
+      0 2px 8px rgba(20, 184, 166, 0.1),
       inset 0 1px 0 rgba(255, 255, 255, 0.8);
     transition: all 0.3s ease;
   }
@@ -326,9 +358,9 @@
   .dark .owis-card {
     background: rgba(45, 55, 72, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 
+    box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.3),
-      0 2px 8px rgba(212, 175, 55, 0.2),
+      0 2px 8px rgba(20, 184, 166, 0.2),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
@@ -345,19 +377,17 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(212, 175, 55, 0.2),
-      transparent
-    );
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(20, 184, 166, 0.2),
+        transparent);
     transition: left 0.8s ease;
   }
 
   .owis-card-premium:hover::before {
     left: 100%;
   }
-  
+
   .owis-hover {
     @apply transition-all duration-500 ease-out;
     transform-style: preserve-3d;
@@ -382,10 +412,10 @@
 
   .owis-interactive:hover {
     transform: translateY(-12px) scale(1.08);
-    box-shadow: 
+    box-shadow:
       0 20px 40px rgba(0, 0, 0, 0.1),
-      0 0 0 1px rgba(212, 175, 55, 0.2),
-      0 0 30px rgba(212, 175, 55, 0.3);
+      0 0 0 1px rgba(20, 184, 166, 0.2),
+      0 0 30px rgba(20, 184, 166, 0.3);
   }
 
   @media (max-width: 767px) {
@@ -398,20 +428,18 @@
     transform: translateY(-4px) scale(1.02);
     transition: all 0.1s ease;
   }
-  
+
   .shimmer-effect {
     @apply relative overflow-hidden;
   }
-  
+
   .shimmer-effect::before {
     @apply absolute inset-0;
     content: '';
-    background: linear-gradient(
-      120deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.4) 50%,
-      transparent 100%
-    );
+    background: linear-gradient(120deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%);
     animation: shimmer 3s ease-in-out infinite;
   }
 
@@ -430,7 +458,7 @@
 
   .floating-element {
     animation: float 3s ease-in-out infinite;
-    filter: drop-shadow(0 10px 20px rgba(212, 175, 55, 0.2));
+    filter: drop-shadow(0 10px 20px rgba(20, 184, 166, 0.2));
   }
 
   /* Disable animations on small screens to improve performance */
@@ -442,18 +470,17 @@
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-owis-gold via-owis-bronze to-owis-gold bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-owis-emerald via-owis-teal to-owis-emerald bg-clip-text text-transparent;
     background-size: 200% auto;
     animation: gradient-flow 3s linear infinite;
   }
 
   .morphing-blob {
     animation: morph 8s ease-in-out infinite;
-    background: linear-gradient(45deg, 
-      rgba(212, 175, 55, 0.3),
-      rgba(135, 169, 107, 0.3),
-      rgba(230, 255, 250, 0.3)
-    );
+    background: linear-gradient(45deg,
+        rgba(20, 184, 166, 0.3),
+        rgba(135, 169, 107, 0.3),
+        rgba(230, 255, 250, 0.3));
     filter: blur(1px);
   }
 
@@ -467,7 +494,7 @@
 
   /* Button enhancements with extreme responsiveness */
   .owis-button-primary {
-    @apply bg-gradient-to-r from-owis-gold to-owis-bronze text-owis-forest dark:text-owis-forest font-semibold;
+    @apply bg-gradient-to-r from-owis-emerald to-owis-teal text-owis-forest dark:text-owis-forest font-semibold;
     @apply transition-all duration-300 ease-out;
     @apply hover:shadow-glow hover:scale-105;
     @apply px-3 xs:px-4 sm:px-6 md:px-8;
@@ -554,7 +581,7 @@
 
   /* Enhanced focus styles with dark mode */
   .focus-ring {
-    @apply focus:outline-none focus:ring-4 focus:ring-owis-gold/30 focus:border-owis-gold;
+    @apply focus:outline-none focus:ring-4 focus:ring-owis-emerald/30 focus:border-owis-emerald;
   }
 
   /* Text color utilities for better dark mode support */
@@ -581,16 +608,16 @@
 
   /* Enhanced shadow utilities */
   .shadow-glow {
-    box-shadow: 
+    box-shadow:
       0 20px 40px rgba(0, 0, 0, 0.1),
-      0 0 0 1px rgba(212, 175, 55, 0.2),
-      0 0 30px rgba(212, 175, 55, 0.3);
+      0 0 0 1px rgba(20, 184, 166, 0.2),
+      0 0 30px rgba(20, 184, 166, 0.3);
   }
 
   .shadow-soft {
-    box-shadow: 
+    box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.1),
-      0 2px 8px rgba(212, 175, 55, 0.1);
+      0 2px 8px rgba(20, 184, 166, 0.1);
   }
 
   /* Modal responsiveness */
@@ -713,6 +740,7 @@
 
 /* Accessibility enhancements */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -727,7 +755,7 @@
   .owis-card {
     border: 2px solid currentColor;
   }
-  
+
   .owis-button-primary {
     border: 2px solid currentColor;
   }
@@ -738,7 +766,7 @@
   .no-print {
     display: none !important;
   }
-  
+
   * {
     color: black !important;
     background: white !important;
@@ -750,11 +778,11 @@
   .owis-hover:hover {
     transform: none;
   }
-  
+
   .owis-interactive:hover {
     transform: none;
   }
-  
+
   .haptic-feedback:active {
     transform: scale(0.95);
   }

@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List # For List type hint
 
-from .. import schemas, models # Assuming models might be needed later
+from .. import tables as schemas
+from .. import model as models # Assuming models might be needed later
 from ..security import get_current_user
 from ..db.database import get_db
 from ..services.recommendation_services import get_wardrobe_recommendations_service

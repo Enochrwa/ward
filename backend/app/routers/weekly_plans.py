@@ -3,7 +3,8 @@ from typing import List, Optional, Dict
 from datetime import datetime, date
 from sqlalchemy.orm import Session, joinedload
 
-from .. import schemas, models
+from .. import model as models
+from .. import tables as schemas
 from ..security import get_current_user # get_current_user returns schemas.User
 from ..db.database import get_db
 
@@ -12,6 +13,7 @@ router = APIRouter(
     tags=["Weekly Plans"],
     responses={404: {"description": "Not found"}},
 )
+
 
 def transform_plan_to_response(db_plan: models.WeeklyPlan) -> schemas.WeeklyPlan:
     daily_outfits_dict = {do.day_of_week: do.outfit_id for do in db_plan.daily_outfits}
@@ -25,6 +27,7 @@ def transform_plan_to_response(db_plan: models.WeeklyPlan) -> schemas.WeeklyPlan
         created_at=db_plan.created_at,
         updated_at=db_plan.updated_at
     )
+
 
 @router.post("/", response_model=schemas.WeeklyPlan, status_code=status.HTTP_201_CREATED)
 async def create_weekly_plan(

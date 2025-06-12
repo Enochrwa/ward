@@ -3,12 +3,12 @@ from fastapi.security import OAuth2PasswordRequestForm # OAuth2PasswordBearer re
 from datetime import datetime, timedelta
 # from pydantic import BaseModel # No longer needed here
 
-from .. import schemas
+from .. import tables as schemas
 from .. import security
 from ..security import get_current_user # Import get_current_user
 from sqlalchemy.orm import Session
 from ..db.database import get_db
-from .. import models # Import your SQLAlchemy models
+from .. import model as models # Import your SQLAlchemy models
 from sqlalchemy import or_ # Add this import
 
 # oauth2_scheme moved to security.py

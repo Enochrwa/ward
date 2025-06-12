@@ -1,4 +1,5 @@
 import os
+import tempfile
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -6,18 +7,30 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Correct the dialect for pymysql
-DATABASE_URL = os.getenv("DATABASE_URL").replace("mysql://", "mysql+pymysql://")
+DATABASE_URL = os.getenv("DATABASE_URL")
+CA_CERT = os.getenv("CA_CERT")  # Full certificate content (multiline or \n)
 
-# Create the engine and session
-# engine = create_engine(DATABASE_URL)
+# Write CA cert to a temporary file
+ca_cert_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pem")
+ca_cert_file.write(CA_CERT.encode("utf-8"))
+ca_cert_file.close()
 
+# Connect with SQLAlchemy using temp CA cert
+connect_args = {
+    "ssl": {
+        "ca": ca_cert_file.name
+    }
+}
 
-engine = create_engine(DATABASE_URL, connect_args={"ssl": {"ssl-mode": "REQUIRED"}})
+engine = create_engine(
+    DATABASE_URL,
+    connect_args=connect_args,
+    pool_pre_ping=True,
+)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Dependency for getting the DB session
 def get_db():
     db = SessionLocal()
     try:

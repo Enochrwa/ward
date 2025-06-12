@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List # Required for List type hint if not already imported
 
-from .. import schemas, models # Assuming models might be needed later
+from ..import tables as schemas, model as models # Assuming models might be needed later
 from ..security import get_current_user
 from ..db.database import get_db
 from ..services.ai_services import analyze_outfit_image_service # Import the service

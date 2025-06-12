@@ -65,7 +65,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-gray-950">
         <DialogHeader>
           <DialogTitle>{view === 'login' ? 'Login' : 'Register'}</DialogTitle>
           <DialogDescription>
@@ -85,7 +85,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                   type="text" // Allow both email and username
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="col-span-3"
+                  className="col-span-3 bg-gray-700"
                   required
                 />
               </div>
@@ -98,7 +98,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="col-span-3"
+                  className="col-span-3 bg-gray-700"
                   required
                 />
               </div>

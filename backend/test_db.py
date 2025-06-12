@@ -4,10 +4,10 @@ import os
 
 load_dotenv()
 
-host = os.getenv("HOST")
-port = int(os.getenv("DB_PORT", "3306"))
+host = os.getenv("DB_HOST")
+port = int(os.getenv("DB_PORT", "16628"))
 user = os.getenv("DB_USER")
-password = os.getenv("PASSWORD")  # Must NOT be None or empty
+password = os.getenv("DB_PASSWORD")  # Must NOT be None or empty
 
 print(f"Connecting to {host}:{port} as {user}")
 print("Password loaded:", "YES" if password else "NO")  # Debug

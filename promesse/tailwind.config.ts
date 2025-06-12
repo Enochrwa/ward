@@ -94,27 +94,27 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Enhanced OWIS Brand Colors with pleasant non-yellow alternatives
+				// Enhanced OWIS Brand Colors with teal and emerald
 				owis: {
 					forest: '#1a4a3a',
 					'forest-light': '#2a5a4a',
 					'forest-dark': '#0a3a2a',
-					gold: '#6A7A9B', // Changed from gold to warm taupe
-					'gold-light': '#8796B0', // Lighter taupe
-					'gold-dark': '#566580', // Darker taupe
+					teal: '#008080', // Replaced gold with teal
+					'teal-light': '#20B2AA', // Lighter teal
+					'teal-dark': '#006666', // Darker teal
 					cream: '#faf7f2',
 					'cream-warm': '#fcf9f4',
 					'cream-cool': '#f8f5f0',
-					sage: '#87a96b',
-					'sage-light': '#97b97b',
-					'sage-dark': '#77995b',
+					emerald: '#50C878', // Replaced sage with emerald
+					'emerald-light': '#5FD38F', // Lighter emerald
+					'emerald-dark': '#40B060', // Darker emerald
 					charcoal: '#2d3748',
 					'charcoal-light': '#3d4758',
 					'charcoal-dark': '#1d2738',
 					pearl: '#f7fafc',
-					bronze: '#6C757D', // Changed from bronze to warm brown
-					'bronze-light': '#8A929A', // Lighter warm brown
-					'bronze-dark': '#5A6268', // Darker warm brown
+					bronze: '#6C757D',
+					'bronze-light': '#8A929A',
+					'bronze-dark': '#5A6268',
 					mint: '#e6fffa',
 					'mint-light': '#f0fffb',
 					'mint-dark': '#dcfff9',
@@ -254,10 +254,10 @@ export default {
 				},
 				'pulse-glow': {
 					'0%, 100%': {
-						boxShadow: '0 0 20px rgba(106, 122, 155, 0.3)' // Changed from gold to taupe
+						boxShadow: '0 0 20px rgba(0, 128, 128, 0.3)' // Changed to teal
 					},
 					'50%': {
-						boxShadow: '0 0 40px rgba(106, 122, 155, 0.6)' // Changed from gold to taupe
+						boxShadow: '0 0 40px rgba(0, 128, 128, 0.6)' // Changed to teal
 					}
 				},
 				'shimmer': {
@@ -338,8 +338,8 @@ export default {
 				'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
 				'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 30px -5px rgba(0, 0, 0, 0.05)',
 				'large': '0 10px 40px -15px rgba(0, 0, 0, 0.1), 0 20px 50px -10px rgba(0, 0, 0, 0.05)',
-				'glow': '0 0 30px rgba(106, 122, 155, 0.3)', // Changed from gold to taupe
-				'glow-lg': '0 0 50px rgba(106, 122, 155, 0.4)', // Changed from gold to taupe
+				'glow': '0 0 30px rgba(0, 128, 128, 0.3)', // Changed to teal
+				'glow-lg': '0 0 50px rgba(0, 128, 128, 0.4)', // Changed to teal
 				'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
 				'2xs': '0 1px 1px 0 rgba(0, 0, 0, 0.05)'
 			},

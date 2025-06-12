@@ -30,16 +30,16 @@ const EnhancedHeroSection = () => {
         <div className="max-w-7xl mx-auto">
           {/* Award Badge - Responsive */}
           <div 
-            className={`inline-flex items-center space-x-2 xs:space-x-3 bg-gradient-to-r from-yellow-400/20 to-amber-400/20 border border-yellow-400/40 rounded-full px-4 xs:px-6 sm:px-8 py-2 xs:py-3 mb-6 xs:mb-8 backdrop-blur-sm transition-all duration-1000 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}
+            className={`inline-flex items-center space-x-2 xs:space-x-3 bg-gradient-to-r from-teal-400/20 to-amber-400/20 border border-teal-400/40 rounded-full px-4 xs:px-6 sm:px-8 py-2 xs:py-3 mb-6 xs:mb-8 backdrop-blur-sm transition-all duration-1000 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}
           >
-            <Award className="w-4 h-4 xs:w-5 xs:h-5 text-yellow-400 animate-pulse" />
+            <Award className="w-4 h-4 xs:w-5 xs:h-5 text-teal-400 animate-pulse" />
             <span className="text-white text-xs xs:text-sm font-semibold tracking-wide">
               <span className="hidden xs:inline">Award-Winning AI Fashion Platform</span>
               <span className="xs:hidden">Award-Winning Platform</span>
             </span>
             <div className="flex space-x-1">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-2 h-2 xs:w-3 xs:h-3 text-yellow-400 fill-current" />
+                <Star key={i} className="w-2 h-2 xs:w-3 xs:h-3 text-teal-400 fill-current" />
               ))}
             </div>
           </div>
@@ -53,7 +53,7 @@ const EnhancedHeroSection = () => {
               Your
             </span>
             <span className="block relative">
-              <span className="bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 bg-clip-text text-transparent animate-gradient-flow font-black drop-shadow-lg">
+              <span className="bg-gradient-to-r from-teal-400 via-emerald-400 to-teal-500 bg-clip-text text-transparent animate-gradient-flow font-black drop-shadow-lg">
                 {words[currentWord]}
               </span>
             </span>
@@ -84,7 +84,7 @@ const EnhancedHeroSection = () => {
             <Link to="/wardrobe" className="w-full sm:w-auto">
               <Button 
                 size="lg"
-                className="w-full sm:w-auto bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-slate-900 px-6 xs:px-8 sm:px-12 py-4 xs:py-5 sm:py-6 text-sm xs:text-base sm:text-xl font-bold rounded-xl xs:rounded-2xl shadow-2xl hover:shadow-yellow-400/25 transition-all duration-300 group relative overflow-hidden"
+                className="w-full sm:w-auto bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-teal-500 hover:to-emerald-600 text-slate-900 px-6 xs:px-8 sm:px-12 py-4 xs:py-5 sm:py-6 text-sm xs:text-base sm:text-xl font-bold rounded-xl xs:rounded-2xl shadow-2xl hover:shadow-teal-400/25 transition-all duration-300 group relative overflow-hidden"
               >
                 <span className="relative z-10 flex items-center justify-center space-x-2 xs:space-x-3">
                   <Sparkles className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 group-hover:animate-spin transition-transform" />
@@ -93,7 +93,7 @@ const EnhancedHeroSection = () => {
                     <span className="xs:hidden">Start Journey</span>
                   </span>
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </Button>
             </Link>
             
@@ -103,7 +103,7 @@ const EnhancedHeroSection = () => {
                 size="lg" 
                 className="w-full sm:w-auto px-6 xs:px-8 sm:px-12 py-4 xs:py-5 sm:py-6 text-sm xs:text-base sm:text-xl font-bold rounded-xl xs:rounded-2xl border-2 border-white/40 text-white hover:bg-white/10 backdrop-blur-sm transition-all duration-300 group shadow-lg"
               >
-                <Zap className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 mr-2 xs:mr-3 group-hover:text-yellow-400 transition-colors" />
+                <Zap className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 mr-2 xs:mr-3 group-hover:text-emerald-400 transition-colors" />
                 <span className="hidden xs:inline">Explore AI Studio</span>
                 <span className="xs:hidden">AI Studio</span>
               </Button>
@@ -118,7 +118,7 @@ const EnhancedHeroSection = () => {
             {[
               { icon: Users, title: '10M+ Users', desc: 'Trusted worldwide', color: 'from-blue-400 to-cyan-400' },
               { icon: TrendingUp, title: '98% Accuracy', desc: 'AI recommendations', color: 'from-green-400 to-emerald-400' },
-              { icon: Award, title: 'Award Winner', desc: '2024 Innovation Award', color: 'from-yellow-400 to-amber-400' }
+              { icon: Award, title: 'Award Winner', desc: '2024 Innovation Award', color: 'from-teal-400 to-amber-400' }
             ].map((feature, index) => (
               <div 
                 key={feature.title}

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 import uvicorn
 
 from app.db import database
+from app.db.database import Base 
 from app import models # Assuming models.py is in backend/app/
 
 from app.routers import (
@@ -16,7 +17,7 @@ from app.routers import (
     recommendations, # Or whatever you named it
 )
 
-models.Base.metadata.create_all(bind=database.engine) # This creates tables if they don't exist
+Base.metadata.create_all(bind=database.engine) # This creates tables if they don't exist
 app = FastAPI()
 
 # Register routers

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
-from .. import models, schemas
+from .. import model as models, tables as schemas
 from sqlalchemy import func, or_
 
 # Helper function to find matching outfits based on simple criteria

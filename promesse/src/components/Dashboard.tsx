@@ -92,7 +92,7 @@ const Dashboard = () => {
   const styleInsights = [
     { category: 'Most Worn Color', value: 'Navy Blue', percentage: 35, color: 'bg-blue-500' },
     { category: 'Favorite Style', value: 'Casual Chic', percentage: 62, color: 'bg-purple-500' },
-    { category: 'Season Readiness', value: 'Summer 2024', percentage: 78, color: 'bg-yellow-500' },
+    { category: 'Season Readiness', value: 'Summer 2024', percentage: 78, color: 'bg-teal-500' },
     { category: 'Sustainability Score', value: 'Excellent', percentage: 89, color: 'bg-green-500' }
   ];
 
@@ -140,7 +140,7 @@ const Dashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-full flex items-center justify-center">
                     <weatherOutfit.icon size={24} className="text-white" />
                   </div>
                   <div>

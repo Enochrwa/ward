@@ -10,7 +10,7 @@ from typing import List, Optional # Added Optional for get_fashion_trends_servic
 # import tensorflow as tf # Example: if using TensorFlow
 # from sklearn.cluster import KMeans # Example: for color quantization
 
-from .. import schemas, models
+from .. import tables as schemas, model as models
 
 # --- Mock/Placeholder AI Functions ---
 # These will be replaced or augmented with real model calls.

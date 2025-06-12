@@ -86,6 +86,7 @@ class Outfit(BaseModel): # Actual definition of Outfit
     updated_at: Optional[datetime] = None
     tags: Optional[List[str]] = None
     image_url: Optional[str] = None
+    feedbacks: List[Feedback] = [] # Added feedbacks list
 
     class Config:
         from_attributes = True
@@ -274,6 +275,59 @@ class PersonalizedWardrobeSuggestions(BaseModel):
     class Config:
         from_attributes = True
 
+# User Profile Schemas
+class UserProfileBase(BaseModel):
+    preferred_styles: Optional[List[str]] = None
+    preferred_colors: Optional[List[str]] = None
+    avoided_colors: Optional[List[str]] = None
+    sizes: Optional[Dict[str, str]] = None
+
+class UserProfileCreate(UserProfileBase):
+    pass
+
+class UserProfileUpdate(UserProfileBase):
+    pass # All fields already optional in UserProfileBase
+
+class UserProfile(UserProfileBase):
+    user_id: int
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Forward declaration for Feedback schema to be used in Outfit schema later
+class Feedback(BaseModel):
+    pass
+
+class FeedbackBase(BaseModel):
+    feedback_text: Optional[str] = None
+    rating: Optional[int] = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def check_at_least_one_field(cls, values):
+        feedback_text = values.get('feedback_text')
+        rating = values.get('rating')
+        if not feedback_text and rating is None: # Check if both are None or empty string for text
+            raise ValueError('At least one of feedback_text or rating must be provided')
+        if rating is not None and not (1 <= rating <= 5):
+            raise ValueError('Rating must be between 1 and 5')
+        return values
+
+class FeedbackCreate(FeedbackBase):
+    pass
+
+class Feedback(FeedbackBase): # Actual definition of Feedback schema
+    id: int
+    outfit_id: int
+    user_id: int
+    created_at: datetime
+    commenter_username: Optional[str] = None # Will be populated in the router
+
+    class Config:
+        from_attributes = True
+
+
 # Update forward references if Pydantic v1 style is strictly needed
 # For Pydantic v2, this is often handled more automatically.
 # If issues arise, call Model.model_rebuild() for models with forward refs
@@ -286,6 +340,8 @@ Outfit.model_rebuild()
 WeeklyPlan.model_rebuild()
 Occasion.model_rebuild()
 StyleHistory.model_rebuild()
+UserProfile.model_rebuild() # Added UserProfile
+Feedback.model_rebuild() # Added Feedback
 WardrobeStats.model_rebuild()
 ItemWearFrequency.model_rebuild()
 CategoryUsage.model_rebuild()

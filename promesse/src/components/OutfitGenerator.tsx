@@ -1,11 +1,32 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar, Cloud, Heart, Church, Home, Users, Star, MapPin, Sparkles } from 'lucide-react';
+import { Calendar, Cloud, Heart, Church, Home, Users, Star, MapPin, Sparkles, Compass, Zap, AlertTriangle } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox'; // For "Use current location"
+import { Input } from '@/components/ui/input'; // For manual lat/lon
+import { Label } from '@/components/ui/label'; // For form elements
+import { useToast } from '@/components/ui/use-toast';
+import useGeolocation from '@/hooks/useGeolocation';
+import * as apiClient from '@/lib/apiClient';
+import { PersonalizedWardrobeSuggestions } from '@/types/recommendationTypes';
+import LoadingSpinner from './ui/loading'; // Assuming a loading spinner component
 
 const OutfitGenerator = () => {
-  const [selectedOccasion, setSelectedOccasion] = useState('work');
+  const [selectedOccasion, setSelectedOccasion] = useState('work'); // This might be used to influence recommendations later
   
+  // Geolocation states
+  const { coordinates: geoCoordinates, error: geoError, isLoading: geoIsLoading, getLocation } = useGeolocation();
+  const [useCurrentLocation, setUseCurrentLocation] = useState(false);
+  const [manualLatitude, setManualLatitude] = useState('');
+  const [manualLongitude, setManualLongitude] = useState('');
+
+  // Recommendation states
+  const [recommendations, setRecommendations] = useState<PersonalizedWardrobeSuggestions | null>(null);
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
+  const [recommendationError, setRecommendationError] = useState<string | null>(null);
+
+  const { toast } = useToast();
+
   const occasions = [
     { id: 'work', label: 'Work Meeting', icon: '💼', color: 'from-blue-500 to-blue-600' },
     { id: 'casual', label: 'Casual Day', icon: '👕', color: 'from-green-500 to-green-600' },
@@ -76,131 +97,201 @@ const OutfitGenerator = () => {
     }
   };
 
-  const currentOutfit = outfitSuggestions[selectedOccasion as keyof typeof outfitSuggestions];
+  // const currentOutfit = outfitSuggestions[selectedOccasion as keyof typeof outfitSuggestions]; // Mock data removed
+
+  useEffect(() => {
+    if (geoError) {
+      toast({ title: "Geolocation Error", description: geoError, variant: "destructive" });
+    }
+    if (geoCoordinates) {
+      toast({ title: "Location Fetched", description: `Lat: ${geoCoordinates.lat.toFixed(2)}, Lon: ${geoCoordinates.lon.toFixed(2)}` });
+    }
+  }, [geoCoordinates, geoError, toast]);
+
+  const handleGenerateOutfit = async () => {
+    setIsLoadingRecommendations(true);
+    setRecommendationError(null);
+    setRecommendations(null);
+
+    let lat: number | undefined = undefined;
+    let lon: number | undefined = undefined;
+
+    if (useCurrentLocation && geoCoordinates) {
+      lat = geoCoordinates.lat;
+      lon = geoCoordinates.lon;
+    } else if (!useCurrentLocation && manualLatitude && manualLongitude) {
+      lat = parseFloat(manualLatitude);
+      lon = parseFloat(manualLongitude);
+      if (isNaN(lat) || isNaN(lon)) {
+        toast({ title: "Invalid Coordinates", description: "Manual latitude and longitude must be valid numbers.", variant: "destructive" });
+        setIsLoadingRecommendations(false);
+        return;
+      }
+    }
+
+    try {
+      const data = await apiClient.getWardrobeSuggestions(lat, lon);
+      setRecommendations(data);
+      if (data.newOutfitIdeas.length === 0 && data.itemsToAcquire.length === 0) {
+        toast({ title: "No specific suggestions", description: "Try adjusting your wardrobe or preferences for more ideas.", variant: "default" });
+      }
+    } catch (err: any) {
+      setRecommendationError(err.message || "Failed to fetch recommendations.");
+      toast({ title: "Recommendation Error", description: err.message, variant: "destructive" });
+    } finally {
+      setIsLoadingRecommendations(false);
+    }
+  };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-owis-mint to-owis-cream">
+    <section className="py-12 md:py-20 bg-gradient-to-br from-owis-mint to-owis-cream">
       <div className="container mx-auto px-4 max-w-6xl">
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl md:text-5xl font-heading font-bold text-owis-forest mb-6">
+        <div className="text-center mb-12 md:mb-16 animate-fade-in">
+          <h2 className="text-3xl md:text-5xl font-heading font-bold text-owis-forest mb-4 md:mb-6">
             AI Outfit Generator
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Let our advanced AI curate the perfect outfit for any occasion, 
-            considering weather, style preferences, and sustainability.
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+            Let our AI curate the perfect outfit, considering weather, your style, and sustainability.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Controls */}
-          <div className="space-y-8 animate-fade-in">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12 items-start">
+          {/* Controls Column */}
+          <div className="lg:col-span-1 space-y-6 md:space-y-8 animate-fade-in">
             <div>
-              <h3 className="text-2xl font-heading font-semibold text-owis-charcoal mb-6">
-                Choose Your Occasion
+              <h3 className="text-xl md:text-2xl font-heading font-semibold text-owis-charcoal mb-4 md:mb-6">
+                1. Choose Occasion
               </h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 md:gap-3">
                 {occasions.map((occasion) => (
                   <button
                     key={occasion.id}
                     onClick={() => setSelectedOccasion(occasion.id)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                    className={`p-3 md:p-4 rounded-lg md:rounded-xl border-2 transition-all duration-300 flex flex-col items-center justify-center text-center ${
                       selectedOccasion === occasion.id
                         ? 'border-owis-gold bg-owis-gold/10 text-owis-forest shadow-lg scale-105'
-                        : 'border-gray-200 hover:border-owis-gold/50 hover:bg-white/50'
+                        : 'border-gray-200 bg-white/50 hover:border-owis-gold/50 hover:bg-white/80'
                     }`}
                   >
-                    <div className="text-2xl mb-2">{occasion.icon}</div>
-                    <div className="font-medium text-sm">{occasion.label}</div>
+                    <span className="text-xl md:text-2xl mb-1 md:mb-2">{occasion.icon}</span>
+                    <span className="font-medium text-xs md:text-sm">{occasion.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="flex items-center space-x-4 text-sm text-muted-foreground bg-white/60 p-4 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4" />
-                <span>Today, 2:00 PM</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Cloud className="h-4 w-4" />
-                <span>72°F, Partly Cloudy</span>
+            {/* Weather Options */}
+            <div>
+              <h3 className="text-xl md:text-2xl font-heading font-semibold text-owis-charcoal mb-4 md:mb-6">
+                2. Weather Options
+              </h3>
+              <div className="p-4 bg-white/60 rounded-lg space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="useCurrentLocation"
+                    checked={useCurrentLocation}
+                    onCheckedChange={(checked) => setUseCurrentLocation(Boolean(checked))}
+                  />
+                  <Label htmlFor="useCurrentLocation" className="text-sm md:text-base">Use current location</Label>
+                </div>
+                {useCurrentLocation && (
+                  <Button onClick={getLocation} disabled={geoIsLoading} variant="outline" size="sm" className="w-full">
+                    {geoIsLoading ? <LoadingSpinner size="xs" className="mr-2" /> : <Compass size={16} className="mr-2" />}
+                    {geoCoordinates ? 'Refresh Location' : 'Get My Location'}
+                  </Button>
+                )}
+                {geoCoordinates && useCurrentLocation && (
+                    <p className="text-xs text-gray-600">Using: Lat {geoCoordinates.lat.toFixed(2)}, Lon {geoCoordinates.lon.toFixed(2)}</p>
+                )}
+                {geoError && useCurrentLocation && (
+                    <p className="text-xs text-red-500">{geoError}</p>
+                )}
+
+                {!useCurrentLocation && (
+                  <div className="space-y-2 pt-2">
+                    <Label htmlFor="manualLatitude" className="text-sm">Or enter manually:</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="manualLatitude"
+                        placeholder="Latitude"
+                        value={manualLatitude}
+                        onChange={(e) => setManualLatitude(e.target.value)}
+                        className="text-sm"
+                      />
+                      <Input
+                        id="manualLongitude"
+                        placeholder="Longitude"
+                        value={manualLongitude}
+                        onChange={(e) => setManualLongitude(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             <Button 
               size="lg"
-              className="w-full bg-gradient-to-r from-owis-gold to-owis-bronze hover:from-owis-gold-dark hover:to-owis-bronze-dark text-owis-forest font-semibold py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              onClick={handleGenerateOutfit}
+              disabled={isLoadingRecommendations || (useCurrentLocation && geoIsLoading)}
+              className="w-full bg-gradient-to-r from-owis-gold to-owis-bronze hover:from-owis-gold-dark hover:to-owis-bronze-dark text-owis-forest font-semibold py-3 md:py-4 text-base md:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Sparkles className="w-5 h-5 mr-2" />
-              Generate New Outfit
+              {isLoadingRecommendations ? <LoadingSpinner className="mr-2" /> : <Sparkles className="w-5 h-5 mr-2" />}
+              Generate Outfit Ideas
             </Button>
           </div>
 
-          {/* Outfit Display */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl animate-scale-in border border-white/30">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-heading font-semibold text-owis-charcoal">
-                Perfect Match
-              </h3>
-              <div className="flex items-center space-x-2">
-                <div className={`h-3 w-3 rounded-full ${
-                  currentOutfit.confidence > 90 ? 'bg-green-500' : 'bg-owis-gold'
-                }`}></div>
-                <span className="text-sm font-medium text-owis-charcoal">
-                  {currentOutfit.confidence}% Match
-                </span>
+          {/* Outfit Display Column */}
+          <div className="lg:col-span-2 bg-white/80 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-xl animate-scale-in border border-white/30 min-h-[400px]">
+            <h3 className="text-xl md:text-2xl font-heading font-semibold text-owis-charcoal mb-4 md:mb-6">
+              AI Suggestions
+            </h3>
+            {isLoadingRecommendations && (
+              <div className="flex flex-col items-center justify-center h-full">
+                <LoadingSpinner size="lg" />
+                <p className="mt-4 text-owis-charcoal/70">Generating your outfit ideas...</p>
               </div>
-            </div>
-
-            {/* Outfit Image */}
-            <div className="mb-6 rounded-lg overflow-hidden">
-              <img 
-                src={currentOutfit.image} 
-                alt="Outfit suggestion"
-                className="w-full h-64 object-cover"
-              />
-            </div>
-
-            <div className="space-y-4 mb-6">
-              {currentOutfit.items.map((item, index) => (
-                <div 
-                  key={item}
-                  className="flex items-center space-x-4 p-3 bg-gradient-to-r from-white/60 to-white/40 rounded-lg animate-fade-in border border-white/50"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <div className="w-12 h-12 bg-gradient-to-br from-gray-300 to-gray-400 rounded-lg flex items-center justify-center">
-                    <Star className="w-6 h-6 text-white" />
+            )}
+            {!isLoadingRecommendations && recommendationError && (
+              <div className="text-center py-10 text-red-500 bg-red-50 p-4 rounded-md">
+                 <AlertTriangle size={32} className="mx-auto mb-2" />
+                <p>{recommendationError}</p>
+              </div>
+            )}
+            {!isLoadingRecommendations && !recommendationError && recommendations && (
+              <div className="space-y-6">
+                {recommendations.newOutfitIdeas.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-lg mb-2 text-owis-sage">New Outfit Ideas:</h4>
+                    <ul className="list-disc list-inside space-y-2 pl-2">
+                      {recommendations.newOutfitIdeas.map((idea, index) => (
+                        <li key={`idea-${index}`} className="text-sm md:text-base text-gray-700">{idea}</li>
+                      ))}
+                    </ul>
                   </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-owis-charcoal">{item}</div>
-                    <div className="text-sm text-muted-foreground">Last worn 3 days ago</div>
+                )}
+                {recommendations.itemsToAcquire.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-lg mb-2 text-owis-sage">Consider Adding These To Your Wardrobe:</h4>
+                    <ul className="list-disc list-inside space-y-2 pl-2">
+                      {recommendations.itemsToAcquire.map((item, index) => (
+                        <li key={`acquire-${index}`} className="text-sm md:text-base text-gray-700">{item}</li>
+                      ))}
+                    </ul>
                   </div>
-                  <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                    Sustainable
-                  </div>
+                )}
+                {recommendations.newOutfitIdeas.length === 0 && recommendations.itemsToAcquire.length === 0 && (
+                   <p className="text-center py-10 text-gray-500">No specific suggestions generated. Try different options or broaden your wardrobe!</p>
+                )}
+              </div>
+            )}
+             {!isLoadingRecommendations && !recommendationError && !recommendations && (
+                <div className="text-center py-10">
+                    <Zap size={48} className="mx-auto text-gray-300 mb-4" />
+                    <p className="text-gray-500">Click "Generate Outfit Ideas" to see AI magic!</p>
                 </div>
-              ))}
-            </div>
-
-            <div className="space-y-3 text-sm border-t border-gray-200 pt-4">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Sustainability Score:</span>
-                <span className="font-medium text-green-600">{currentOutfit.sustainability}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Weather Compatibility:</span>
-                <span className="font-medium text-owis-charcoal">{currentOutfit.weather}</span>
-              </div>
-            </div>
-
-            <div className="flex space-x-3 mt-6">
-              <Button variant="outline" className="flex-1 border-owis-sage text-owis-sage hover:bg-owis-sage hover:text-white">
-                Save Outfit
-              </Button>
-              <Button variant="outline" className="flex-1 border-owis-gold text-owis-gold hover:bg-owis-gold hover:text-owis-forest">
-                Share Look
-              </Button>
-            </div>
+            )}
           </div>
         </div>
       </div>

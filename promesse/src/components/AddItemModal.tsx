@@ -9,24 +9,28 @@ import { WardrobeItemCreate } from './WardrobeManager'; // Import the interface
 export interface AddItemModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newItem: WardrobeItemCreate) => void; // Use imported interface
+  // Update onSave to pass the image file
+  onSave: (newItemData: Omit<WardrobeItemCreate, 'image_url'>, imageFile?: File) => void;
 }
 
 const AddItemModal = ({ isOpen, onClose, onSave }: AddItemModalProps) => {
-  const [itemData, setItemData] = useState({
+  const [itemData, setItemData] = useState<Omit<WardrobeItemCreate, 'image_url' | 'tags' | 'price'> & { tags: string; price: string; image_url?: string }>({ // Keep image_url for now if direct URL is an option
     name: '',
     brand: '',
     category: 'Shirts', // Default category
     size: '',
-    price: '',
+    price: '', // Keep as string for form input
     material: '',
     season: 'All Seasons', // Default season
-    image_url: '', // Changed from image to image_url
-    tags: '',
-    color: '', // Added optional field
-    notes: '', // Added optional field
+    // image_url: '', // Remove if only file upload, or keep if URL is fallback
+    tags: '', // Keep as string for form input
+    color: '',
+    notes: '',
   });
-  const { toast } = useToast(); // Standard toast, not from hooks
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const { toast } = useToast();
 
   const categories = ['Shirts', 'Pants', 'Dresses', 'Shoes', 'Accessories', 'Jackets', 'Sweaters', 'Other'];
   const seasons = ['Spring', 'Summer', 'Fall', 'Winter', 'All Seasons'];
@@ -44,23 +48,23 @@ const AddItemModal = ({ isOpen, onClose, onSave }: AddItemModalProps) => {
       return;
     }
 
-    const newItem: WardrobeItemCreate = {
+    const newItemData: Omit<WardrobeItemCreate, 'image_url'> = {
       name: itemData.name,
       brand: itemData.brand,
       category: itemData.category,
       size: itemData.size,
-      price: parseFloat(itemData.price) || 0, // Ensure price is a number
+      price: parseFloat(itemData.price) || 0,
       material: itemData.material,
       season: itemData.season,
-      image_url: itemData.image_url || undefined, // Send undefined if empty, backend might handle default
       tags: itemData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
       color: itemData.color || undefined,
       notes: itemData.notes || undefined,
+      // image_url is handled by the imageFile or explicitly if backend supports direct URL alongside file
     };
 
-    onSave(newItem); // This will now call WardrobeManager's handleSaveItem
+    onSave(newItemData, imageFile || undefined);
 
-    // Reset form and close. Toast is handled by WardrobeManager after API call.
+    // Reset form and close
     setItemData({
       name: '',
       brand: '',
@@ -69,13 +73,28 @@ const AddItemModal = ({ isOpen, onClose, onSave }: AddItemModalProps) => {
       price: '',
       material: '',
       season: 'All Seasons',
-      image_url: '',
       tags: '',
       color: '',
       notes: '',
     });
+    setImageFile(null);
+    setImagePreview(null);
     onClose();
-    // Toast is removed from here, will be shown by WardrobeManager
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImageFile(null);
+      setImagePreview(null);
+    }
   };
 
   if (!isOpen) return null;
@@ -183,17 +202,28 @@ const AddItemModal = ({ isOpen, onClose, onSave }: AddItemModalProps) => {
               </select>
             </div>
 
-            <div>
+            {/* Image Upload Field */}
+            <div className="sm:col-span-2">
               <label className="block text-xs xs:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 xs:mb-2">
-                Image URL
+                Item Image
               </label>
-              <Input
-                value={itemData.image_url}
-                onChange={(e) => setItemData({...itemData, image_url: e.target.value})}
-                placeholder="https://example.com/image.jpg"
-                className="bg-white/80 border-owis-sage/30 text-sm xs:text-base h-10 xs:h-11"
-              />
+              <div className="mt-1 flex items-center">
+                <span className="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                  ) : (
+                    <Upload className="h-full w-full text-gray-300 dark:text-gray-500" />
+                  )}
+                </span>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="ml-4 text-sm xs:text-base file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:bg-owis-mint/20 file:text-owis-forest hover:file:bg-owis-mint/40"
+                />
+              </div>
             </div>
+            {/* End Image Upload Field */}
             <div>
               <label className="block text-xs xs:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 xs:mb-2">
                 Color (optional)

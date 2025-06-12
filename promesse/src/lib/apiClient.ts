@@ -68,3 +68,120 @@ const apiClient = async (endpoint: string, options: RequestOptions = {}) => {
 };
 
 export default apiClient;
+
+// Specific types that might be used by the new functions.
+// Ideally, these would be imported from a central types file.
+// For now, mirroring based on WardrobeManager.tsx and backend expectations.
+export interface WardrobeItemData { // Generic enough for create/update data part
+  name?: string;
+  brand?: string;
+  category?: string;
+  size?: string;
+  price?: number;
+  material?: string;
+  season?: string;
+  image_url?: string | null; // Allow null for removal
+  tags?: string[];
+  color?: string;
+  notes?: string;
+  favorite?: boolean; // For updates
+}
+
+
+export const addItem = async (itemData: WardrobeItemData, imageFile?: File) => {
+  const formData = new FormData();
+  // Backend expects the Pydantic model as 'item' for create
+  formData.append('item', new Blob([JSON.stringify(itemData)], { type: 'application/json' }));
+
+  if (imageFile) {
+    formData.append('image', imageFile);
+  }
+
+  // The generic apiClient will handle token and base URL.
+  // It should not set Content-Type to application/json for FormData.
+  return apiClient('/wardrobe/items/', {
+    method: 'POST',
+    body: formData,
+    // Content-Type header will be set automatically by browser for FormData
+  });
+};
+
+export const updateItem = async (itemId: string, itemData: WardrobeItemData, imageFile?: File) => {
+  const formData = new FormData();
+  // Backend expects the Pydantic model as 'item_update' for update
+  formData.append('item_update', new Blob([JSON.stringify(itemData)], { type: 'application/json' }));
+
+  if (imageFile) {
+    formData.append('image', imageFile);
+  }
+  // If image_url is explicitly null, it's handled by itemData.image_url = null being stringified.
+  // The backend will interpret this.
+
+  return apiClient(`/wardrobe/items/${itemId}`, {
+    method: 'PUT',
+    body: formData,
+    // Content-Type header will be set automatically by browser for FormData
+  });
+};
+
+// User Profile API functions
+import { UserProfile, UserProfileUpdate } from '@/types/userTypes'; // Adjust path as necessary
+
+export const getUserProfile = async (): Promise<UserProfile> => {
+  return apiClient('/profile/me', {
+    method: 'GET',
+  });
+};
+
+export const updateUserProfile = async (profileData: UserProfileUpdate): Promise<UserProfile> => {
+  return apiClient('/profile/me', {
+    method: 'PUT',
+    body: profileData, // apiClient handles JSON stringification
+  });
+};
+// Note: The backend's PUT /profile/me handles creation if profile doesn't exist.
+
+// Recommendation API functions
+import { PersonalizedWardrobeSuggestions } from '@/types/recommendationTypes'; // Assuming this type exists or will be created
+
+export const getWardrobeSuggestions = async (latitude?: number, longitude?: number): Promise<PersonalizedWardrobeSuggestions> => {
+  let endpoint = '/recommendations/wardrobe/';
+  const params = new URLSearchParams();
+  if (latitude !== undefined) {
+    params.append('lat', latitude.toString());
+  }
+  if (longitude !== undefined) {
+    params.append('lon', longitude.toString());
+  }
+  const queryString = params.toString();
+  if (queryString) {
+    endpoint += `?${queryString}`;
+  }
+
+  return apiClient(endpoint, {
+    method: 'GET',
+  });
+};
+
+
+// Feedback API functions
+import { Feedback, FeedbackCreate } from '@/types/outfitTypes'; // Adjust path as necessary
+
+export const getFeedbackForOutfit = async (outfitId: string | number): Promise<Feedback[]> => {
+  return apiClient(`/community/outfits/${outfitId}/feedback`, {
+    method: 'GET',
+  });
+};
+
+export const addFeedbackToOutfit = async (outfitId: string | number, feedbackData: FeedbackCreate): Promise<Feedback> => {
+  return apiClient(`/community/outfits/${outfitId}/feedback`, {
+    method: 'POST',
+    body: feedbackData,
+  });
+};
+
+export const deleteFeedback = async (feedbackId: number): Promise<void> => {
+  return apiClient(`/community/feedback/${feedbackId}`, {
+    method: 'DELETE',
+  });
+};

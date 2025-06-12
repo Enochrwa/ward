@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional
 from datetime import datetime
+from sqlalchemy.orm import Session
 
-from .. import schemas
-from ..security import get_current_user # Corrected import path
+from .. import schemas, models # Import models and schemas
+from ..security import get_current_user # get_current_user returns schemas.User
+from ..db.database import get_db
 
 router = APIRouter(
     prefix="/wardrobe",
@@ -11,36 +13,29 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-fake_wardrobe_db: List[schemas.WardrobeItem] = []
-next_item_id = 1
+# Remove fake_wardrobe_db and next_item_id
 
 @router.post("/items/", response_model=schemas.WardrobeItem, status_code=status.HTTP_201_CREATED)
 async def create_wardrobe_item(
     item: schemas.WardrobeItemCreate,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    global next_item_id
-    new_item = schemas.WardrobeItem(
-        id=next_item_id,
+    db_item = models.WardrobeItem(
+        **item.model_dump(),
         user_id=current_user.id,
-        name=item.name,
-        brand=item.brand,
-        category=item.category,
-        size=item.size,
-        price=item.price,
-        material=item.material,
-        season=item.season,
-        image_url=item.image_url,
-        tags=item.tags if item.tags else [],
-        favorite=False,
-        times_worn=0,
         date_added=datetime.utcnow(),
-        last_worn=None,
-        updated_at=datetime.utcnow() # Set updated_at on creation as well
+        updated_at=datetime.utcnow(),
+        times_worn=0,
+        favorite=False
     )
-    fake_wardrobe_db.append(new_item)
-    next_item_id += 1
-    return new_item
+    if item.tags: # Assuming model setter handles JSON conversion for tags
+        db_item.tags = item.tags
+
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
 
 @router.get("/items/", response_model=List[schemas.WardrobeItem])
 async def read_wardrobe_items(
@@ -48,67 +43,65 @@ async def read_wardrobe_items(
     season: Optional[str] = None,
     favorite: Optional[bool] = None,
     skip: int = 0,
-    limit: int = 100, # Increased default limit
+    limit: int = 100,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    user_items = [item for item in fake_wardrobe_db if item.user_id == current_user.id]
+    query = db.query(models.WardrobeItem).filter(models.WardrobeItem.user_id == current_user.id)
 
     if category:
-        user_items = [item for item in user_items if item.category and item.category.lower() == category.lower()]
+        query = query.filter(models.WardrobeItem.category.ilike(f"%{category}%"))
     if season:
-        user_items = [item for item in user_items if item.season and item.season.lower() == season.lower()]
+        query = query.filter(models.WardrobeItem.season.ilike(f"%{season}%"))
     if favorite is not None:
-        user_items = [item for item in user_items if item.favorite == favorite]
+        query = query.filter(models.WardrobeItem.favorite == favorite)
 
-    return user_items[skip : skip + limit]
+    items = query.offset(skip).limit(limit).all()
+    return items
 
 @router.get("/items/{item_id}", response_model=schemas.WardrobeItem)
 async def read_wardrobe_item(
     item_id: int,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    for item in fake_wardrobe_db:
-        if item.id == item_id and item.user_id == current_user.id:
-            return item
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+    db_item = db.query(models.WardrobeItem).filter(models.WardrobeItem.id == item_id, models.WardrobeItem.user_id == current_user.id).first()
+    if db_item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+    return db_item
 
 @router.put("/items/{item_id}", response_model=schemas.WardrobeItem)
 async def update_wardrobe_item(
     item_id: int,
     item_update: schemas.WardrobeItemUpdate,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    for index, db_item in enumerate(fake_wardrobe_db):
-        if db_item.id == item_id:
-            if db_item.user_id != current_user.id:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update this item")
+    db_item = db.query(models.WardrobeItem).filter(models.WardrobeItem.id == item_id, models.WardrobeItem.user_id == current_user.id).first()
 
-            update_data = item_update.model_dump(exclude_unset=True) # Use model_dump
-            updated_item = db_item.model_copy(update=update_data) # Use model_copy
-            updated_item.updated_at = datetime.utcnow()
-            fake_wardrobe_db[index] = updated_item
-            return updated_item
+    if db_item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
 
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+    update_data = item_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_item, key, value)
+
+    db_item.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(db_item)
+    return db_item
 
 @router.delete("/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_wardrobe_item(
     item_id: int,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    global fake_wardrobe_db
-    initial_len = len(fake_wardrobe_db)
+    db_item = db.query(models.WardrobeItem).filter(models.WardrobeItem.id == item_id, models.WardrobeItem.user_id == current_user.id).first()
 
-    item_to_delete_index = -1
-    for index, item in enumerate(fake_wardrobe_db):
-        if item.id == item_id:
-            if item.user_id != current_user.id:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this item")
-            item_to_delete_index = index
-            break
+    if db_item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
 
-    if item_to_delete_index != -1:
-        del fake_wardrobe_db[item_to_delete_index]
-        return # Returns 204 No Content
-
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+    db.delete(db_item)
+    db.commit()
+    return

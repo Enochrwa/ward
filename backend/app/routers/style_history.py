@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List, Optional
+from typing import List
 from datetime import datetime
+from sqlalchemy.orm import Session, joinedload
 
-from .. import schemas
-from ..security import get_current_user
-from .wardrobe import fake_wardrobe_db # To update WardrobeItem
-from .outfits import fake_outfits_db  # To validate Outfit if outfit_id is given
+from .. import schemas, models
+from ..security import get_current_user # get_current_user returns schemas.User
+from ..db.database import get_db
 
 router = APIRouter(
     prefix="/style-history",
@@ -13,154 +13,97 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-fake_style_history_db: List[schemas.StyleHistory] = []
-next_style_history_id = 1
-
-def validate_style_history_references(
-    user_id: int,
-    item_id: Optional[int] = None,
-    outfit_id: Optional[int] = None
-):
-    if item_id is not None:
-        item_found = False
-        for item_model in fake_wardrobe_db:
-            if item_model.id == item_id:
-                if item_model.user_id != user_id:
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail=f"Item with ID {item_id} does not belong to the current user."
-                    )
-                item_found = True
-                break
-        if not item_found:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Wardrobe item with ID {item_id} not found."
-            )
-    elif outfit_id is not None:
-        outfit_found = False
-        for outfit_model in fake_outfits_db:
-            if outfit_model.id == outfit_id:
-                if outfit_model.user_id != user_id:
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail=f"Outfit with ID {outfit_id} does not belong to the current user."
-                    )
-                outfit_found = True
-                break
-        if not outfit_found:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Outfit with ID {outfit_id} not found."
-            )
-    # Validator in schemas.StyleHistoryCreate already ensures one is not None and not both are None
-    return True
-
 @router.post("/", response_model=schemas.StyleHistory, status_code=status.HTTP_201_CREATED)
-async def create_style_history_entry(
-    history_entry: schemas.StyleHistoryCreate,
+async def log_style_history_entry(
+    entry: schemas.StyleHistoryCreate,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    global next_style_history_id
+    # Ensure date_worn is set, default to now if not provided by client
+    # Pydantic model StyleHistoryCreate should have `date_worn: datetime`
+    # If it can be optional, then default it here or in Pydantic model.
+    # For this example, assume date_worn is required in StyleHistoryCreate.
 
-    # The Pydantic model StyleHistoryCreate already validates item_id/outfit_id mutual exclusivity.
-    # Now, validate existence and ownership.
-    validate_style_history_references(
-        user_id=current_user.id,
-        item_id=history_entry.item_id,
-        outfit_id=history_entry.outfit_id
+    if entry.item_id:
+        item = db.query(models.WardrobeItem).filter(models.WardrobeItem.id == entry.item_id, models.WardrobeItem.user_id == current_user.id).first()
+        if not item:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Wardrobe Item with ID {entry.item_id} not found or does not belong to user.")
+        item.last_worn = entry.date_worn
+        item.times_worn = (item.times_worn or 0) + 1
+        item.updated_at = datetime.utcnow()
+
+    if entry.outfit_id:
+        outfit = db.query(models.Outfit).options(joinedload(models.Outfit.items)).filter(models.Outfit.id == entry.outfit_id, models.Outfit.user_id == current_user.id).first()
+        if not outfit:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Outfit with ID {entry.outfit_id} not found or does not belong to user.")
+        # Update last_worn and times_worn for all items in the outfit
+        for item_in_outfit in outfit.items:
+            # Ensure this item also belongs to the current user if there's any doubt, though relationship should ensure this.
+            item_in_outfit.last_worn = entry.date_worn
+            item_in_outfit.times_worn = (item_in_outfit.times_worn or 0) + 1
+            item_in_outfit.updated_at = datetime.utcnow()
+
+
+    db_entry_data = entry.model_dump()
+
+    db_entry = models.StyleHistory(
+        **db_entry_data,
+        user_id=current_user.id
     )
 
-    new_entry = schemas.StyleHistory(
-        id=next_style_history_id,
-        user_id=current_user.id,
-        item_id=history_entry.item_id,
-        outfit_id=history_entry.outfit_id,
-        date_worn=history_entry.date_worn,
-        notes=history_entry.notes
-    )
-    fake_style_history_db.append(new_entry)
-    next_style_history_id += 1
+    db.add(db_entry)
+    db.commit()
+    db.refresh(db_entry)
+    return db_entry
 
-    # Side effect: Update WardrobeItem if item_id is logged
-    if new_entry.item_id is not None:
-        for i, item_in_db in enumerate(fake_wardrobe_db):
-            if item_in_db.id == new_entry.item_id and item_in_db.user_id == current_user.id:
-                # Create a new WardrobeItem instance with updated fields
-                updated_item_data = item_in_db.model_dump()
-                updated_item_data["times_worn"] = item_in_db.times_worn + 1
-                updated_item_data["last_worn"] = new_entry.date_worn
-                updated_item_data["updated_at"] = datetime.utcnow() # Also update general updated_at
-
-                # Pydantic models are immutable by default if Config.allow_mutation = False (default is True)
-                # Direct assignment might work if allow_mutation=True.
-                # For safety and explicitness with potentially immutable models, replace the instance.
-                fake_wardrobe_db[i] = schemas.WardrobeItem(**updated_item_data)
-                break
-
-    return new_entry
 
 @router.get("/", response_model=List[schemas.StyleHistory])
-async def read_style_history(
-    item_id: Optional[int] = None,
-    outfit_id: Optional[int] = None,
+async def read_style_history_entries(
     skip: int = 0,
     limit: int = 100,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    user_history = [
-        entry for entry in fake_style_history_db if entry.user_id == current_user.id
-    ]
-
-    if item_id is not None:
-        user_history = [entry for entry in user_history if entry.item_id == item_id]
-
-    if outfit_id is not None:
-        user_history = [entry for entry in user_history if entry.outfit_id == outfit_id]
-
-    return user_history[skip : skip + limit]
+    entries = db.query(models.StyleHistory).filter(models.StyleHistory.user_id == current_user.id).order_by(models.StyleHistory.date_worn.desc()).offset(skip).limit(limit).all()
+    return entries
 
 @router.get("/{entry_id}", response_model=schemas.StyleHistory)
 async def read_style_history_entry(
     entry_id: int,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    for entry in fake_style_history_db:
-        if entry.id == entry_id and entry.user_id == current_user.id:
-            return entry
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Style history entry not found")
+    db_entry = db.query(models.StyleHistory).filter(models.StyleHistory.id == entry_id, models.StyleHistory.user_id == current_user.id).first()
+    if db_entry is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Style history entry not found")
+    return db_entry
+
 
 @router.delete("/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_style_history_entry(
     entry_id: int,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    global fake_style_history_db
+    db_entry = db.query(models.StyleHistory).filter(models.StyleHistory.id == entry_id, models.StyleHistory.user_id == current_user.id).first()
 
-    entry_to_delete_index = -1
-    entry_item_id_to_decrement = None # For potential side-effect adjustment
+    if db_entry is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Style history entry not found")
 
-    for index, entry in enumerate(fake_style_history_db):
-        if entry.id == entry_id:
-            if entry.user_id != current_user.id:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this entry")
-            entry_to_delete_index = index
-            # entry_item_id_to_decrement = entry.item_id # Store for potential side-effect
-            break
+    # Decrement times_worn if applicable
+    if db_entry.item_id:
+        item = db.query(models.WardrobeItem).filter(models.WardrobeItem.id == db_entry.item_id, models.WardrobeItem.user_id == current_user.id).first()
+        if item and item.times_worn and item.times_worn > 0:
+             item.times_worn -= 1
+             item.updated_at = datetime.utcnow()
+    elif db_entry.outfit_id:
+        outfit = db.query(models.Outfit).options(joinedload(models.Outfit.items)).filter(models.Outfit.id == db_entry.outfit_id, models.Outfit.user_id == current_user.id).first()
+        if outfit:
+            for item_in_outfit in outfit.items:
+                 if item_in_outfit.times_worn and item_in_outfit.times_worn > 0:
+                    item_in_outfit.times_worn -=1
+                    item_in_outfit.updated_at = datetime.utcnow()
 
-    if entry_to_delete_index != -1:
-        del fake_style_history_db[entry_to_delete_index]
-
-        # Optional: Decrement times_worn for the item.
-        # For now, as per instruction, this is skipped for simplicity with fake DB.
-        # if entry_item_id_to_decrement is not None:
-        #    for i, item_in_db in enumerate(fake_wardrobe_db):
-        #        if item_in_db.id == entry_item_id_to_decrement and item_in_db.user_id == current_user.id:
-        #            item_in_db.times_worn = max(0, item_in_db.times_worn - 1) # Avoid negative
-        #            # Deciding how to update last_worn on deletion is complex, so often left as is or re-calculated.
-        #            item_in_db.updated_at = datetime.utcnow()
-        #            fake_wardrobe_db[i] = schemas.WardrobeItem(**item_in_db.model_dump())
-        #            break
-        return
-
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Style history entry not found")
+    db.delete(db_entry)
+    db.commit()
+    return

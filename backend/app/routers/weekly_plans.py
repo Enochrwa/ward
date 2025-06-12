@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional, Dict
 from datetime import datetime, date
+from sqlalchemy.orm import Session, joinedload
 
-from .. import schemas
-from ..security import get_current_user
-# Import fake_outfits_db for validation
-from .outfits import fake_outfits_db
+from .. import schemas, models
+from ..security import get_current_user # get_current_user returns schemas.User
+from ..db.database import get_db
 
 router = APIRouter(
     prefix="/weekly-plans",
@@ -13,144 +13,149 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-fake_weekly_plans_db: List[schemas.WeeklyPlan] = []
-next_weekly_plan_id = 1
-
-VALID_DAYS = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"}
-
-def validate_plan_outfits_for_user(daily_outfits: Dict[str, Optional[int]], user_id: int):
-    """
-    Validates if all outfit_ids in daily_outfits exist in fake_outfits_db and belong to the user.
-    Outfit_id can be None.
-    Raises HTTPException if validation fails.
-    """
-    if not daily_outfits:
-        return True # No outfits to validate
-
-    for day, outfit_id in daily_outfits.items():
-        if day.lower() not in VALID_DAYS:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid day '{day}'. Must be one of {', '.join(VALID_DAYS)}."
-            )
-        if outfit_id is None:
-            continue  # None is a valid outfit_id, means no outfit planned
-
-        outfit_found = False
-        for outfit_model in fake_outfits_db: # Iterate over Outfit models
-            if outfit_model.id == outfit_id:
-                if outfit_model.user_id != user_id:
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail=f"Outfit with ID {outfit_id} on day '{day}' does not belong to the current user."
-                    )
-                outfit_found = True
-                break
-        if not outfit_found:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Outfit with ID {outfit_id} on day '{day}' not found."
-            )
-    return True
+def transform_plan_to_response(db_plan: models.WeeklyPlan) -> schemas.WeeklyPlan:
+    daily_outfits_dict = {do.day_of_week: do.outfit_id for do in db_plan.daily_outfits}
+    return schemas.WeeklyPlan(
+        id=db_plan.id,
+        user_id=db_plan.user_id,
+        name=db_plan.name,
+        start_date=db_plan.start_date,
+        end_date=db_plan.end_date,
+        daily_outfits=daily_outfits_dict,
+        created_at=db_plan.created_at,
+        updated_at=db_plan.updated_at
+    )
 
 @router.post("/", response_model=schemas.WeeklyPlan, status_code=status.HTTP_201_CREATED)
 async def create_weekly_plan(
     plan: schemas.WeeklyPlanCreate,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    global next_weekly_plan_id
-
-    if plan.start_date > plan.end_date:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Start date must be before or the same as end date."
-        )
-
-    validate_plan_outfits_for_user(plan.daily_outfits, current_user.id)
-
-    new_plan = schemas.WeeklyPlan(
-        id=next_weekly_plan_id,
-        user_id=current_user.id,
+    db_plan = models.WeeklyPlan(
         name=plan.name,
         start_date=plan.start_date,
         end_date=plan.end_date,
-        daily_outfits=plan.daily_outfits,
+        user_id=current_user.id,
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow()
     )
-    fake_weekly_plans_db.append(new_plan)
-    next_weekly_plan_id += 1
-    return new_plan
+    # Must add and commit db_plan first to get its ID for WeeklyPlanDayOutfit entries
+    db.add(db_plan)
+    db.commit()
+    # db.refresh(db_plan) # Refresh to get ID, though commit usually handles this for auto-increment.
+
+    day_outfit_entries = []
+    if plan.daily_outfits:
+        for day, outfit_id in plan.daily_outfits.items():
+            if outfit_id:
+                outfit = db.query(models.Outfit).filter(models.Outfit.id == outfit_id, models.Outfit.user_id == current_user.id).first()
+                if not outfit:
+                    # Rollback: Delete the plan created if any outfit is invalid
+                    db.delete(db_plan)
+                    # Also delete any day_outfit_entries already added if this loop was partially successful
+                    # For simplicity, this example deletes the plan and raises. Proper transaction management would be better.
+                    db.commit()
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Outfit with ID {outfit_id} for {day} not found or does not belong to user.")
+
+            day_outfit_entry = models.WeeklyPlanDayOutfit(
+                weekly_plan_id=db_plan.id, # Use the ID from the committed plan
+                day_of_week=day,
+                outfit_id=outfit_id
+            )
+            day_outfit_entries.append(day_outfit_entry)
+
+        db.add_all(day_outfit_entries)
+        db.commit()
+
+    db.refresh(db_plan) # Refresh to load relationships like daily_outfits
+    return transform_plan_to_response(db_plan)
+
 
 @router.get("/", response_model=List[schemas.WeeklyPlan])
 async def read_weekly_plans(
     skip: int = 0,
     limit: int = 100,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    user_plans = [p for p in fake_weekly_plans_db if p.user_id == current_user.id]
-    return user_plans[skip : skip + limit]
+    # Use joinedload to efficiently fetch related daily_outfits
+    db_plans = db.query(models.WeeklyPlan).filter(models.WeeklyPlan.user_id == current_user.id)        .options(joinedload(models.WeeklyPlan.daily_outfits))        .order_by(models.WeeklyPlan.start_date.desc())        .offset(skip).limit(limit).all()
+
+    return [transform_plan_to_response(plan) for plan in db_plans]
 
 @router.get("/{plan_id}", response_model=schemas.WeeklyPlan)
 async def read_weekly_plan(
     plan_id: int,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    for p in fake_weekly_plans_db:
-        if p.id == plan_id and p.user_id == current_user.id:
-            return p
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Weekly plan not found")
+    db_plan = db.query(models.WeeklyPlan).filter(models.WeeklyPlan.id == plan_id, models.WeeklyPlan.user_id == current_user.id)        .options(joinedload(models.WeeklyPlan.daily_outfits))        .first()
+    if db_plan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Weekly plan not found")
+
+    return transform_plan_to_response(db_plan)
+
 
 @router.put("/{plan_id}", response_model=schemas.WeeklyPlan)
 async def update_weekly_plan(
     plan_id: int,
     plan_update: schemas.WeeklyPlanUpdate,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    for index, db_plan in enumerate(fake_weekly_plans_db):
-        if db_plan.id == plan_id:
-            if db_plan.user_id != current_user.id:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update this plan")
+    db_plan = db.query(models.WeeklyPlan).filter(models.WeeklyPlan.id == plan_id, models.WeeklyPlan.user_id == current_user.id)        .options(joinedload(models.WeeklyPlan.daily_outfits))        .first()
 
-            update_data = plan_update.model_dump(exclude_unset=True)
+    if db_plan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Weekly plan not found")
 
-            # Validate start_date and end_date consistency
-            start_date = update_data.get("start_date", db_plan.start_date)
-            end_date = update_data.get("end_date", db_plan.end_date)
-            if start_date > end_date:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Start date must be before or the same as end date."
-                )
+    update_data = plan_update.model_dump(exclude_unset=True)
 
-            # Validate outfits if they are being updated
-            if "daily_outfits" in update_data and update_data["daily_outfits"] is not None:
-                validate_plan_outfits_for_user(update_data["daily_outfits"], current_user.id)
+    if "daily_outfits" in update_data:
+        new_daily_outfits_dict = update_data.pop("daily_outfits")
 
-            updated_plan = db_plan.model_copy(update=update_data)
-            updated_plan.updated_at = datetime.utcnow()
-            fake_weekly_plans_db[index] = updated_plan
-            return updated_plan
+        # Simple approach: Delete existing and add new ones
+        # More sophisticated: Compare and update, add, delete individual entries
+        for existing_day_outfit in db_plan.daily_outfits: # db_plan.daily_outfits is a list of WeeklyPlanDayOutfit objects
+            db.delete(existing_day_outfit)
+        # db.commit() # Commit deletions or do it once at the end
 
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Weekly plan not found")
+        if new_daily_outfits_dict: # If new daily_outfits are provided
+            new_day_entries = []
+            for day, outfit_id in new_daily_outfits_dict.items():
+                if outfit_id:
+                    outfit = db.query(models.Outfit).filter(models.Outfit.id == outfit_id, models.Outfit.user_id == current_user.id).first()
+                    if not outfit:
+                        # Consider rollback strategy for atomicity if any outfit is invalid
+                        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Outfit with ID {outfit_id} for {day} not found or does not belong to user.")
+                new_day_entries.append(models.WeeklyPlanDayOutfit(weekly_plan_id=db_plan.id, day_of_week=day, outfit_id=outfit_id))
+            db.add_all(new_day_entries)
+
+    for key, value in update_data.items():
+        setattr(db_plan, key, value)
+
+    db_plan.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(db_plan) # Refresh to get the updated state, including new/modified daily_outfits
+
+    # Re-query to ensure all relationships are correctly loaded for the response after modifications
+    updated_db_plan = db.query(models.WeeklyPlan).filter(models.WeeklyPlan.id == plan_id)        .options(joinedload(models.WeeklyPlan.daily_outfits)).first()
+    return transform_plan_to_response(updated_db_plan)
 
 @router.delete("/{plan_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_weekly_plan(
     plan_id: int,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    global fake_weekly_plans_db
+    db_plan = db.query(models.WeeklyPlan).filter(models.WeeklyPlan.id == plan_id, models.WeeklyPlan.user_id == current_user.id).first()
 
-    plan_to_delete_index = -1
-    for index, p in enumerate(fake_weekly_plans_db):
-        if p.id == plan_id:
-            if p.user_id != current_user.id:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this plan")
-            plan_to_delete_index = index
-            break
+    if db_plan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Weekly plan not found")
 
-    if plan_to_delete_index != -1:
-        del fake_weekly_plans_db[plan_to_delete_index]
-        return
+    # Associated WeeklyPlanDayOutfit entries will be deleted due to cascade="all, delete-orphan"
+    # set on the WeeklyPlan.daily_outfits relationship in models.py.
 
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Weekly plan not found")
+    db.delete(db_plan)
+    db.commit()
+    return

@@ -6,8 +6,13 @@ from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from . import schemas
-# from .. import database # This would be for a real DB
-from .routers.auth import fake_users_db # Import from auth.py - HACK for fake DB
+from .db.database import SessionLocal, get_db # Import SessionLocal and get_db
+from . import models # Import your SQLAlchemy models
+from sqlalchemy.orm import Session # Import Session for type hinting
+from dotenv import load_dotenv # For SECRET_KEY
+import os # For SECRET_KEY
+
+load_dotenv()
 
 # Password Hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -19,7 +24,9 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 # JWT Token
-SECRET_KEY = "your-secret-key"  # TODO: Move to config and use a strong key
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("No SECRET_KEY set for the application")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -31,7 +38,7 @@ class TokenData(BaseModel):
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login") # tokenUrl is relative to the app root
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)): # Add db session
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -41,15 +48,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     if token_data is None or token_data.username is None:
         raise credentials_exception
 
-    # user = database.get_user(db, username=token_data.username) # Real DB call
-    # user = database.get_user(db, username=token_data.username) # Real DB call
-    user = fake_users_db.get(token_data.username) # Use imported fake_users_db
+    user = db.query(models.User).filter(models.User.username == token_data.username).first()
 
     if user is None:
         raise credentials_exception
-    # User is a dict from fake_users_db. Convert to User schema.
-    # schemas.User already excludes 'hashed_password' if it's not a field there.
-    return schemas.User(**user)
+    # User is now a SQLAlchemy model instance. Convert to User schema.
+    # Ensure your schemas.User can be created from the SQLAlchemy model instance.
+    # This might require adding `from_orm = True` in your Pydantic schema's Config class.
+    return schemas.User.model_validate(user) # Use model_validate for Pydantic v2
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):

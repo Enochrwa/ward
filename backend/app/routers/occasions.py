@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional
 from datetime import datetime
+from sqlalchemy.orm import Session
 
-from .. import schemas
-from ..security import get_current_user
-from .outfits import fake_outfits_db # For outfit validation
+from .. import schemas, models # Import models and schemas
+from ..security import get_current_user # get_current_user returns schemas.User
+from ..db.database import get_db
+from ..services.recommendation_services import recommend_outfits_for_occasion_service # Import service
 
 router = APIRouter(
     prefix="/occasions",
@@ -12,118 +14,115 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-fake_occasions_db: List[schemas.Occasion] = []
-next_occasion_id = 1
+# Helper to convert model to schema and add suggestions
+async def occasion_model_to_response(db_occasion_model: models.Occasion, db: Session, current_user: schemas.User) -> schemas.Occasion:
+    # Convert base model to schema
+    occasion_schema = schemas.Occasion.model_validate(db_occasion_model)
 
-def validate_occasion_outfit_for_user(outfit_id: Optional[int], user_id: int):
-    """
-    Validates if the given outfit_id (if not None) exists in fake_outfits_db
-    and belongs to the user. Raises HTTPException if validation fails.
-    """
-    if outfit_id is None:
-        return True # No outfit to validate
+    # Fetch and add suggestions
+    # Ensure current_user is passed as schemas.User, which it should be from get_current_user
+    suggested_db_outfits = await recommend_outfits_for_occasion_service(
+        db=db,
+        user=current_user, # This should be schemas.User
+        occasion=occasion_schema # Pass the schema version of occasion
+    )
+    occasion_schema.suggested_outfits = suggested_db_outfits # This list is already of schemas.Outfit
+    return occasion_schema
 
-    outfit_found = False
-    for outfit_model in fake_outfits_db:
-        if outfit_model.id == outfit_id:
-            if outfit_model.user_id != user_id:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Outfit with ID {outfit_id} does not belong to the current user."
-                )
-            outfit_found = True
-            break
-    if not outfit_found:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Outfit with ID {outfit_id} not found."
-        )
-    return True
 
 @router.post("/", response_model=schemas.Occasion, status_code=status.HTTP_201_CREATED)
 async def create_occasion(
     occasion: schemas.OccasionCreate,
-    current_user: schemas.User = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_user) # Ensure type is schemas.User
 ):
-    global next_occasion_id
+    if occasion.outfit_id:
+        outfit = db.query(models.Outfit).filter(models.Outfit.id == occasion.outfit_id, models.Outfit.user_id == current_user.id).first()
+        if not outfit:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Outfit with ID {occasion.outfit_id} not found or does not belong to user.")
 
-    if occasion.outfit_id is not None:
-        validate_occasion_outfit_for_user(occasion.outfit_id, current_user.id)
-
-    new_occasion = schemas.Occasion(
-        id=next_occasion_id,
+    db_occasion_model = models.Occasion(
+        **occasion.model_dump(),
         user_id=current_user.id,
-        name=occasion.name,
-        date=occasion.date,
-        outfit_id=occasion.outfit_id,
-        notes=occasion.notes,
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow()
     )
-    fake_occasions_db.append(new_occasion)
-    next_occasion_id += 1
-    return new_occasion
+    db.add(db_occasion_model)
+    db.commit()
+    db.refresh(db_occasion_model)
+
+    # Use the helper to include suggestions in the response
+    return await occasion_model_to_response(db_occasion_model, db, current_user)
+
 
 @router.get("/", response_model=List[schemas.Occasion])
 async def read_occasions(
     skip: int = 0,
     limit: int = 100,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    user_occasions = [occ for occ in fake_occasions_db if occ.user_id == current_user.id]
-    return user_occasions[skip : skip + limit]
+    # Note: Suggestions are NOT added to the list view to keep it light.
+    # Client can fetch individual occasion to get suggestions.
+    occasions_models = db.query(models.Occasion).filter(models.Occasion.user_id == current_user.id).order_by(models.Occasion.date.desc()).offset(skip).limit(limit).all()
+    # Basic conversion, no suggestions here.
+    return [schemas.Occasion.model_validate(occ) for occ in occasions_models]
+
 
 @router.get("/{occasion_id}", response_model=schemas.Occasion)
 async def read_occasion(
     occasion_id: int,
-    current_user: schemas.User = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_user) # Ensure type is schemas.User
 ):
-    for occ in fake_occasions_db:
-        if occ.id == occasion_id and occ.user_id == current_user.id:
-            return occ
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Occasion not found")
+    db_occasion_model = db.query(models.Occasion).filter(models.Occasion.id == occasion_id, models.Occasion.user_id == current_user.id).first()
+    if db_occasion_model is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Occasion not found")
+
+    return await occasion_model_to_response(db_occasion_model, db, current_user)
+
 
 @router.put("/{occasion_id}", response_model=schemas.Occasion)
 async def update_occasion(
     occasion_id: int,
     occasion_update: schemas.OccasionUpdate,
-    current_user: schemas.User = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_user) # Ensure type is schemas.User
 ):
-    for index, db_occasion in enumerate(fake_occasions_db):
-        if db_occasion.id == occasion_id:
-            if db_occasion.user_id != current_user.id:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update this occasion")
+    db_occasion_model = db.query(models.Occasion).filter(models.Occasion.id == occasion_id, models.Occasion.user_id == current_user.id).first()
 
-            update_data = occasion_update.model_dump(exclude_unset=True)
+    if db_occasion_model is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Occasion not found")
 
-            # Validate outfit_id if it's being updated
-            if "outfit_id" in update_data: # This means outfit_id is explicitly set in the request
-                validate_occasion_outfit_for_user(update_data["outfit_id"], current_user.id)
+    update_data = occasion_update.model_dump(exclude_unset=True)
+    if "outfit_id" in update_data: # Check if outfit_id is part of the update
+        new_outfit_id = update_data["outfit_id"]
+        if new_outfit_id is not None: # If a new outfit_id is provided
+            outfit = db.query(models.Outfit).filter(models.Outfit.id == new_outfit_id, models.Outfit.user_id == current_user.id).first()
+            if not outfit:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Outfit with ID {new_outfit_id} not found or does not belong to user.")
+        # If new_outfit_id is None, it will be set directly by setattr, unlinking the outfit.
 
-            updated_occasion = db_occasion.model_copy(update=update_data)
-            updated_occasion.updated_at = datetime.utcnow()
-            fake_occasions_db[index] = updated_occasion
-            return updated_occasion
+    for key, value in update_data.items():
+        setattr(db_occasion_model, key, value)
 
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Occasion not found")
+    db_occasion_model.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(db_occasion_model)
+
+    return await occasion_model_to_response(db_occasion_model, db, current_user)
 
 @router.delete("/{occasion_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_occasion(
     occasion_id: int,
+    db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_user)
 ):
-    global fake_occasions_db
+    db_occasion = db.query(models.Occasion).filter(models.Occasion.id == occasion_id, models.Occasion.user_id == current_user.id).first()
 
-    occasion_to_delete_index = -1
-    for index, occ in enumerate(fake_occasions_db):
-        if occ.id == occasion_id:
-            if occ.user_id != current_user.id:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this occasion")
-            occasion_to_delete_index = index
-            break
+    if db_occasion is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Occasion not found")
 
-    if occasion_to_delete_index != -1:
-        del fake_occasions_db[occasion_to_delete_index]
-        return
-
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Occasion not found")
+    db.delete(db_occasion)
+    db.commit()
+    return

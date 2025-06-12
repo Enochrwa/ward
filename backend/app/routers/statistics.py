@@ -1,88 +1,94 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func, desc, distinct
 from typing import List, Dict
-from collections import Counter
 
-from .. import schemas
-from ..security import get_current_user
-from .wardrobe import fake_wardrobe_db
-from .outfits import fake_outfits_db
-# fake_style_history_db might be needed if wear counts are not solely from WardrobeItem.times_worn
-# from .style_history import fake_style_history_db
+from .. import schemas, models
+from ..security import get_current_user # get_current_user returns schemas.User
+from ..db.database import get_db
 
 router = APIRouter(
     prefix="/statistics",
     tags=["Statistics"],
+    responses={404: {"description": "Not found"}},
 )
 
-@router.get("/summary", response_model=schemas.WardrobeStats)
-async def get_wardrobe_summary(current_user: schemas.User = Depends(get_current_user)):
-    user_items = [item for item in fake_wardrobe_db if item.user_id == current_user.id]
-    user_outfits = [outfit for outfit in fake_outfits_db if outfit.user_id == current_user.id]
+@router.get("/wardrobe-stats/", response_model=schemas.WardrobeStats)
+async def get_wardrobe_statistics(
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_user)
+):
+    user_id = current_user.id
 
-    total_items = len(user_items)
-    total_outfits = len(user_outfits)
+    total_items = db.query(func.count(models.WardrobeItem.id)).filter(models.WardrobeItem.user_id == user_id).scalar()
+    total_outfits = db.query(func.count(models.Outfit.id)).filter(models.Outfit.user_id == user_id).scalar()
 
-    items_by_category = Counter(item.category for item in user_items if item.category)
-    items_by_season = Counter(item.season for item in user_items if item.season)
+    items_by_category_query = db.query(models.WardrobeItem.category, func.count(models.WardrobeItem.id).label("count")).filter(models.WardrobeItem.user_id == user_id).group_by(models.WardrobeItem.category).all()
+    items_by_category = {cat if cat else "Uncategorized": count for cat, count in items_by_category_query}
 
-    favorite_items_count = sum(1 for item in user_items if item.favorite)
 
-    # Sort items by times_worn for most/least worn
-    # Ensure times_worn is available and up-to-date in user_items
-    # WardrobeItem.times_worn is updated by style_history router
-    sorted_items_by_wear = sorted(user_items, key=lambda x: x.times_worn, reverse=True)
+    items_by_season_query = db.query(models.WardrobeItem.season, func.count(models.WardrobeItem.id).label("count")).filter(models.WardrobeItem.user_id == user_id, models.WardrobeItem.season != None, models.WardrobeItem.season != "").group_by(models.WardrobeItem.season).all()
+    items_by_season = {season if season else "Unspecified": count for season, count in items_by_season_query}
 
-    most_worn_items = sorted_items_by_wear[:5]
 
-    # For least_worn_items, we could filter out never-worn items if desired
-    # For now, include all, sorted ascending by times_worn
-    least_worn_items_all = sorted(user_items, key=lambda x: x.times_worn)
-    least_worn_items = least_worn_items_all[:5]
+    most_worn_items_db = db.query(models.WardrobeItem).filter(models.WardrobeItem.user_id == user_id, models.WardrobeItem.times_worn > 0).order_by(desc(models.WardrobeItem.times_worn)).limit(5).all()
+    # For least worn, include items with times_worn = 0 or NULL
+    least_worn_items_db = db.query(models.WardrobeItem).filter(models.WardrobeItem.user_id == user_id).order_by(func.coalesce(models.WardrobeItem.times_worn, 0)).limit(5).all()
+
+    favorite_items_count = db.query(func.count(models.WardrobeItem.id)).filter(models.WardrobeItem.user_id == user_id, models.WardrobeItem.favorite == True).scalar()
 
     return schemas.WardrobeStats(
-        total_items=total_items,
-        total_outfits=total_outfits,
-        items_by_category=dict(items_by_category),
-        items_by_season=dict(items_by_season),
-        most_worn_items=most_worn_items,
-        least_worn_items=least_worn_items,
-        favorite_items_count=favorite_items_count,
+        total_items=total_items if total_items is not None else 0,
+        total_outfits=total_outfits if total_outfits is not None else 0,
+        items_by_category=items_by_category,
+        items_by_season=items_by_season,
+        most_worn_items=[schemas.WardrobeItem.model_validate(item) for item in most_worn_items_db],
+        least_worn_items=[schemas.WardrobeItem.model_validate(item) for item in least_worn_items_db],
+        favorite_items_count=favorite_items_count if favorite_items_count is not None else 0
     )
 
-@router.get("/item-wear-frequency", response_model=List[schemas.ItemWearFrequency])
-async def get_item_wear_frequency(current_user: schemas.User = Depends(get_current_user)):
-    user_items = [item for item in fake_wardrobe_db if item.user_id == current_user.id]
+@router.get("/item-wear-frequency/", response_model=List[schemas.ItemWearFrequency])
+async def get_item_wear_frequency(
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_user)
+):
+    user_id = current_user.id
+    # Query items and their wear counts, including those never worn (times_worn is 0 or NULL)
+    items_with_wear_count = db.query(models.WardrobeItem)        .filter(models.WardrobeItem.user_id == user_id)        .order_by(desc(func.coalesce(models.WardrobeItem.times_worn, 0)))        .all()
 
-    frequency_list = [
-        schemas.ItemWearFrequency(item=item, wear_count=item.times_worn)
-        for item in user_items
-    ]
+    response = []
+    for item in items_with_wear_count:
+        response.append(schemas.ItemWearFrequency(
+            item=schemas.WardrobeItem.model_validate(item),
+            wear_count=item.times_worn if item.times_worn is not None else 0
+        ))
+    return response
 
-    # Sort by wear_count, descending
-    sorted_frequency_list = sorted(frequency_list, key=lambda x: x.wear_count, reverse=True)
+@router.get("/category-usage/", response_model=List[schemas.CategoryUsage])
+async def get_category_usage(
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_user)
+):
+    user_id = current_user.id
 
-    return sorted_frequency_list
+    total_user_items_count = db.query(func.count(distinct(models.WardrobeItem.id)))        .filter(models.WardrobeItem.user_id == user_id).scalar()
 
-@router.get("/category-usage", response_model=List[schemas.CategoryUsage])
-async def get_category_usage(current_user: schemas.User = Depends(get_current_user)):
-    user_items = [item for item in fake_wardrobe_db if item.user_id == current_user.id]
-    total_items = len(user_items)
-
-    if total_items == 0:
+    # Handle case where total_user_items_count might be 0 to avoid division by zero
+    if not total_user_items_count or total_user_items_count == 0:
+        # If user has no items, return empty list or handle as appropriate
         return []
 
-    items_by_category = Counter(item.category for item in user_items if item.category)
+    category_counts_query = db.query(
+        models.WardrobeItem.category,
+        func.count(models.WardrobeItem.id).label("item_count"),
+        (func.count(models.WardrobeItem.id) * 100.0 / total_user_items_count).label("usage_percentage")
+    ).filter(models.WardrobeItem.user_id == user_id)     .group_by(models.WardrobeItem.category)     .all()
 
-    category_usage_list = []
-    for category, count in items_by_category.items():
-        percentage = (count / total_items) * 100 if total_items > 0 else 0
-        category_usage_list.append(schemas.CategoryUsage(
-            category=category,
-            item_count=count,
-            usage_percentage=round(percentage, 2) # Round to 2 decimal places
+    response = []
+    for category_name, item_count, usage_percentage in category_counts_query:
+        response.append(schemas.CategoryUsage(
+            category=category_name if category_name else "Uncategorized",
+            item_count=item_count,
+            usage_percentage=round(usage_percentage, 2) if usage_percentage is not None else 0.0
         ))
-
-    # Sort by item_count or percentage, descending
-    sorted_category_usage = sorted(category_usage_list, key=lambda x: x.item_count, reverse=True)
-
-    return sorted_category_usage
+    return response

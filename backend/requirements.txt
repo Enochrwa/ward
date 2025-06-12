@@ -1,0 +1,18 @@
+fastapi
+uvicorn[standard]
+SQLAlchemy
+mysql-connector-python
+python-dotenv
+passlib[bcrypt]
+python-jose[cryptography]
+Pillow
+# AI / ML Libraries
+tensorflow
+transformers
+scikit-learn
+torch
+sentencepiece
+datasets
+# Testing Libraries
+pytest
+pytest-asyncio

@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 import uvicorn
 
-from .app.db import database
-from .app import models # Assuming models.py is in backend/app/
+from app.db import database
+from app import models # Assuming models.py is in backend/app/
 
 from app.routers import (
     auth,

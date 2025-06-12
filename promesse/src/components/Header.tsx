@@ -28,7 +28,7 @@ const Header = () => {
     { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
     { name: 'Wardrobe', href: '/wardrobe', icon: Heart },
     { name: 'AI Studio', href: '/ai-studio', icon: Brain },
-    { name: 'Community', href: '/community', icon: Calendar },
+    // { name: 'Community', href: '/community', icon: Calendar },
     { name: 'Admin', href: '/admin', icon: Settings },
   ];
 

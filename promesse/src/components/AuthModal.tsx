@@ -123,7 +123,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                   id="username-register"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="col-span-3"
+                  className="col-span-3 bg-gray-700"
                   required
                 />
               </div>
@@ -136,7 +136,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="col-span-3"
+                  className="col-span-3 bg-gray-700"
                   required
                 />
               </div>
@@ -149,7 +149,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialVi
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="col-span-3"
+                  className="col-span-3 bg-gray-700"
                   required
                 />
               </div>

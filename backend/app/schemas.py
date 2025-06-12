@@ -29,6 +29,10 @@ class Token(BaseModel):
     class Config:
         from_attributes = True
 
+class UserLogin(BaseModel):
+    emailOrUsername: str
+    password: str
+
 class WardrobeItem(BaseModel):
     id: int
     user_id: int
@@ -288,3 +292,4 @@ CategoryUsage.model_rebuild()
 OutfitAnalysisResponse.model_rebuild()
 TrendForecastResponse.model_rebuild()
 PersonalizedWardrobeSuggestions.model_rebuild()
+UserLogin.model_rebuild() # Add UserLogin to model_rebuild

@@ -7,6 +7,13 @@ from .. import tables as schemas  # schemas are in tables.py
 from .. import model as models    # SQLAlchemy models are in model.py
 from ..security import get_current_user
 from ..db.database import get_db
+from ..services.ai_style_insights_service import (
+    get_user_style_profile,
+    get_wardrobe_analysis_details,
+    generate_personalized_general_insights,
+    generate_ai_style_outfit_recommendations
+)
+# FullAIStyleInsightsResponse is already available via schemas.FullAIStyleInsightsResponse
 
 router = APIRouter(
     prefix="/profile",
@@ -72,3 +79,35 @@ async def update_user_profile(
         db.commit()
         db.refresh(db_profile)
         return db_profile
+
+@router.get("/me/style-insights", response_model=schemas.FullAIStyleInsightsResponse)
+async def get_full_style_insights(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Retrieves comprehensive AI-driven style insights for the current user.
+    This includes their style profile, wardrobe analysis, personalized tips,
+    and outfit recommendations.
+    """
+    user_style_profile_response = get_user_style_profile(db=db, user=current_user)
+    wardrobe_analysis_response = get_wardrobe_analysis_details(db=db, user=current_user)
+
+    personalized_insights_list = generate_personalized_general_insights(
+        user_style_profile=user_style_profile_response,
+        wardrobe_analysis=wardrobe_analysis_response
+    )
+
+    suggested_outfits_list = generate_ai_style_outfit_recommendations(
+        db=db,
+        user=current_user,
+        user_style_profile=user_style_profile_response,
+        wardrobe_analysis=wardrobe_analysis_response
+    )
+
+    return schemas.FullAIStyleInsightsResponse(
+        user_profile=user_style_profile_response,
+        wardrobe_analysis=wardrobe_analysis_response,
+        personalized_insights=personalized_insights_list,
+        suggested_outfits=suggested_outfits_list
+    )

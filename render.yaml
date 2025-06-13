@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: digital-wardrobe-backend
+    env: python
+    region: oregon # Default, can be changed
+    plan: free # Default, can be changed
+    buildCommand: "pip install -r backend/requirements.txt"
+    startCommand: "python backend/main.py" # Assuming this correctly starts the Uvicorn server for Render
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11 # Match your project's Python version
+      - key: DATABASE_URL
+        sync: false # Set this manually in Render's environment variables dashboard (from Aiven.io)
+      - key: SECRET_KEY
+        sync: false # Set this manually in Render's environment variables dashboard (generate a strong key)
+      - key: AI_DEMO_MODE
+        value: "false" # Ensures AI demo mode is off for production
+      - key: TF_ENABLE_ONEDNN_OPTS
+        value: "0"
+      # Optional: Add PORT if Render requires it, though it often injects it.
+      # - key: PORT
+      #   value: "8000" # Or the port your app listens on if not default Render port

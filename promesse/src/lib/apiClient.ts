@@ -37,7 +37,7 @@ const apiClient = async (endpoint: string, options: RequestOptions = {}) => {
   };
 
   // Determine the base URL
-  const VITE_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || '';
+  const VITE_BASE_URL = 'http://localhost:8000' || '';
   const finalApiUrl = VITE_BASE_URL ? `${VITE_BASE_URL}/api${endpoint}` : `/api${endpoint}`;
 
   try {

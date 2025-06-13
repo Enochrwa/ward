@@ -135,10 +135,10 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Weather-Based Outfit Suggestion */}
-          <Card className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-blue-200 dark:border-blue-800">
+          {/* Weather-Based Outfit Sugge4tion */}
+          <Card className="bg-slate-200 border-blue-200 dark:border-blue-800">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between b">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-full flex items-center justify-center">
                     <weatherOutfit.icon size={24} className="text-white" />
@@ -221,7 +221,7 @@ const Dashboard = () => {
                 <CardDescription>Your fashion patterns and preferences</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-4 ">
                   {styleInsights.map((insight, index) => (
                     <div key={index} className="space-y-2">
                       <div className="flex justify-between items-center">

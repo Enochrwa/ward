@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
+
 import os
 import logging # Added for logging
 import tensorflow as tf
@@ -28,6 +30,23 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 
 Base.metadata.create_all(bind=database.engine) # This creates tables if they don't exist
 app = FastAPI()
+
+
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5713",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5713",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Or use ["*"] to allow all origins (not safe for production)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # Mount static files directory
 # This should be done before including routers if routers depend on static paths at startup,

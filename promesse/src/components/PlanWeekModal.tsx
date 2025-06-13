@@ -3,9 +3,9 @@ import { Calendar, Sparkles, Eye, Save, X, PackageOpen, AlertTriangle, Info } fr
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { apiClient } from '@/lib/apiClient';
+import  apiClient  from '@/lib/apiClient';
 import { useAuth } from '@/hooks/useAuth';
-import { LoadingSpinner } from '@/components/ui/loading'; // Assuming this exists
+import  LoadingSpinner  from '@/components/ui/loading'; // Assuming this exists
 
 // Simplified WardrobeItem type for this component's props
 export interface WardrobeItem {

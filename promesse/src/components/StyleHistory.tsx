@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { apiClient } from '@/lib/apiClient';
+import  apiClient  from '@/lib/apiClient';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
-import { LoadingSpinner } from '@/components/ui/loading'; // Assuming this exists
+import  LoadingSpinner  from '@/components/ui/loading'; // Assuming this exists
 
 interface StyleHistoryProps {
   isOpen: boolean;

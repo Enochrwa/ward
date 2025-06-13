@@ -4,9 +4,9 @@ import { Calendar, Eye, Trash2, X, PackageOpen, AlertTriangle } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { apiClient } from '@/lib/apiClient';
+import  apiClient  from '@/lib/apiClient';
 import { useAuth } from '@/hooks/useAuth';
-import { LoadingSpinner } from '@/components/ui/loading'; // Assuming this exists
+import  LoadingSpinner  from '@/components/ui/loading'; // Assuming this exists
 
 export interface SavedWeeklyPlansProps {
   isOpen: boolean;

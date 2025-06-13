@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import apiClient from '@/lib/apiClient'; // Added apiClient import
 
 // Interfaces
 export interface User {
@@ -49,27 +50,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
-      setToken(storedToken);
-      fetchUserData(storedToken);
+      // No need to setToken here, as fetchUserData will trigger re-renders if successful
+      // and setToken is implicitly called via login/register or initial load.
+      // The main purpose here is to validate the token and fetch user data.
+      fetchUserData();
     }
   }, []);
 
-  const fetchUserData = async (currentToken: string) => {
+  const fetchUserData = async () => { // Removed currentToken parameter
     setIsLoading(true);
+    // setError(null); // Clear previous error before new attempt
     try {
-      const response = await fetch('http://localhost:8000/api/users/me', {
-        headers: {
-          'Authorization': `Bearer ${currentToken}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch user data');
-      }
-      const userData: User = await response.json();
+      // apiClient will automatically use the token from localStorage
+      const userData: User = await apiClient('/users/me');
       setUser(userData);
-      setError(null);
+      setError(null); // Clear error on success
     } catch (err: any) {
-      setError(err.message || 'An error occurred');
+      setError(err.message || 'Failed to fetch user data');
       setUser(null);
       setToken(null);
       localStorage.removeItem('token');
@@ -82,21 +79,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:8000/api/login', {
+      const { access_token: newToken } = await apiClient('/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
+        body: credentials,
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed');
-      }
-      const { access_token: newToken } = await response.json();
       localStorage.setItem('token', newToken);
-      setToken(newToken);
-      await fetchUserData(newToken);
+      setToken(newToken); // Set token state
+      await fetchUserData(); // fetchUserData will use apiClient which reads from localStorage
     } catch (err: any) {
       setError(err.message || 'An error occurred during login');
       setUser(null);
@@ -111,30 +100,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:8000/api/register', {
+      // Assuming register endpoint returns a similar token structure or user data
+      const responseData = await apiClient('/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
+        body: userData,
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Registration failed');
-      }
-      // Assuming registration returns token and user or just a success message
-      // If it returns token, we can auto-login:
-      const responseData = await response.json();
-      if (responseData.access_token) {
+
+      // If registration immediately returns a token (auto-login)
+      if (responseData && responseData.access_token) {
         localStorage.setItem('token', responseData.access_token);
         setToken(responseData.access_token);
-        await fetchUserData(responseData.access_token);
+        await fetchUserData(); // fetchUserData will use apiClient which reads from localStorage
       } else {
-        // If no token, perhaps redirect to login or show a message
-        // For now, we'll just clear loading and let user login manually
-        // Or if it returns user data directly:
-        // setUser(responseData.user);
-        // setToken(null); // Or handle token separately if provided
+        // Handle cases where registration does not auto-login
+        // e.g., display a success message, require manual login, or if it returns user data directly:
+        // if (responseData && responseData.user) { // Hypothetical structure
+        //   setUser(responseData.user);
+        // }
+        // For now, assume registration implies a need to login separately or returns a token.
+        // If it doesn't return a token, the user remains logged out.
+        // setError('Registration successful. Please log in.'); // Example message
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred during registration');

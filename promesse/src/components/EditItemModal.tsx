@@ -22,6 +22,8 @@ const EditItemModal = ({ isOpen, onClose, onUpdate, item }: EditItemModalProps) 
   const [removeCurrentImage, setRemoveCurrentImage] = useState(false);
   const { toast } = useToast();
 
+  const VITE_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || '';
+
   const categories = ['Shirts', 'Pants', 'Dresses', 'Shoes', 'Accessories', 'Jackets', 'Sweaters', 'Other'];
   const seasons = ['Spring', 'Summer', 'Fall', 'Winter', 'All Seasons'];
 
@@ -173,7 +175,7 @@ const EditItemModal = ({ isOpen, onClose, onUpdate, item }: EditItemModalProps) 
               <div className="mt-1 flex items-center gap-4">
                 <span className="inline-block h-16 w-16 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-700">
                   {imagePreview ? (
-                    <img src={imagePreview.startsWith('data:') ? imagePreview : `http://localhost:8000${imagePreview}`} alt="Preview" className="h-full w-full object-cover" />
+                    <img src={imagePreview.startsWith('data:') ? imagePreview : `${VITE_BASE_URL}${imagePreview}`} alt="Preview" className="h-full w-full object-cover" />
                   ) : (
                     <Upload className="h-full w-full text-gray-300 dark:text-gray-500 p-4" />
                   )}

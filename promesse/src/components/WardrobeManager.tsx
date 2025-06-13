@@ -79,6 +79,8 @@ const WardrobeManager = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<WardrobeItem | null>(null);
 
+  const VITE_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || '';
+
   // Fetch Items Function
   const fetchItems = useCallback(async () => {
     if (!token) { // Do not fetch if user is not logged in
@@ -405,7 +407,7 @@ const WardrobeManager = () => {
               >
                 <div className={viewMode === 'list' ? 'w-20 sm:w-24 lg:w-32 flex-shrink-0' : 'aspect-square'}>
                   <img
-                    src={item.image_url ? `http://localhost:8000${item.image_url}` : "https://via.placeholder.com/150?text=No+Image"} // Added base URL and placeholder
+                    src={item.image_url ? `${VITE_BASE_URL}${item.image_url}` : "https://via.placeholder.com/150?text=No+Image"}
                     alt={item.name}
                     className="w-full h-full object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
                   />

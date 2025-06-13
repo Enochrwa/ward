@@ -6,28 +6,31 @@ import tensorflow_hub as hub
 from PIL import Image
 import numpy as np
 from typing import List, Optional, Union
+import logging # Added for logging
 
 # Global variable to hold the loaded model
 mobilenet_v2_model = None
 MODEL_LOADED = False
 MODEL_URL = "https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/4"
 
+logger = logging.getLogger(__name__) # Added logger
+
 def _load_model():
     """Loads the MobileNetV2 model from TensorFlow Hub."""
     global mobilenet_v2_model, MODEL_LOADED
     if not MODEL_LOADED:
         try:
-            print(f"Loading MobileNetV2 model from {MODEL_URL}...")
+            logger.info(f"Loading MobileNetV2 model from {MODEL_URL}...")
             # Load the model from TF Hub
             # Using input_shape ensures the model expects a fixed size, which is good for consistency.
             # MobileNetV2 expects images of size 224x224.
             mobilenet_v2_model = hub.KerasLayer(MODEL_URL, input_shape=(224, 224, 3))
             MODEL_LOADED = True
-            print("MobileNetV2 model loaded successfully.")
+            logger.info("MobileNetV2 model loaded successfully.")
         except Exception as e:
             mobilenet_v2_model = None
             MODEL_LOADED = False
-            print(f"Error loading MobileNetV2 model: {e}")
+            logger.error(f"Error loading MobileNetV2 model: {e}")
             # Depending on policy, could raise here or allow fallback in extract function
 
 def get_image_embedding(image: Image.Image) -> Union[List[float], str]:
@@ -68,7 +71,7 @@ def get_image_embedding(image: Image.Image) -> Union[List[float], str]:
 
         return embedding
     except Exception as e:
-        print(f"Error during image embedding extraction with MobileNetV2: {e}")
+        logger.error(f"Error during image embedding extraction with MobileNetV2: {e}")
         return f"Error during image embedding extraction: {str(e)}"
 
 # Example usage (optional, can be removed or commented out)
@@ -78,7 +81,7 @@ if __name__ == '__main__':
     # Create a dummy black image for testing
     try:
         img = Image.new('RGB', (224, 224), color = 'black')
-        print("Attempting to extract embedding for a dummy image...")
+        logger.info("Attempting to extract embedding for a dummy image...")
         # Ensure model is loaded for the test
         if not MODEL_LOADED and mobilenet_v2_model is None:
              _load_model()
@@ -86,12 +89,12 @@ if __name__ == '__main__':
         if mobilenet_v2_model:
             embedding_result = get_image_embedding(img)
             if isinstance(embedding_result, list):
-                print(f"Successfully extracted embedding (first 10 features): {embedding_result[:10]}")
-                print(f"Embedding dimension: {len(embedding_result)}")
+                logger.info(f"Successfully extracted embedding (first 10 features): {embedding_result[:10]}")
+                logger.info(f"Embedding dimension: {len(embedding_result)}")
             else:
-                print(f"Embedding extraction failed: {embedding_result}")
+                logger.error(f"Embedding extraction failed: {embedding_result}")
         else:
-            print("Skipping example usage as model failed to load.")
+            logger.warning("Skipping example usage as model failed to load.")
 
     except Exception as e:
-        print(f"Error in example usage: {e}")
+        logger.error(f"Error in example usage: {e}")

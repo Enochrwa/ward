@@ -3,6 +3,7 @@
 
 from typing import List, Dict, Any, Optional
 import re
+import logging # Added for logging
 
 # Define occasion categories and their characteristics
 OCCASION_MAPPING = {
@@ -238,6 +239,7 @@ if __name__ == "__main__":
     test_colors = ["#000000", "#FFFFFF", "#2563EB"]
     test_items = ["blazer", "dress shirt", "formal shoes"]
     
+    logger = logging.getLogger(__name__) # Added logger for example
     result = determine_occasion_suitability(test_style, test_colors, test_items)
-    print(f"Occasion analysis result: {result}")
+    logger.info(f"Occasion analysis result: {result}")
 

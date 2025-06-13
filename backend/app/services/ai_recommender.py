@@ -7,6 +7,7 @@ import tensorflow_hub as hub
 from PIL import Image, ImageDraw # Pillow for image manipulation
 import numpy as np
 from typing import List, Dict, Union, Any
+import logging # Added for logging
 
 # Global variables for the object detection model
 object_detector_model = None
@@ -15,6 +16,8 @@ DETECTOR_LOADED = False
 # You might need to adjust the URL based on the specific version or task.
 # This one is a common choice for general object detection.
 DETECTOR_URL = "https://tfhub.dev/tensorflow/efficientdet/lite0/detection/1"
+
+logger = logging.getLogger(__name__) # Added logger
 
 # COCO class names - EfficientDet models trained on COCO typically output IDs.
 # We need a mapping to human-readable labels.
@@ -51,16 +54,16 @@ def _load_detector_model():
     global object_detector_model, DETECTOR_LOADED
     if not DETECTOR_LOADED:
         try:
-            print(f"Loading EfficientDet-Lite0 model from {DETECTOR_URL}...")
+            logger.info(f"Loading EfficientDet-Lite0 model from {DETECTOR_URL}...")
             # This model expects tf.uint8 images with shape [1, height, width, 3]
             # Values in range [0, 255].
             object_detector_model = hub.load(DETECTOR_URL)
             DETECTOR_LOADED = True
-            print("EfficientDet-Lite0 model loaded successfully.")
+            logger.info("EfficientDet-Lite0 model loaded successfully.")
         except Exception as e:
             object_detector_model = None
             DETECTOR_LOADED = False
-            print(f"Error loading EfficientDet-Lite0 model: {e}")
+            logger.error(f"Error loading EfficientDet-Lite0 model: {e}")
 
 def identify_items(image: Image.Image, confidence_threshold=0.3) -> Union[List[Dict[str, Any]], str]:
     """
@@ -136,7 +139,7 @@ def identify_items(image: Image.Image, confidence_threshold=0.3) -> Union[List[D
         return identified_items_list
 
     except Exception as e:
-        print(f"Error during item identification with EfficientDet-Lite0: {e}")
+        logger.error(f"Error during item identification with EfficientDet-Lite0: {e}")
         # tf.errors.InvalidArgumentError can occur if image tensor is not as expected
         if "uint8" in str(e).lower(): # Example of more specific error feedback
             return f"Error during item identification: Image data type mismatch. Details: {str(e)}"
@@ -183,12 +186,12 @@ if __name__ == '__main__':
             # print("Using test_image.jpg for detection.")
             # Fallback to dummy image if test_image.jpg is not found
             test_img = Image.new('RGB', (320, 320), color='white') # EfficientDet expects min 320x320 for some versions
-            print("Using a dummy white image for detection testing.")
+            logger.info("Using a dummy white image for detection testing.")
         except FileNotFoundError:
             test_img = Image.new('RGB', (320, 320), color='white')
-            print("test_image.jpg not found. Using a dummy white image for detection testing.")
+            logger.warning("test_image.jpg not found. Using a dummy white image for detection testing.")
 
-        print("Attempting to identify items in the image...")
+        logger.info("Attempting to identify items in the image...")
         # Ensure model is loaded for the test
         if not DETECTOR_LOADED and object_detector_model is None:
             _load_detector_model()
@@ -197,30 +200,30 @@ if __name__ == '__main__':
             items_result = identify_items(test_img, confidence_threshold=0.2) # Lower threshold for dummy image
             if isinstance(items_result, list):
                 if items_result:
-                    print(f"Successfully identified items (first 3): {items_result[:3]}")
+                    logger.info(f"Successfully identified items (first 3): {items_result[:3]}")
                     for item in items_result:
-                        print(f"  - Label: {item['label']}, Confidence: {item['confidence']:.2f}")
+                        logger.info(f"  - Label: {item['label']}, Confidence: {item['confidence']:.2f}")
                     recommendations = get_basic_recommendations(items_result)
-                    print("Recommendations:")
+                    logger.info("Recommendations:")
                     for rec in recommendations:
-                        print(f"  - {rec}")
+                        logger.info(f"  - {rec}")
                 else:
-                    print("No items identified in the dummy image, which is expected.")
+                    logger.info("No items identified in the dummy image, which is expected.")
                     recommendations = get_basic_recommendations(items_result) # Test with empty list
-                    print("Recommendations (for no items):")
+                    logger.info("Recommendations (for no items):")
                     for rec in recommendations:
-                        print(f"  - {rec}")
+                        logger.info(f"  - {rec}")
 
             elif isinstance(items_result, str) and items_result.startswith("No items identified"):
-                print(items_result) # Expected for a blank image
+                logger.info(items_result) # Expected for a blank image
                 recommendations = get_basic_recommendations([])
-                print("Recommendations (for no items):")
+                logger.info("Recommendations (for no items):")
                 for rec in recommendations:
-                    print(f"  - {rec}")
+                    logger.info(f"  - {rec}")
             else: # Error string
-                print(f"Item identification failed: {items_result}")
+                logger.error(f"Item identification failed: {items_result}")
         else:
-            print("Skipping example usage as object detector model failed to load.")
+            logger.warning("Skipping example usage as object detector model failed to load.")
 
     except Exception as e:
-        print(f"Error in example usage: {e}")
+        logger.error(f"Error in example usage: {e}")

@@ -19,7 +19,9 @@ try:
     from sklearn.metrics.pairwise import cosine_similarity
     sentence_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 except ImportError:
-    print("Warning: sentence_transformers not available. Occasion matching will use fallback logic.")
+    import logging # Import here if not at top level already
+    logger = logging.getLogger(__name__)
+    logger.warning("sentence_transformers not available. Occasion matching will use fallback logic.")
     sentence_model = None
     cosine_similarity = None
 
@@ -42,15 +44,16 @@ def find_ai_matched_outfits_for_occasion(
     num_recommendations: int = 3,
     min_coherence_score: float = 0.4 # Minimum internal coherence for an outfit to be considered
 ) -> List[models.Outfit]:
+    logger = logging.getLogger(__name__) # Ensure logger is available
 
     if not sentence_model:
-        print("Sentence transformer model not loaded. Cannot perform AI matching.")
+        logger.warning("Sentence transformer model not loaded. Cannot perform AI matching.")
         return []
 
     try:
         occasion_embedding = sentence_model.encode(occasion_text)
     except Exception as e:
-        print(f"Error encoding occasion text: {e}")
+        logger.error(f"Error encoding occasion text: {e}")
         return []
 
     # Fetch user's outfits with their items eagerly loaded
@@ -135,7 +138,7 @@ def find_ai_matched_outfits_for_occasion(
     # Adding a secondary sort by coherence in case of tie in final_match_score, or just to favor more coherent ones slightly
     sorted_outfits = sorted(scored_outfits, key=lambda x: (x["score"], x["debug_coherence"]), reverse=True)
 
-    # print(f"Debug - Sorted Outfits: {[ (s['outfit_model'].name, s['score'], s['debug_occasion_sim'],s['debug_coherence']) for s in sorted_outfits[:5]]}")
+    # logger.debug(f"Sorted Outfits: {[ (s['outfit_model'].name, s['score'], s['debug_occasion_sim'],s['debug_coherence']) for s in sorted_outfits[:5]]}")
 
 
     return [s["outfit_model"] for s in sorted_outfits[:num_recommendations]]
@@ -170,8 +173,7 @@ async def recommend_outfits_for_occasion_service(
         try:
             recommendations.append(schemas.Outfit.model_validate(outfit_model))
         except Exception as e:
-            # Log this error, as it indicates a problem with Pydantic schema validation
-            print(f"Error validating outfit model {outfit_model.id} for schema: {e}")
+            logger.error(f"Error validating outfit model {outfit_model.id} for schema: {e}")
             # Optionally, skip this outfit or handle error
             continue
 
@@ -346,7 +348,7 @@ async def get_wardrobe_recommendations_service(
     #             if trend_item.category in missing_essentials and len(items_to_acquire_suggestions) < 3:
     #                 items_to_acquire_suggestions.append(f"Fashion Highlight: '{trend_item.name}' ({trend_item.category}) is currently trending. This could be a great addition!")
     # except Exception as e:
-    #     print(f"Could not fetch fashion trends for recommendations: {e}")
+    #     logger.error(f"Could not fetch fashion trends for recommendations: {e}")
 
     if not items_to_acquire_suggestions:
         items_to_acquire_suggestions.append("Your wardrobe essentials seem covered! Explore accessories to diversify your looks.")

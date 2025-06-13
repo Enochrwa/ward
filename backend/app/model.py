@@ -41,6 +41,8 @@ class WardrobeItem(Base):
     material = Column(String(255), nullable=True)
     season = Column(String(50), nullable=True, index=True) # e.g., Summer, Winter, All Seasons
     image_url = Column(String(2048), nullable=True)
+    ai_embedding = Column(JSON, nullable=True)
+    ai_dominant_colors = Column(JSON, nullable=True)
     _tags = Column("tags", Text, nullable=True) # Store as JSON string
     favorite = Column(Boolean, default=False)
     times_worn = Column(Integer, default=0)

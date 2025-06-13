@@ -1,9 +1,11 @@
 import httpx
 import os
 from typing import Optional, Dict
+import logging # Added for logging
 
 OPENWEATHERMAP_API_KEY = os.getenv("OPENWEATHERMAP_API_KEY")
 WEATHER_API_URL = "https://api.openweathermap.org/data/2.5/weather"
+logger = logging.getLogger(__name__) # Added logger
 
 async def get_weather_data(latitude: float, longitude: float) -> Optional[Dict]:
     """
@@ -11,7 +13,7 @@ async def get_weather_data(latitude: float, longitude: float) -> Optional[Dict]:
     """
     if not OPENWEATHERMAP_API_KEY:
         # Mock response if API key is not available
-        print("OPENWEATHERMAP_API_KEY not found. Using mocked weather data.") # Should be a logger in real app
+        logger.warning("OPENWEATHERMAP_API_KEY not found. Using mocked weather data.")
         if latitude == 10.0 and longitude == 10.0: # Cold weather mock
             return {"temperature_celsius": 5.0, "condition": "Snow"}
         elif latitude == 20.0 and longitude == 20.0: # Rainy weather mock
@@ -38,13 +40,13 @@ async def get_weather_data(latitude: float, longitude: float) -> Optional[Dict]:
                 "condition": data.get("weather", [{}])[0].get("main") # e.g., "Clear", "Rain"
             }
     except httpx.RequestError as e:
-        print(f"An error occurred while requesting weather data: {e}") # Logger
+        logger.error(f"An error occurred while requesting weather data: {e}")
         return None
     except httpx.HTTPStatusError as e:
-        print(f"Weather API returned an error: {e.response.status_code} - {e.response.text}") # Logger
+        logger.error(f"Weather API returned an error: {e.response.status_code} - {e.response.text}")
         return None
     except Exception as e:
-        print(f"An unexpected error occurred: {e}") # Logger
+        logger.error(f"An unexpected error occurred: {e}")
         return None
 
 # Example usage (optional, for direct testing of this file)
@@ -52,20 +54,20 @@ async def get_weather_data(latitude: float, longitude: float) -> Optional[Dict]:
 #     import asyncio
 #     async def main():
 #         # Mocked example
-#         print("Fetching mocked cold weather (10,10):")
+#         logger.info("Fetching mocked cold weather (10,10):")
 #         weather_mock_cold = await get_weather_data(latitude=10.0, longitude=10.0)
-#         print(weather_mock_cold)
+#         logger.info(weather_mock_cold)
 
-#         print("\nFetching mocked rainy weather (20,20):")
+#         logger.info("\nFetching mocked rainy weather (20,20):")
 #         weather_mock_rain = await get_weather_data(latitude=20.0, longitude=20.0)
-#         print(weather_mock_rain)
+#         logger.info(weather_mock_rain)
 
 #         # Real API example (if key is set)
 #         if OPENWEATHERMAP_API_KEY:
-#             print("\nFetching real weather data for London (51.5074, 0.1278):")
+#             logger.info("\nFetching real weather data for London (51.5074, 0.1278):")
 #             weather_real = await get_weather_data(latitude=51.5074, longitude=0.1278)
-#             print(weather_real)
+#             logger.info(weather_real)
 #         else:
-#             print("\nSkipping real API call example as OPENWEATHERMAP_API_KEY is not set.")
+#             logger.warning("\nSkipping real API call example as OPENWEATHERMAP_API_KEY is not set.")
 
 #     asyncio.run(main())

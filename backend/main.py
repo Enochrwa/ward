@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 import os
+import logging # Added for logging
 import tensorflow as tf
 from app.db import database
 from app.db.database import Base
@@ -21,6 +22,10 @@ from app.routers import (
     community,      # Added new community router
 )
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
+# Basic logging configuration
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
 Base.metadata.create_all(bind=database.engine) # This creates tables if they don't exist
 app = FastAPI()
 

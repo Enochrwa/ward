@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional
 from datetime import datetime
+import os # Added for file deletion
+import logging # Added for logging
 from sqlalchemy.orm import Session
 
 from .. import tables as schemas, models
@@ -12,6 +14,8 @@ router = APIRouter(
     tags=["Outfits"],
     responses={404: {"description": "Not found"}},
 )
+
+logger = logging.getLogger(__name__) # Added logger
 
 @router.post("/", response_model=schemas.Outfit, status_code=status.HTTP_201_CREATED)
 async def create_outfit(
@@ -116,6 +120,22 @@ async def delete_outfit(
 
     if db_outfit is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Outfit not found")
+
+    # Delete the image file if it exists
+    if db_outfit.image_url:
+        # Assuming image_url stores a relative path like /static/outfit_images/filename.ext
+        # Adjust WARDROBE_IMAGES_DIR or define OUTFIT_IMAGES_DIR if paths differ structurally
+        image_path_on_disk = db_outfit.image_url.lstrip("/") # Remove leading '/'
+        if os.path.exists(image_path_on_disk):
+            try:
+                os.remove(image_path_on_disk)
+            except FileNotFoundError:
+                logger.warning(f"Outfit image file not found: {image_path_on_disk}")
+            except Exception as e:
+                logger.error(f"Error deleting outfit image file {image_path_on_disk}: {e}")
+        else:
+            logger.warning(f"Outfit image path not found, but listed in DB: {image_path_on_disk}")
+
 
     # Many-to-many relationships like outfit.items are typically handled by SQLAlchemy
     # and do not require manual deletion of association table entries if cascade is set correctly

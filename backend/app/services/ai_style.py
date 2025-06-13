@@ -5,9 +5,11 @@ from PIL import Image
 import numpy as np
 from typing import List, Tuple
 import os
+import logging # Added for logging
 
 # DEMO_MODE can be set globally, e.g., via an environment variable or config file
 DEMO_MODE = os.getenv("AI_DEMO_MODE", "false").lower() == "true"
+logger = logging.getLogger(__name__) # Added logger
 
 def analyze_color_temperature(colors_hex: List[str]) -> str:
     """Analyze if colors are warm, cool, or neutral"""
@@ -148,7 +150,7 @@ def detect_style(image: Image.Image) -> str:
             return f"{primary_indicator} Style"
             
     except Exception as e:
-        print(f"Error in style detection: {e}")
+        logger.error(f"Error in style detection: {e}")
         return "Contemporary Casual"
 
 # Example usage (optional)
@@ -157,15 +159,18 @@ if __name__ == '__main__':
     try:
         # Create a dummy image for testing (not actually processed by the current placeholder)
         img = Image.new('RGB', (100, 100), color = 'blue')
-        print("Attempting to 'detect' style for a dummy image...")
+        logger.info("Attempting to 'detect' style for a dummy image...")
         style_result = detect_style(img)
-        print(f"Detected style: {style_result}")
+        logger.info(f"Detected style: {style_result}")
 
         # Test with demo mode
-        DEMO_MODE = True
-        print("Attempting to 'detect' style for a dummy image (DEMO_MODE=True)...")
-        style_result_demo = detect_style(img)
-        print(f"Detected style (Demo): {style_result_demo}")
+        DEMO_MODE = True # This will be module-level, so re-assigning here for test
+        logger.info("Attempting to 'detect' style for a dummy image (DEMO_MODE=True)...")
+        # To correctly test demo mode, the module level DEMO_MODE would need to be True
+        # or the function needs to accept it as a parameter.
+        # For this conversion, we assume the logger is desired regardless of DEMO_MODE state here.
+        style_result_demo = detect_style(img) # This will use the module-level DEMO_MODE
+        logger.info(f"Detected style (Demo): {style_result_demo}")
 
     except Exception as e:
-        print(f"Error in example usage: {e}")
+        logger.error(f"Error in example usage: {e}")

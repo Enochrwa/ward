@@ -4,10 +4,13 @@ from datetime import datetime
 import shutil
 import uuid
 import os
+import logging # Added for logging
+from PIL import Image
 from sqlalchemy.orm import Session
 
 from .. import tables as schemas
 from .. import model as models # Import models and schemas
+from ..services import ai_embedding, ai_services # Import AI services
 from ..security import get_current_user # get_current_user returns schemas.User
 from ..db.database import get_db
 
@@ -25,6 +28,11 @@ WARDROBE_IMAGES_DIR = os.path.join(STATIC_DIR, "wardrobe_images")
 # Create the directory if it doesn't exist. This should ideally be done at app startup.
 os.makedirs(WARDROBE_IMAGES_DIR, exist_ok=True)
 
+logger = logging.getLogger(__name__) # Added logger
+
+MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB
+ALLOWED_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp"]
+
 @router.post("/items/", response_model=schemas.WardrobeItem, status_code=status.HTTP_201_CREATED)
 async def create_wardrobe_item(
     item: schemas.WardrobeItemCreate = Depends(), # Use Depends for form data when file is also expected
@@ -33,9 +41,19 @@ async def create_wardrobe_item(
     current_user: schemas.User = Depends(get_current_user)
 ):
     item_data = item.model_dump() # Get data from the Pydantic model
+    item_data['ai_embedding'] = None
+    item_data['ai_dominant_colors'] = None
 
     # Handle image upload
     if image and image.filename:
+        if image.content_type not in ALLOWED_CONTENT_TYPES:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid image type. Allowed types: {ALLOWED_CONTENT_TYPES}")
+
+        img_bytes = await image.read()
+        await image.seek(0) # Reset cursor for saving
+        if len(img_bytes) > MAX_FILE_SIZE_BYTES:
+            raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail=f"Image too large. Max size: {MAX_FILE_SIZE_BYTES // (1024*1024)}MB")
+
         # Generate a unique filename
         unique_id = uuid.uuid4()
         extension = os.path.splitext(image.filename)[1]
@@ -45,10 +63,25 @@ async def create_wardrobe_item(
         try:
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
-            item_data['image_url'] = f"/{file_path}"  # Store relative path, e.g., /static/wardrobe_images/uuid.jpg
+            item_data['image_url'] = f"/{file_path}"  # Store relative path
+
+            # AI processing
+            pil_image = Image.open(file_path)
+            try:
+                embedding = ai_embedding.get_image_embedding(pil_image)
+                item_data['ai_embedding'] = embedding
+            except Exception as e:
+                logger.error(f"Error generating image embedding: {e}")
+                # Store None or handle as per specific requirement for embedding errors
+
+            try:
+                colors = ai_services.extract_colors(pil_image)
+                item_data['ai_dominant_colors'] = colors
+            except Exception as e:
+                logger.error(f"Error extracting dominant colors: {e}")
+
         except Exception as e:
-            # Log the error, potentially raise HTTPException or proceed without image
-            print(f"Error saving image: {e}") # Replace with proper logging
+            logger.error(f"Error saving image: {e}")
             item_data['image_url'] = item.image_url # Fallback to image_url from body if any
         finally:
             image.file.close()
@@ -59,7 +92,7 @@ async def create_wardrobe_item(
 
 
     db_item = models.WardrobeItem(
-        **item_data, # image_url is now part of item_data
+        **item_data, # image_url, ai_embedding, ai_dominant_colors are now part of item_data
         user_id=current_user.id,
         date_added=datetime.utcnow(),
         updated_at=datetime.utcnow(),
@@ -124,14 +157,22 @@ async def update_wardrobe_item(
     update_data = item_update.model_dump(exclude_unset=True)
 
     if image and image.filename: # A new image is being uploaded
-        # Optionally, delete the old image
+        if image.content_type not in ALLOWED_CONTENT_TYPES:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid image type. Allowed types: {ALLOWED_CONTENT_TYPES}")
+
+        img_bytes = await image.read()
+        await image.seek(0) # Reset cursor for saving
+        if len(img_bytes) > MAX_FILE_SIZE_BYTES:
+            raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail=f"Image too large. Max size: {MAX_FILE_SIZE_BYTES // (1024*1024)}MB")
+
+        # Optionally, delete the old image file if it exists
         if db_item.image_url:
-            old_image_path_on_disk = db_item.image_url.lstrip("/") # e.g., static/wardrobe_images/uuid.jpg
+            old_image_path_on_disk = db_item.image_url.lstrip("/")
             if os.path.exists(old_image_path_on_disk):
                 try:
                     os.remove(old_image_path_on_disk)
                 except Exception as e:
-                    print(f"Error deleting old image {old_image_path_on_disk}: {e}") # Replace with proper logging
+                    logger.error(f"Error deleting old image {old_image_path_on_disk}: {e}")
 
         # Save the new image
         unique_id = uuid.uuid4()
@@ -143,28 +184,48 @@ async def update_wardrobe_item(
             with open(new_file_path_on_disk, "wb") as buffer:
                 shutil.copyfileobj(image.file, buffer)
             update_data['image_url'] = f"/{new_file_path_on_disk}" # Update path for DB
+
+            # AI processing for the new image
+            pil_image = Image.open(new_file_path_on_disk)
+            try:
+                embedding = ai_embedding.get_image_embedding(pil_image)
+                update_data['ai_embedding'] = embedding
+            except Exception as e:
+                logger.error(f"Error generating image embedding for update: {e}")
+                update_data['ai_embedding'] = None
+
+            try:
+                colors = ai_services.extract_colors(pil_image)
+                update_data['ai_dominant_colors'] = colors
+            except Exception as e:
+                logger.error(f"Error extracting dominant colors for update: {e}")
+                update_data['ai_dominant_colors'] = None
         except Exception as e:
-            print(f"Error saving new image: {e}") # Replace with proper logging
-            # Decide if you want to proceed without updating image_url or raise error
+            logger.error(f"Error saving new image: {e}")
+            # If saving new image fails, we might want to revert image_url or handle error
+            # For now, if it fails here, image_url in update_data might not be set or be old
         finally:
             image.file.close()
 
     elif 'image_url' in update_data and update_data['image_url'] is None:
-        # If image_url is explicitly set to null in the request body (and no new image file uploaded)
+        # This case handles when 'image_url' is explicitly set to null in the request,
+        # meaning the user wants to remove the existing image without uploading a new one.
         if db_item.image_url:
             old_image_path_on_disk = db_item.image_url.lstrip("/")
             if os.path.exists(old_image_path_on_disk):
                 try:
                     os.remove(old_image_path_on_disk)
                 except Exception as e:
-                    print(f"Error deleting image {old_image_path_on_disk}: {e}") # Replace with proper logging
-        update_data['image_url'] = None # Ensure DB field is set to None
+                    logger.error(f"Error deleting image {old_image_path_on_disk}: {e}")
+        # Ensure AI fields are also cleared if the image is removed
+        update_data['ai_embedding'] = None
+        update_data['ai_dominant_colors'] = None
+    # If no new image is uploaded and image_url is not being set to None,
+    # then existing image_url, ai_embedding, and ai_dominant_colors on db_item remain unchanged
+    # unless explicitly part of item_update (which they are not for these fields).
 
     for key, value in update_data.items():
         setattr(db_item, key, value)
-
-    # The WardrobeItem model's @tags.setter handles JSON conversion.
-    # If 'tags' is in update_data, setattr will use the setter.
 
     db_item.updated_at = datetime.utcnow()
     db.commit()
@@ -181,6 +242,20 @@ async def delete_wardrobe_item(
 
     if db_item is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+
+    # Delete the image file if it exists
+    if db_item.image_url:
+        image_path_on_disk = db_item.image_url.lstrip("/")  # Remove leading '/'
+        if os.path.exists(image_path_on_disk):
+            try:
+                os.remove(image_path_on_disk)
+            except FileNotFoundError:
+                logger.warning(f"File not found: {image_path_on_disk}")
+            except Exception as e:
+                logger.error(f"Error deleting file {image_path_on_disk}: {e}")
+        else:
+            logger.warning(f"Image path not found, but listed in DB: {image_path_on_disk}")
+
 
     db.delete(db_item)
     db.commit()

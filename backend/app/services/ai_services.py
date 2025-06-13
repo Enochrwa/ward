@@ -10,6 +10,7 @@ import io
 import numpy as np
 from typing import List, Optional, Union, Any # Added Union, Any
 from sklearn.cluster import KMeans
+import logging # Added for logging
 
 from .. import tables as schemas # models import removed as it wasn't used directly here
 # Import new lightweight AI modules
@@ -20,8 +21,11 @@ from .ai_recommender import identify_items as lw_identify_items, get_basic_recom
 # --- Global Configuration ---
 # DEMO_MODE can be triggered by an environment variable for easier configuration
 DEMO_MODE = os.getenv("AI_DEMO_MODE", "false").lower() == "true"
+
+logger = logging.getLogger(__name__) # Added logger
+
 if DEMO_MODE:
-    print("AI Services are running in DEMO MODE.")
+    logger.info("AI Services are running in DEMO MODE.")
 
 # --- AI Functions ---
 
@@ -47,7 +51,7 @@ def extract_colors(image: Image.Image, num_colors=5) -> List[str]:
         if pixels.shape[0] < num_colors: # Not enough pixels for desired clusters
             # Fallback: return fewer colors or a default palette
             # For simplicity, returning a default if too few pixels
-            print(f"Warning: Not enough pixels to extract {num_colors} colors. Returning default.")
+            logger.warning(f"Not enough pixels to extract {num_colors} colors. Returning default.")
             return ["#FFFFFF", "#000000", "#CCCCCC"]
 
 
@@ -56,7 +60,7 @@ def extract_colors(image: Image.Image, num_colors=5) -> List[str]:
         hex_colors = [f"#{r:02x}{g:02x}{b:02x}" for r, g, b in dominant_colors]
         return hex_colors
     except Exception as e:
-        print(f"Error during color extraction: {e}")
+        logger.error(f"Error during color extraction: {e}")
         return ["#EAEAEA", "#B0B0B0", "#505050", "#202020", "#F0F0F0"] # Default palette on error
 
 # --- Main Service Function ---
@@ -76,7 +80,7 @@ async def analyze_outfit_image_service(
 
     # --- DEMO MODE ---
     if DEMO_MODE:
-        print(f"DEMO MODE: Analyzing {file.filename}")
+        logger.info(f"DEMO MODE: Analyzing {file.filename}")
         # Static data for demo mode
         demo_style = "Demo: Chic Casual"
         demo_colors = ["#FFD700", "#4682B4", "#32CD32", "#FF69B4", "#FFFFFF"]
@@ -110,7 +114,7 @@ async def analyze_outfit_image_service(
         )
 
     # --- REGULAR (Lightweight Models) MODE ---
-    print(f"Lightweight AI: Analyzing {file.filename}")
+    logger.info(f"Lightweight AI: Analyzing {file.filename}")
     # 1. Extract Image Embedding (returns List[float] or error string)
     # Not directly in OutfitAnalysisResponse, but could be logged or stored.
     image_embedding_result = get_image_embedding(image.copy())

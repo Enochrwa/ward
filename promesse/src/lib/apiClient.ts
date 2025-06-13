@@ -36,9 +36,12 @@ const apiClient = async (endpoint: string, options: RequestOptions = {}) => {
     body: (body && headers['Content-Type'] === 'application/json') ? JSON.stringify(body) : body,
   };
 
+  // Determine the base URL
+  const VITE_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || '';
+  const finalApiUrl = VITE_BASE_URL ? `${VITE_BASE_URL}/api${endpoint}` : `/api${endpoint}`;
+
   try {
-    // Assuming all backend API routes are prefixed with /api
-    const response = await fetch(`/api${endpoint}`, config);
+    const response = await fetch(finalApiUrl, config);
 
     if (response.status === 204) { // Handle No Content responses
       return null;

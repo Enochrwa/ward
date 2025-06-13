@@ -1,284 +1,254 @@
-import React, { useState } from 'react';
-import { Calendar, Plus, Sparkles, Eye, Save, X, Zap, Star, MapPin, Cloud, Sun, CloudRain } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { Calendar, Sparkles, Eye, Save, X, PackageOpen, AlertTriangle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { apiClient } from '@/lib/apiClient';
+import { useAuth } from '@/hooks/useAuth';
+import { LoadingSpinner } from '@/components/ui/loading'; // Assuming this exists
+
+// Simplified WardrobeItem type for this component's props
+export interface WardrobeItem {
+  id: number; // Or string, depending on your backend
+  name: string;
+  image_url?: string;
+  // Add other relevant fields if needed for display or logic within this modal
+}
 
 export interface PlanWeekModalProps {
   isOpen: boolean;
   onClose: () => void;
+  wardrobeItems: WardrobeItem[]; // Pass wardrobe items as a prop
 }
 
-interface WeatherData {
-  temp: string;
-  condition: string;
-  icon: React.ReactNode;
-}
-
-interface OutfitItem {
-  id: string;
+// Matches backend WeeklyPlanCreate Pydantic schema
+interface WeeklyPlanCreate {
   name: string;
-  image: string;
-  value: number;
-  category: string;
+  start_date: string; // ISO date string "YYYY-MM-DD"
+  end_date: string;   // ISO date string "YYYY-MM-DD"
+  daily_outfits: Record<string, number | null>; // day_name (e.g. "monday") -> outfit_id
 }
 
-interface DayOutfit {
-  outerwear?: OutfitItem;
-  top: OutfitItem;
-  bottom: OutfitItem;
-  shoes: OutfitItem;
-  accessories: OutfitItem[];
-}
+// Expected response from AI plan generation
+type AIPlanResponse = Record<string, number | null>; // day_name -> outfit_id
 
-interface DayPlan {
-  event: string;
-  weather: WeatherData;
-  outfit: DayOutfit;
-  totalValue: number;
-  confidence: number;
-}
 
-interface WeekPlan {
-  [key: string]: DayPlan;
-}
+const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const dayKeys = daysOfWeek.map(day => day.toLowerCase());
 
-const PlanWeekModal = ({ isOpen, onClose }: PlanWeekModalProps) => {
+
+const PlanWeekModal = ({ isOpen, onClose, wardrobeItems }: PlanWeekModalProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [weekOf, setWeekOf] = useState(new Date().toISOString().split('T')[0]);
-  const [weekPlan, setWeekPlan] = useState<WeekPlan>({});
+
+  // weekPlan now stores outfit IDs per day
+  const [weekPlan, setWeekPlan] = useState<Record<string, number | null>>({});
+
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [isLoadingAiPlan, setIsLoadingAiPlan] = useState(false);
+  const [isSavingPlan, setIsSavingPlan] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
   const { toast } = useToast();
+  const { token } = useAuth();
 
-  // Mock wardrobe items
-  const wardrobeItems: OutfitItem[] = [
-    { id: '1', name: 'Navy Blazer', image: '/api/placeholder/150/150', value: 200, category: 'outerwear' },
-    { id: '2', name: 'White Shirt', image: '/api/placeholder/150/150', value: 50, category: 'top' },
-    { id: '3', name: 'Black Trousers', image: '/api/placeholder/150/150', value: 80, category: 'bottom' },
-    { id: '4', name: 'Leather Shoes', image: '/api/placeholder/150/150', value: 150, category: 'shoes' },
-    { id: '5', name: 'Purple Watch', image: '/api/placeholder/150/150', value: 300, category: 'accessories' },
-    { id: '6', name: 'Silk Dress', image: '/api/placeholder/150/150', value: 180, category: 'top' },
-    { id: '7', name: 'Denim Jacket', image: '/api/placeholder/150/150', value: 90, category: 'outerwear' },
-    { id: '8', name: 'Sneakers', image: '/api/placeholder/150/150', value: 120, category: 'shoes' }
-  ];
+  const VITE_BASE_URL = import.meta.env.VITE_BASE_URL || '';
 
-  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  const getWeatherIcon = (condition: string) => {
-    switch (condition.toLowerCase()) {
-      case 'sunny': return <Sun className="w-3 h-3 xs:w-4 xs:h-4 text-purple-500" />;
-      case 'cloudy': return <Cloud className="w-3 h-3 xs:w-4 xs:h-4 text-gray-500" />;
-      case 'rainy': return <CloudRain className="w-3 h-3 xs:w-4 xs:h-4 text-blue-500" />;
-      default: return <Sun className="w-3 h-3 xs:w-4 xs:h-4 text-purple-500" />;
+  const handleGenerateAIPlan = useCallback(async () => {
+    if (!token) {
+      toast({ title: "Authentication Error", description: "Please log in to generate a plan.", variant: "destructive" });
+      return;
+    }
+    setIsLoadingAiPlan(true);
+    setAiError(null);
+    try {
+      // const response = await apiClient<AIPlanResponse>('/weekly-plans/generate-ai-plan', {
+      //   method: 'POST',
+      //   token,
+      //   body: JSON.stringify({ start_date: weekOf }),
+      // });
+      // setWeekPlan(response || {});
+      // setCurrentStep(2);
+
+      // TEMP: Simulating AI response until endpoint is ready
+      // This creates a plan with null outfit IDs, user has to fill them manually.
+      // Or, if you have outfit IDs from wardrobeItems, you could randomly assign a few.
+      console.warn("AI Plan Generation: Using placeholder. Integrate with actual /api/weekly-plans/generate-ai-plan");
+      const placeholderPlan: AIPlanResponse = dayKeys.reduce((acc, day) => {
+        acc[day] = null; // Or pick a random outfit ID from wardrobeItems if available and desired
+        return acc;
+      }, {} as AIPlanResponse);
+      setWeekPlan(placeholderPlan);
+      // Example: assign first outfit to Monday if wardrobeItems exist
+      // if (wardrobeItems.length > 0 && placeholderPlan.monday === null) {
+      //    const firstOutfitCandidate = wardrobeItems.find(item => item.category === 'outfit'); // This assumes wardrobeItems can be outfits
+      //    if(firstOutfitCandidate) placeholderPlan.monday = firstOutfitCandidate.id;
+      // }
+      setCurrentStep(2);
+      toast({ title: "Manual Plan Created", description: "AI endpoint placeholder: Please assign outfits manually.", variant: "default" });
+
+
+    } catch (error: any) {
+      console.error("AI Plan Generation Error:", error);
+      setAiError(error.message || "Failed to generate AI plan. Please try creating a blank plan or try again later.");
+      toast({ title: "AI Plan Error", description: error.message || "Could not generate plan.", variant: "destructive" });
+    } finally {
+      setIsLoadingAiPlan(false);
+    }
+  }, [token, weekOf, toast/*, wardrobeItems*/]); // Add wardrobeItems if used in placeholder
+
+  const createBlankPlan = () => {
+    const blankPlan: Record<string, number | null> = dayKeys.reduce((acc, day) => {
+      acc[day.toLowerCase()] = null;
+      return acc;
+    }, {});
+    setWeekPlan(blankPlan);
+    setCurrentStep(2);
+    toast({ title: "Blank Plan Created", description: "You can now assign outfits to each day.", variant: "default"});
+  };
+
+
+  const saveWeeklyPlan = async () => {
+    if (!token) {
+      toast({ title: "Authentication Error", description: "Please log in to save the plan.", variant: "destructive" });
+      return;
+    }
+    setIsSavingPlan(true);
+
+    const startDate = new Date(weekOf);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+
+    const planToSave: WeeklyPlanCreate = {
+      name: `Plan for week of ${startDate.toLocaleDateString()}`,
+      start_date: weekOf,
+      end_date: endDate.toISOString().split('T')[0],
+      daily_outfits: weekPlan,
+    };
+
+    try {
+      await apiClient('/weekly-plans/', {
+        method: 'POST',
+        token,
+        body: JSON.stringify(planToSave),
+      });
+      toast({
+        title: "Weekly Plan Saved!",
+        description: "Your outfit schedule has been saved successfully.",
+        variant: "success",
+      });
+      onClose(); // Close modal on successful save
+      // Optionally reset state here if modal can be reopened without remounting
+      setCurrentStep(1);
+      setWeekPlan({});
+      setWeekOf(new Date().toISOString().split('T')[0]);
+    } catch (error: any) {
+      console.error("Save Weekly Plan Error:", error);
+      toast({
+        title: "Error Saving Plan",
+        description: error.message || "Could not save the plan.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingPlan(false);
     }
   };
 
-  const generateRecommendations = () => {
-    const events = ['Work Meeting', 'Casual Day', 'Date Night', 'Business Lunch', 'Weekend Outing', 'Formal Event', 'Gym Session'];
-    const weathers: WeatherData[] = [
-      { temp: '22°C', condition: 'Sunny', icon: getWeatherIcon('sunny') },
-      { temp: '18°C', condition: 'Cloudy', icon: getWeatherIcon('cloudy') },
-      { temp: '15°C', condition: 'Rainy', icon: getWeatherIcon('rainy') }
-    ];
+  // Simplified: Renders outfit ID or a placeholder.
+  // Needs wardrobeItems prop to find and display outfit image/name.
+  const renderOutfitPreview = (outfitId: number | null, dayKey: string) => {
+    // This is tricky: weekly plan stores outfit_id, but wardrobeItems are individual items.
+    // For a proper preview, you'd need a list of all user *Outfits* (not just WardrobeItems)
+    // and then find the outfit by outfitId.
+    // For now, we'll just show the ID or a placeholder if we can't find a matching item.
+    // This part highlights a potential mismatch if `wardrobeItems` is just clothing items
+    // and not pre-defined outfits.
 
-    const newWeekPlan: WeekPlan = {};
+    // Placeholder logic: try to find an item (if wardrobeItems were outfits)
+    // const outfitDetails = wardrobeItems.find(item => item.id === outfitId && item.category === 'outfit'); // Requires outfits in wardrobeItems
 
-    daysOfWeek.forEach((day, index) => {
-      const event = events[index % events.length];
-      const weather = weathers[index % weathers.length];
-      
-      // Smart outfit selection based on event and weather
-      let selectedItems: DayOutfit;
-      
-      if (event.includes('Work') || event.includes('Business')) {
-        selectedItems = {
-          outerwear: wardrobeItems.find(item => item.name.includes('Blazer')),
-          top: wardrobeItems.find(item => item.name.includes('Shirt'))!,
-          bottom: wardrobeItems.find(item => item.name.includes('Trousers'))!,
-          shoes: wardrobeItems.find(item => item.name.includes('Leather'))!,
-          accessories: [wardrobeItems.find(item => item.name.includes('Watch'))!]
-        };
-      } else if (event.includes('Casual') || event.includes('Weekend')) {
-        selectedItems = {
-          outerwear: wardrobeItems.find(item => item.name.includes('Denim')),
-          top: wardrobeItems.find(item => item.name.includes('Shirt'))!,
-          bottom: wardrobeItems.find(item => item.name.includes('Trousers'))!,
-          shoes: wardrobeItems.find(item => item.name.includes('Sneakers'))!,
-          accessories: []
-        };
-      } else {
-        selectedItems = {
-          top: wardrobeItems.find(item => item.name.includes('Dress'))!,
-          bottom: wardrobeItems.find(item => item.name.includes('Trousers'))!,
-          shoes: wardrobeItems.find(item => item.name.includes('Leather'))!,
-          accessories: [wardrobeItems.find(item => item.name.includes('Watch'))!]
-        };
-      }
+    if (outfitId === null) {
+      return (
+        <div className="text-xs text-gray-500 dark:text-gray-400 italic text-center py-4">
+          No outfit assigned
+        </div>
+      );
+    }
 
-      // Calculate total value
-      const totalValue = [
-        selectedItems.outerwear?.value || 0,
-        selectedItems.top?.value || 0,
-        selectedItems.bottom?.value || 0,
-        selectedItems.shoes?.value || 0,
-        ...(selectedItems.accessories?.map(acc => acc.value) || [])
-      ].reduce((sum, val) => sum + val, 0);
-
-      newWeekPlan[day] = {
-        event,
-        weather,
-        outfit: selectedItems,
-        totalValue,
-        confidence: Math.floor(Math.random() * 20) + 80 // 80-100% confidence
-      };
-    });
-
-    setWeekPlan(newWeekPlan);
-    setCurrentStep(2);
-  };
-
-  const saveWeeklyPlan = () => {
-    const savedPlans = JSON.parse(localStorage.getItem('weeklyPlans') || '[]');
-    const newPlan = {
-      weekOf,
-      plan: weekPlan,
-      createdAt: new Date().toISOString()
-    };
-    
-    savedPlans.push(newPlan);
-    localStorage.setItem('weeklyPlans', JSON.stringify(savedPlans));
-    
-    toast({
-      title: "Weekly Plan Saved!",
-      description: "Your outfit schedule has been saved successfully.",
-    });
-    
-    onClose();
-  };
-
-  const renderOutfitPreview = (outfit: DayOutfit) => {
-    const allItems = [
-      outfit.outerwear,
-      outfit.top,
-      outfit.bottom,
-      outfit.shoes,
-      ...(outfit.accessories || [])
-    ].filter(Boolean) as OutfitItem[];
+    // If we had outfit details (e.g. from a prop `userOutfits: Outfit[]`)
+    // const outfitDetails = userOutfits.find(o => o.id === outfitId);
+    // if (outfitDetails && outfitDetails.image_url) {
+    //   return <img src={outfitDetails.image_url} alt={outfitDetails.name} className="w-full h-20 object-cover rounded" />;
+    // }
 
     return (
-      <div className="grid grid-cols-3 gap-1 xs:gap-2">
-        {allItems.slice(0, 6).map((item, index) => (
-          <div key={index} className="relative group">
-            <img 
-              src={item.image} 
-              alt={item.name}
-              className="w-full h-12 xs:h-16 object-cover rounded border-2 border-white shadow-sm"
-            />
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
-              <span className="text-white text-xs font-medium text-center px-1">
-                {item.name}
-              </span>
-            </div>
-          </div>
-        ))}
+      <div className="text-center py-4">
+        <PackageOpen size={24} className="mx-auto text-gray-400 mb-1" />
+        <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Outfit ID: {outfitId}</p>
+        <Button variant="link" size="xs" className="text-xs mt-1" onClick={() => {/* TODO: Open outfit selection for this day */}}>
+          Change
+        </Button>
       </div>
     );
   };
 
-  const renderDetailedOutfit = (outfit: DayOutfit) => {
-    return (
-      <div className="space-y-2 xs:space-y-4">
-        {outfit.outerwear && (
-          <div className="flex items-center gap-2 xs:gap-3 p-2 xs:p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-            <img src={outfit.outerwear.image} alt={outfit.outerwear.name} className="w-8 h-8 xs:w-12 xs:h-12 object-cover rounded" />
-            <div>
-              <h4 className="font-medium text-purple-800 dark:text-purple-200 text-xs xs:text-sm">{outfit.outerwear.name}</h4>
-              <p className="text-xs text-purple-600 dark:text-purple-300">${outfit.outerwear.value}</p>
-            </div>
-          </div>
-        )}
-        
-        <div className="flex items-center gap-2 xs:gap-3 p-2 xs:p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <img src={outfit.top.image} alt={outfit.top.name} className="w-8 h-8 xs:w-12 xs:h-12 object-cover rounded" />
-          <div>
-            <h4 className="font-medium text-blue-800 dark:text-blue-200 text-xs xs:text-sm">{outfit.top.name}</h4>
-            <p className="text-xs text-blue-600 dark:text-blue-300">${outfit.top.value}</p>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-2 xs:gap-3 p-2 xs:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-          <img src={outfit.bottom.image} alt={outfit.bottom.name} className="w-8 h-8 xs:w-12 xs:h-12 object-cover rounded" />
-          <div>
-            <h4 className="font-medium text-green-800 dark:text-green-200 text-xs xs:text-sm">{outfit.bottom.name}</h4>
-            <p className="text-xs text-green-600 dark:text-green-300">${outfit.bottom.value}</p>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-2 xs:gap-3 p-2 xs:p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-          <img src={outfit.shoes.image} alt={outfit.shoes.name} className="w-8 h-8 xs:w-12 xs:h-12 object-cover rounded" />
-          <div>
-            <h4 className="font-medium text-orange-800 dark:text-orange-200 text-xs xs:text-sm">{outfit.shoes.name}</h4>
-            <p className="text-xs text-orange-600 dark:text-orange-300">${outfit.shoes.value}</p>
-          </div>
-        </div>
-
-        {outfit.accessories && outfit.accessories.length > 0 && (
-          <div className="space-y-1 xs:space-y-2">
-            <h4 className="font-medium text-gray-700 dark:text-gray-300 text-xs xs:text-sm">Accessories</h4>
-            {outfit.accessories.map((accessory, index) => (
-              <div key={index} className="flex items-center gap-2 xs:gap-3 p-2 xs:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <img src={accessory.image} alt={accessory.name} className="w-8 h-8 xs:w-12 xs:h-12 object-cover rounded" />
-                <div>
-                  <h5 className="font-medium text-gray-800 dark:text-gray-200 text-xs xs:text-sm">{accessory.name}</h5>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">${accessory.value}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 xs:p-3 sm:p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl xs:rounded-3xl w-full max-w-xs xs:max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-6xl max-h-[95vh] xs:max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl xs:rounded-3xl w-full max-w-xs xs:max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-6xl max-h-[95vh] xs:max-h-[90vh] flex flex-col">
         <div className="p-3 xs:p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <div>
             <h2 className="text-lg xs:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Plan Your Week</h2>
-            <p className="text-xs xs:text-sm text-gray-600 dark:text-gray-400">AI-powered outfit recommendations for the entire week</p>
+            <p className="text-xs xs:text-sm text-gray-600 dark:text-gray-400">Create or generate an outfit schedule.</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose} className="p-1 xs:p-2">
-            <X size={16} className="xs:w-5 xs:h-5" />
+          <Button variant="ghost" size="icon" onClick={onClose} className="p-1 xs:p-2" aria-label="Close plan week modal">
+            <X size={20} className="xs:w-5 xs:h-5" />
           </Button>
         </div>
 
-        <div className="p-3 xs:p-4 sm:p-6">
+        <div className="p-3 xs:p-4 sm:p-6 flex-grow overflow-y-auto">
           {currentStep === 1 && (
             <div className="space-y-4 xs:space-y-6">
               <div>
-                <label className="block text-xs xs:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 xs:mb-2">
+                <label htmlFor="weekStartDate" className="block text-xs xs:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 xs:mb-2">
                   Week Starting
                 </label>
                 <input
                   type="date"
+                  id="weekStartDate"
                   value={weekOf}
                   onChange={(e) => setWeekOf(e.target.value)}
-                  className="w-full p-2 xs:p-3 text-sm xs:text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white h-10 xs:h-11"
+                  className="w-full p-2 xs:p-3 text-sm xs:text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white h-10 xs:h-11 focus:ring-owis-purple focus:border-owis-purple"
                 />
               </div>
 
-              <div className="text-center">
-                <Button
-                  onClick={generateRecommendations}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 xs:px-8 py-2 xs:py-3 rounded-xl text-sm xs:text-base h-10 xs:h-12"
+              <div className="text-center space-y-3">
+                 <Button
+                  onClick={handleGenerateAIPlan}
+                  disabled={isLoadingAiPlan}
+                  className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 xs:px-8 py-2 xs:py-3 rounded-xl text-sm xs:text-base h-10 xs:h-12"
                 >
-                  <Sparkles className="w-4 h-4 xs:w-5 xs:h-5 mr-1 xs:mr-2" />
+                  {isLoadingAiPlan ? <LoadingSpinner size={20} className="mr-2" /> : <Sparkles className="w-4 h-4 xs:w-5 xs:h-5 mr-1 xs:mr-2" />}
                   Generate AI Recommendations
                 </Button>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Alternatively</p>
+                 <Button
+                  onClick={createBlankPlan}
+                  variant="outline"
+                  className="w-full sm:w-auto text-sm xs:text-base h-10 xs:h-12"
+                >
+                  Create Blank Plan
+                </Button>
               </div>
+              {aiError && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-md text-center">
+                    <AlertTriangle className="w-5 h-5 text-red-500 mx-auto mb-1" />
+                    <p className="text-xs text-red-600 dark:text-red-400">{aiError}</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -286,160 +256,71 @@ const PlanWeekModal = ({ isOpen, onClose }: PlanWeekModalProps) => {
             <div className="space-y-4 xs:space-y-6">
               <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 xs:gap-0">
                 <h3 className="text-lg xs:text-xl font-semibold text-gray-900 dark:text-white">
-                  Week of {new Date(weekOf).toLocaleDateString()}
+                  Week of {new Date(weekOf).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
                 </h3>
                 <div className="flex gap-2 w-full xs:w-auto">
-                  <Button variant="outline" onClick={() => setCurrentStep(1)} className="flex-1 xs:flex-none text-xs xs:text-sm h-8 xs:h-9">
+                  <Button variant="outline" onClick={() => { setCurrentStep(1); setAiError(null); /* Do not clear weekPlan */ }} className="flex-1 xs:flex-none text-xs xs:text-sm h-8 xs:h-9">
                     Back
                   </Button>
-                  <Button onClick={saveWeeklyPlan} className="flex-1 xs:flex-none bg-green-600 hover:bg-green-700 text-white text-xs xs:text-sm h-8 xs:h-9">
-                    <Save className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />
+                  <Button
+                    onClick={saveWeeklyPlan}
+                    disabled={isSavingPlan}
+                    className="flex-1 xs:flex-none bg-green-600 hover:bg-green-700 text-white text-xs xs:text-sm h-8 xs:h-9"
+                  >
+                    {isSavingPlan ? <LoadingSpinner size={16} className="mr-2" /> : <Save className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />}
                     Save Plan
                   </Button>
                 </div>
               </div>
 
-              {/* Week Overview */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 xs:gap-3 sm:gap-4">
-                {daysOfWeek.map((day) => {
-                  const dayPlan = weekPlan[day];
-                  if (!dayPlan) return null;
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 xs:gap-3 sm:gap-4">
+                {daysOfWeek.map((dayName) => {
+                  const dayKey = dayName.toLowerCase();
+                  const outfitId = weekPlan[dayKey];
+                  // Calculate actual date for the day card
+                  const planStartDate = new Date(weekOf);
+                  const dayIndex = daysOfWeek.findIndex(d => d.toLowerCase() === dayKey);
+                  const currentDate = new Date(planStartDate);
+                  currentDate.setDate(planStartDate.getDate() + dayIndex);
+                  const displayDate = currentDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
 
                   return (
                     <Card 
-                      key={day} 
-                      className={`cursor-pointer transition-all hover:shadow-lg ${
-                        selectedDay === day ? 'ring-2 ring-blue-500' : ''
+                      key={dayKey}
+                      className={`transition-all hover:shadow-lg dark:border-gray-700 ${
+                        selectedDay === dayKey ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''
                       }`}
-                      onClick={() => setSelectedDay(selectedDay === day ? null : day)}
+                      // onClick={() => setSelectedDay(selectedDay === dayKey ? null : dayKey)} // Simplified, no detailed view for now
                     >
                       <CardHeader className="pb-2 xs:pb-3 p-2 xs:p-4">
                         <div className="flex items-center justify-between">
-                          <CardTitle className="text-sm xs:text-lg">{day}</CardTitle>
-                          <Button size="sm" variant="ghost" className="p-1">
-                            <Eye size={12} className="xs:w-4 xs:h-4" />
-                          </Button>
-                        </div>
-                        <div className="flex items-center gap-1 xs:gap-2 text-xs text-gray-600 dark:text-gray-400">
-                          {dayPlan.weather.icon}
-                          <span>{dayPlan.weather.temp}</span>
-                          <span>•</span>
-                          <span>{dayPlan.weather.condition}</span>
+                          <CardTitle className="text-sm xs:text-base capitalize">{dayName}</CardTitle>
+                           <span className="text-xs text-gray-500 dark:text-gray-400">{displayDate}</span>
+                          {/* <Button size="icon" variant="ghost" className="p-1 h-7 w-7" onClick={() => setSelectedDay(selectedDay === dayKey ? null : dayKey)}>
+                            <Eye size={14} className="xs:w-4 xs:h-4" />
+                          </Button> */}
                         </div>
                       </CardHeader>
                       
-                      <CardContent className="space-y-2 xs:space-y-3 p-2 xs:p-4 pt-0">
-                        <div>
-                          <div className="flex items-center gap-1 xs:gap-2 mb-1 xs:mb-2">
-                            <MapPin size={10} className="xs:w-3 xs:h-3 text-gray-500" />
-                            <span className="text-xs font-medium text-gray-900 dark:text-white">
-                              {dayPlan.event}
-                            </span>
-                          </div>
-                          
-                          {renderOutfitPreview(dayPlan.outfit)}
-                        </div>
-                        
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-1">
-                            <Star size={10} className="xs:w-3 xs:h-3 text-purple-500" />
-                            <span className="text-gray-600 dark:text-gray-400">
-                              {dayPlan.confidence}%
-                            </span>
-                          </div>
-                          <div className="font-semibold text-green-600">
-                            ${dayPlan.totalValue.toFixed(0)}
-                          </div>
-                        </div>
+                      <CardContent className="p-2 xs:p-4 pt-0">
+                        {renderOutfitPreview(outfitId, dayKey)}
+                        {/* Add button to assign/change outfit */}
+                        {/* <Button variant="outline" size="xs" className="w-full mt-2 text-xs" onClick={() => { console.log(`Change outfit for ${dayKey}`)}}>
+                           {outfitId ? 'Change Outfit' : 'Assign Outfit'}
+                        </Button> */}
                       </CardContent>
                     </Card>
                   );
                 })}
               </div>
-
-              {/* Detailed View - Responsive for small screens */}
-              {selectedDay && weekPlan[selectedDay] && (
-                <Card className="mt-4 xs:mt-6">
-                  <CardHeader className="p-3 xs:p-6">
-                    <CardTitle className="flex items-center gap-1 xs:gap-2 text-sm xs:text-lg">
-                      <Calendar size={16} className="xs:w-5 xs:h-5" />
-                      {selectedDay} - Detailed Outfit
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3 xs:p-6 pt-0">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 xs:gap-6">
-                      <div>
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-2 xs:mb-3 text-sm xs:text-base">Event & Weather</h4>
-                        <div className="space-y-1 xs:space-y-2">
-                          <div className="flex items-center gap-1 xs:gap-2 text-xs xs:text-sm">
-                            <MapPin size={12} className="xs:w-4 xs:h-4 text-blue-500" />
-                            <span>{weekPlan[selectedDay].event}</span>
-                          </div>
-                          <div className="flex items-center gap-1 xs:gap-2 text-xs xs:text-sm">
-                            {weekPlan[selectedDay].weather.icon}
-                            <span>{weekPlan[selectedDay].weather.temp} • {weekPlan[selectedDay].weather.condition}</span>
-                          </div>
-                          <div className="flex items-center gap-1 xs:gap-2 text-xs xs:text-sm">
-                            <Star size={12} className="xs:w-4 xs:h-4 text-purple-500" />
-                            <span>{weekPlan[selectedDay].confidence}% Style Match</span>
-                          </div>
-                          <div className="flex items-center gap-1 xs:gap-2 text-xs xs:text-sm">
-                            <Zap size={12} className="xs:w-4 xs:h-4 text-green-500" />
-                            <span>Total Value: ${weekPlan[selectedDay].totalValue.toFixed(0)}</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-2 xs:mb-3 text-sm xs:text-base">Outfit Details</h4>
-                        {renderDetailedOutfit(weekPlan[selectedDay].outfit)}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Weekly Summary - Mobile responsive */}
-              <Card>
-                <CardHeader className="p-3 xs:p-6">
-                  <CardTitle className="text-sm xs:text-lg">Weekly Summary</CardTitle>
-                </CardHeader>
-                <CardContent className="p-3 xs:p-6 pt-0">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 xs:gap-4">
-                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 xs:p-4 text-center">
-                      <div className="text-lg xs:text-2xl font-bold text-blue-600">
-                        {Object.values(weekPlan).reduce((sum, day) => sum + day.totalValue, 0).toFixed(0)}
-                      </div>
-                      <div className="text-xs text-blue-700 dark:text-blue-300">Total Value</div>
-                    </div>
-                    <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2 xs:p-4 text-center">
-                      <div className="text-lg xs:text-2xl font-bold text-green-600">
-                        {Math.round(Object.values(weekPlan).reduce((sum, day) => sum + day.confidence, 0) / Object.values(weekPlan).length)}%
-                      </div>
-                      <div className="text-xs text-green-700 dark:text-green-300">Avg Match</div>
-                    </div>
-                    <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-2 xs:p-4 text-center">
-                      <div className="text-lg xs:text-2xl font-bold text-purple-600">
-                        {Object.values(weekPlan).reduce((sum, day) => {
-                          const outfitItems = [
-                            day.outfit.outerwear,
-                            day.outfit.top,
-                            day.outfit.bottom,
-                            day.outfit.shoes,
-                            ...(day.outfit.accessories || [])
-                          ].filter(Boolean);
-                          return sum + outfitItems.length;
-                        }, 0)}
-                      </div>
-                      <div className="text-xs text-purple-700 dark:text-purple-300">Total Items</div>
-                    </div>
-                    <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-2 xs:p-4 text-center">
-                      <div className="text-lg xs:text-2xl font-bold text-orange-600">7</div>
-                      <div className="text-xs text-orange-700 dark:text-orange-300">Days Planned</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg text-center">
+                    <Info size={18} className="inline mr-2 text-gray-600 dark:text-gray-400" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400 inline">
+                        Outfit assignment per day is a planned feature. Currently, the AI generates a basic plan structure.
+                    </p>
+                </div>
+              {/* Simplified: Removed detailed view and weekly summary as they relied on mock data structure */}
             </div>
           )}
         </div>

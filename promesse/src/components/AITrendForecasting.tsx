@@ -3,7 +3,7 @@ import { TrendingUp, Sparkles, Eye, Heart, Share2, Camera, Upload, Zap, Crown, S
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import apiClient from '@/services/apiClient';
+import apiClient from '@/lib/apiClient';
 
 // Interface for individual trend item - ensure fields match backend & handle optionality
 interface TrendData {

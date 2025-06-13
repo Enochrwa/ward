@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Calendar, Cloud, Star, Sparkles, Wand2, Heart, TrendingUp, Palette, Sun, Snowflake, Eye, Users, Loader2, ImageOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import apiClient from '@/services/apiClient';
+import apiClient from '@/lib/apiClient';
 
 // Matches backend schemas.EventDetailsInput
 interface EventDetailsInputPayload {

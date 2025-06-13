@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship, sessionmaker
 #from sqlalchemy.ext.declarative import declarative_base # Base is imported, declarative_base not directly used
 from datetime import datetime
 #import json # SQLAlchemy's JSON type handles serialization
-
+import json
 from .db.database import Base # Import Base from the new database.py
 
 # Association table for Outfit and WardrobeItem (many-to-many)
@@ -24,6 +24,7 @@ class User(Base):
     wardrobe_items = relationship("WardrobeItem", back_populates="owner")
     outfits = relationship("Outfit", back_populates="owner")
     weekly_plans = relationship("WeeklyPlan", back_populates="owner")
+    feedbacks = relationship("Feedback", back_populates="commenter")  # or 'user'
     occasions = relationship("Occasion", back_populates="owner")
     style_history_entries = relationship("StyleHistory", back_populates="user")
     profile = relationship("UserProfile", uselist=False, back_populates="owner", cascade="all, delete-orphan")
@@ -79,7 +80,7 @@ class Outfit(Base):
     style_history_entries = relationship("StyleHistory", back_populates="outfit_worn")
     occasions_linked = relationship("Occasion", back_populates="outfit_assigned") # An outfit can be assigned to multiple occasions
     weekly_plan_days = relationship("WeeklyPlanDayOutfit", back_populates="outfit")
-
+    feedbacks = relationship("Feedback", back_populates="outfit")
 
     @property
     def tags(self):
@@ -170,7 +171,8 @@ class Feedback(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     outfit = relationship("Outfit", back_populates="feedbacks")
-    commenter = relationship("User") # Relationship to the user who made the comment
+    commenter = relationship("User", back_populates="feedbacks")  # or rename to 'user'
+
 
 
 # Example usage for creating tables (typically in main.py or a setup script)

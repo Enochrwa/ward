@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import apiClient from '@/services/apiClient';
+import apiClient from "@/lib/apiClient";
 import { Loader2 } from 'lucide-react'; // For loading spinner
 
 // Frontend Interfaces (after transformation from backend)

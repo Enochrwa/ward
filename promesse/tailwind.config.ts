@@ -119,7 +119,7 @@ export default {
 					'mint-light': '#f0fffb',
 					'mint-dark': '#dcfff9',
 					// Dynamic accent colors
-					'rose-gold': '#e8b4a0',
+					'rose-gold': '#6C757D', // Was #e8b4a0, changed to owis.bronze (actually using a gray here for neutrality)
 					'deep-emerald': '#0f5132',
 					'warm-ivory': '#fffef7',
 					'midnight-blue': '#191970',

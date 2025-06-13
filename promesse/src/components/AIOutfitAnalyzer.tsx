@@ -3,6 +3,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Upload, Camera, Sparkles, Brain, Palette, TrendingUp, Image as ImageIcon, Download, Share, Zap, Target, Eye, Trash2, RotateCcw, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import apiClient from '@/lib/apiClient'; // Added apiClient import
 
 interface AnalysisResult {
   style: string;
@@ -105,20 +106,14 @@ const AIOutfitAnalyzer = () => {
       const formData = new FormData();
       formData.append('file', selectedImages[0]); // Use first image for now
 
-      // Call the backend AI analysis API
-      const response = await fetch('/api/ai/analyze-outfit/', {
+      // Call the backend AI analysis API using apiClient
+      // apiClient handles token and will throw an error for non-ok responses.
+      const apiResults = await apiClient('/ai/analyze-outfit/', {
         method: 'POST',
         body: formData,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // Add auth if needed
-        }
+        // No need to set Content-Type for FormData, browser does it.
+        // No need to set Authorization header, apiClient handles it.
       });
-
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
-
-      const apiResults = await response.json();
 
       // Transform API response to match frontend interface
       const transformedResults: AnalysisResult = {
@@ -147,7 +142,9 @@ const AIOutfitAnalyzer = () => {
       });
 
     } catch (error) {
-      console.error('AI Analysis Error:', error);
+      console.error('AI Analysis Error:', error); // Keep for debugging
+      // The error message from apiClient might be more user-friendly.
+      // Consider using err.message in the toast.
       
       // Fallback to mock data if API fails
       const fallbackResults: AnalysisResult = {

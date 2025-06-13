@@ -86,7 +86,7 @@ const Header = () => {
             <div className="w-10 h-10 bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
               <span className="text-white font-bold text-lg">O</span>
             </div>
-            <span className="font-heading font-bold text-xl bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">OWIS</span>
+            <span className="font-heading font-bold text-xl bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">DWS</span>
           </Link>
 
           {/* Desktop Navigation */}

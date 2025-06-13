@@ -14,8 +14,8 @@ const Footer = () => {
                 <span className="text-owis-forest font-bold text-lg">O</span>
               </div>
               <div className="flex flex-col">
-                <span className="font-heading font-bold text-xl leading-none">OWIS</span>
-                <span className="text-sm text-white/70 leading-none">Omni-Wardrobe Intelligence System</span>
+                <span className="font-heading font-bold text-xl leading-none">DWS</span>
+                <span className="text-sm text-white/70 leading-none">DIGITAL WARDROBE SYSTEM</span>
               </div>
             </div>
             <p className="text-white/80 mb-6 max-w-md">
@@ -55,7 +55,7 @@ const Footer = () => {
         <div className="border-t border-white/20 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-white/60 text-sm">
-              © {new Date().getFullYear()} OWIS. All rights reserved.
+              © {new Date().getFullYear()} DWS. All rights reserved.
             </div>
             <div className="flex space-x-6 text-sm text-white/60">
               <a href="#" className="hover:text-owis-purple transition-colors">Privacy</a>

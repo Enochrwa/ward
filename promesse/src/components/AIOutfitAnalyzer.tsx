@@ -176,8 +176,8 @@ const AIOutfitAnalyzer = () => {
       setAnalysisResults(fallbackResults);
       
       toast({
-        title: "⚠️ Using Demo Mode",
-        description: "Connected to demo data. Backend API not available.",
+        title: "⚠️ Analysis Error",
+        description: "Could not connect to the AI analysis service. Showing example results instead. Please try again later.",
         variant: "destructive"
       });
     }

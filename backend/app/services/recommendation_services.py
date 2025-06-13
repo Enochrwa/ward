@@ -80,12 +80,13 @@ def find_ai_matched_outfits_for_occasion(
             item = assoc_obj.item # This is the WardrobeItem model
             if not item: continue
 
-            # Mock AI features if not present (embedding dim for all-MiniLM-L6-v2 is 384)
-            item_emb_list = getattr(item, "embedding", None)
+            # Use actual AI embedding if available, otherwise mock (embedding dim for all-MiniLM-L6-v2 is 384)
+            item_emb_list = item.ai_embedding
             if item_emb_list is None:
                 item_emb_list = np.random.rand(384).tolist()
 
-            item_colors = getattr(item, "ai_colors", None)
+            # Use actual AI dominant colors if available, otherwise mock
+            item_colors = item.ai_dominant_colors
             if item_colors is None:
                 item_colors = random.sample(["#1A1A1A", "#FFFFFF", "#FF0000", "#00FF00", "#0000FF"], k=min(2, len(["#1A1A1A", "#FFFFFF", "#FF0000", "#00FF00", "#0000FF"])))
 
@@ -241,13 +242,13 @@ async def get_wardrobe_recommendations_service(
     # Process items to ensure they have AI features (mocked if not present)
     processed_user_items: List[Dict[str, Any]] = []
     for item in user_items: # Corrected variable name from user_items_from_db
-        # Mock embedding if not present or None
-        embedding = getattr(item, "embedding", None)
+        # Use actual AI embedding if available, otherwise mock
+        embedding = item.ai_embedding
         if embedding is None: # Check covers both missing attr and attr is None
             embedding = np.random.rand(512).tolist() # Example ViT-base embedding
 
-        # Mock ai_colors if not present or None
-        ai_colors = getattr(item, "ai_colors", None)
+        # Use actual AI dominant colors if available, otherwise mock
+        ai_colors = item.ai_dominant_colors
         if ai_colors is None:
             ai_colors = random.sample(["#1A1A1A", "#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#F0F0F0"], k=2)
 

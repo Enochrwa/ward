@@ -29,6 +29,17 @@ class Token(BaseModel):
     class Config:
         from_attributes = True
 
+class EventDetailsInput(BaseModel):
+    event_type: str
+    location: Optional[str] = None
+    weather: Optional[str] = None # e.g., "hot", "mild", "cold"
+    time_of_day: Optional[str] = None # e.g., "morning", "evening"
+    formality: Optional[str] = None # e.g., "casual", "smart_casual", "formal"
+    notes: Optional[str] = None # To capture any extra details from user input
+
+    class Config:
+        from_attributes = True
+
 class UserLogin(BaseModel):
     emailOrUsername: str
     password: str
@@ -50,6 +61,8 @@ class WardrobeItem(BaseModel):
     date_added: datetime
     last_worn: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    ai_embedding: Optional[List[float]] = None
+    ai_dominant_colors: Optional[List[str]] = None
 
     class Config:
         from_attributes = True
@@ -275,6 +288,81 @@ class PersonalizedWardrobeSuggestions(BaseModel):
     class Config:
         from_attributes = True
 
+# AI Style Insights Schemas
+class StyleProfileData(BaseModel):
+    primary_style: Optional[str] = None
+    secondary_styles: Optional[List[str]] = None
+    color_preferences: Optional[List[str]] = None
+    body_type: Optional[str] = None
+    lifestyle: Optional[str] = None
+    brand_alignment: Optional[List[str]] = None
+    fashion_goals: Optional[List[str]] = None
+
+    class Config:
+        from_attributes = True
+
+class StyleProfileInsights(BaseModel):
+    style_confidence_score: Optional[float] = None # e.g., 0.0 to 1.0
+    wardrobe_versatility_score: Optional[float] = None # e.g., 0.0 to 1.0
+    style_summary: Optional[str] = None # Textual summary of overall style
+
+    class Config:
+        from_attributes = True
+
+class UserStyleProfileResponse(BaseModel):
+    profile_data: StyleProfileData
+    generated_insights: StyleProfileInsights
+
+    class Config:
+        from_attributes = True
+
+class WardrobeAnalysisDetails(BaseModel):
+    total_items: int
+    category_breakdown: Dict[str, int]
+    color_distribution: Dict[str, int]
+    brand_diversity_score: Optional[float] = None # Score from 0.0 to 1.0
+    average_item_price: Optional[float] = None
+    style_consistency_score: Optional[float] = None # Score from 0.0 to 1.0
+    wardrobe_gaps: Optional[List[str]] = None # e.g., ["Formal Evening Wear", "Summer Tops"]
+    improvement_suggestions: Optional[List[str]] = None
+
+    class Config:
+        from_attributes = True
+
+class PersonalizedGeneralInsight(BaseModel):
+    id: str
+    insight_type: str # e.g., "style", "color", "fit", "occasion", "trend_alignment"
+    title: str
+    description: str
+    actionable_advice: str
+    confidence_score: float # e.g., 0.0 to 1.0
+    impact_level: str # e.g., "high", "medium", "low"
+
+    class Config:
+        from_attributes = True
+
+class AIStyleInsightOutfitRecommendation(BaseModel):
+    outfit_id: Optional[int] = None # If it's an existing outfit
+    outfit_name: str
+    description: str # Why this outfit is recommended
+    image_url: Optional[str] = None
+    items: List[WardrobeItem] # List of items in the recommended outfit - Direct reference
+    confidence_score: float
+    style_match_notes: Optional[str] = None
+    occasion_suitability: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class FullAIStyleInsightsResponse(BaseModel):
+    user_profile: UserStyleProfileResponse
+    wardrobe_analysis: WardrobeAnalysisDetails
+    personalized_insights: List[PersonalizedGeneralInsight]
+    suggested_outfits: List[AIStyleInsightOutfitRecommendation]
+
+    class Config:
+        from_attributes = True
+
 # User Profile Schemas
 class UserProfileBase(BaseModel):
     preferred_styles: Optional[List[str]] = None
@@ -348,4 +436,16 @@ CategoryUsage.model_rebuild()
 OutfitAnalysisResponse.model_rebuild()
 TrendForecastResponse.model_rebuild()
 PersonalizedWardrobeSuggestions.model_rebuild()
+
+# AI Style Insights Schemas Rebuild
+StyleProfileData.model_rebuild()
+StyleProfileInsights.model_rebuild()
+UserStyleProfileResponse.model_rebuild()
+WardrobeAnalysisDetails.model_rebuild()
+PersonalizedGeneralInsight.model_rebuild()
+AIStyleInsightOutfitRecommendation.model_rebuild()
+FullAIStyleInsightsResponse.model_rebuild()
+
+EventDetailsInput.model_rebuild() # Added EventDetailsInput
+
 UserLogin.model_rebuild() # Add UserLogin to model_rebuild

@@ -28,6 +28,7 @@ os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 # Basic logging configuration
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
+Base.metadata.drop_all(bind=database.engine)
 Base.metadata.create_all(bind=database.engine) # This creates tables if they don't exist
 app = FastAPI()
 

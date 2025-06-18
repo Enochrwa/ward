@@ -1,23 +1,16 @@
 # This module provides functions for identifying items in an image using lightweight models
 # and for generating basic recommendations.
 # It uses EfficientDet-Lite0 from TensorFlow Hub for object detection.
+# Enhanced with persistent caching to prevent re-downloading models.
 
 import tensorflow as tf
-import tensorflow_hub as hub
 from PIL import Image, ImageDraw # Pillow for image manipulation
 import numpy as np
 from typing import List, Dict, Union, Any
-import logging # Added for logging
+import logging
+from .model_manager import get_model_manager
 
-# Global variables for the object detection model
-object_detector_model = None
-DETECTOR_LOADED = False
-# Using EfficientDet-Lite0, a lightweight model from TF Hub
-# You might need to adjust the URL based on the specific version or task.
-# This one is a common choice for general object detection.
-DETECTOR_URL = "https://tfhub.dev/tensorflow/efficientdet/lite0/detection/1"
-
-logger = logging.getLogger(__name__) # Added logger
+logger = logging.getLogger(__name__)
 
 # COCO class names - EfficientDet models trained on COCO typically output IDs.
 # We need a mapping to human-readable labels.
@@ -48,26 +41,9 @@ FASHION_ITEMS_LABELS = ["person", "backpack", "umbrella", "handbag", "tie", "sui
                         "sports ball", "bottle", "wine glass", "cup", "hat", "shoe", "sunglasses", # Some models might have these
                         "watch", "scarf", "belt"]
 
-
-def _load_detector_model():
-    """Loads the EfficientDet-Lite0 model from TensorFlow Hub."""
-    global object_detector_model, DETECTOR_LOADED
-    if not DETECTOR_LOADED:
-        try:
-            logger.info(f"Loading EfficientDet-Lite0 model from {DETECTOR_URL}...")
-            # This model expects tf.uint8 images with shape [1, height, width, 3]
-            # Values in range [0, 255].
-            object_detector_model = hub.load(DETECTOR_URL)
-            DETECTOR_LOADED = True
-            logger.info("EfficientDet-Lite0 model loaded successfully.")
-        except Exception as e:
-            object_detector_model = None
-            DETECTOR_LOADED = False
-            logger.error(f"Error loading EfficientDet-Lite0 model: {e}")
-
 def identify_items(image: Image.Image, confidence_threshold=0.3) -> Union[List[Dict[str, Any]], str]:
     """
-    Identifies items in an image using EfficientDet-Lite0.
+    Identifies items in an image using EfficientDet-Lite0 with persistent caching.
 
     Args:
         image: A PIL Image object.
@@ -78,12 +54,12 @@ def identify_items(image: Image.Image, confidence_threshold=0.3) -> Union[List[D
         and 'box' for a detected item, or a string with an error message.
         Returns an empty list if no relevant items are found.
     """
-    global object_detector_model, DETECTOR_LOADED
-
-    if not DETECTOR_LOADED and object_detector_model is None:
-        _load_detector_model()
-
-    if not object_detector_model:
+    model_manager = get_model_manager()
+    
+    # Get the model (from cache or download)
+    model = model_manager.get_model("efficientdet_lite0")
+    
+    if model is None:
         return "Error: Item identification model (EfficientDet-Lite0) could not be loaded."
 
     try:
@@ -98,7 +74,7 @@ def identify_items(image: Image.Image, confidence_threshold=0.3) -> Union[List[D
 
         # Perform detection
         # The model returns a dictionary of tensors.
-        detector_outputs = object_detector_model(image_tensor)
+        detector_outputs = model(image_tensor)
 
         # Process results
         # These keys are standard for TF Object Detection API models on TF Hub
@@ -192,38 +168,32 @@ if __name__ == '__main__':
             logger.warning("test_image.jpg not found. Using a dummy white image for detection testing.")
 
         logger.info("Attempting to identify items in the image...")
-        # Ensure model is loaded for the test
-        if not DETECTOR_LOADED and object_detector_model is None:
-            _load_detector_model()
-
-        if object_detector_model:
-            items_result = identify_items(test_img, confidence_threshold=0.2) # Lower threshold for dummy image
-            if isinstance(items_result, list):
-                if items_result:
-                    logger.info(f"Successfully identified items (first 3): {items_result[:3]}")
-                    for item in items_result:
-                        logger.info(f"  - Label: {item['label']}, Confidence: {item['confidence']:.2f}")
-                    recommendations = get_basic_recommendations(items_result)
-                    logger.info("Recommendations:")
-                    for rec in recommendations:
-                        logger.info(f"  - {rec}")
-                else:
-                    logger.info("No items identified in the dummy image, which is expected.")
-                    recommendations = get_basic_recommendations(items_result) # Test with empty list
-                    logger.info("Recommendations (for no items):")
-                    for rec in recommendations:
-                        logger.info(f"  - {rec}")
-
-            elif isinstance(items_result, str) and items_result.startswith("No items identified"):
-                logger.info(items_result) # Expected for a blank image
-                recommendations = get_basic_recommendations([])
+        
+        items_result = identify_items(test_img, confidence_threshold=0.2) # Lower threshold for dummy image
+        if isinstance(items_result, list):
+            if items_result:
+                logger.info(f"Successfully identified items (first 3): {items_result[:3]}")
+                for item in items_result:
+                    logger.info(f"  - Label: {item['label']}, Confidence: {item['confidence']:.2f}")
+                recommendations = get_basic_recommendations(items_result)
+                logger.info("Recommendations:")
+                for rec in recommendations:
+                    logger.info(f"  - {rec}")
+            else:
+                logger.info("No items identified in the dummy image, which is expected.")
+                recommendations = get_basic_recommendations(items_result) # Test with empty list
                 logger.info("Recommendations (for no items):")
                 for rec in recommendations:
                     logger.info(f"  - {rec}")
-            else: # Error string
-                logger.error(f"Item identification failed: {items_result}")
-        else:
-            logger.warning("Skipping example usage as object detector model failed to load.")
+
+        elif isinstance(items_result, str) and items_result.startswith("No items identified"):
+            logger.info(items_result) # Expected for a blank image
+            recommendations = get_basic_recommendations([])
+            logger.info("Recommendations (for no items):")
+            for rec in recommendations:
+                logger.info(f"  - {rec}")
+        else: # Error string
+            logger.error(f"Item identification failed: {items_result}")
 
     except Exception as e:
         logger.error(f"Error in example usage: {e}")

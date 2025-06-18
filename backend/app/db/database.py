@@ -13,8 +13,18 @@ CA_CERT = os.getenv("CA_CERT")  # Full certificate content (multiline or \n)
 def create_database_engine():
     """Create database engine with proper SSL configuration for Aiven MySQL"""
     
+    # Use SQLite for development if no DATABASE_URL is provided
     if not DATABASE_URL:
-        raise ValueError("DATABASE_URL environment variable is required")
+        db_path = os.path.join(os.path.dirname(__file__), "..", "..", "digital_wardrobe.db")
+        database_url = f"sqlite:///{db_path}"
+        print(f"Using SQLite database: {database_url}")
+        
+        engine = create_engine(
+            database_url,
+            pool_pre_ping=True,
+            echo=False
+        )
+        return engine
     
     # Check if we need SSL configuration (for Aiven MySQL)
     if CA_CERT and CA_CERT.strip():
@@ -72,3 +82,4 @@ def test_database_connection():
     except Exception as e:
         print(f"Database connection failed: {e}")
         return False
+

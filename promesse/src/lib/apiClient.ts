@@ -4,7 +4,7 @@ import { PersonalizedWardrobeSuggestions } from '@/types/recommendationTypes';
 import { Feedback, FeedbackCreate } from '@/types/outfitTypes';
 
 // Base URL from environment or fallback
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://wardrobe-system-backend.onrender.com';
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:8000';
 
 // Helper: get auth token from localStorage
 const getAuthToken = () => localStorage.getItem('token');

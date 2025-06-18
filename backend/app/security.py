@@ -26,7 +26,10 @@ def get_password_hash(password):
 # JWT Token
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
-    raise ValueError("No SECRET_KEY set for the application")
+    # Use a default secret key for development
+    SECRET_KEY = "development-secret-key-change-in-production-12345678901234567890"
+    print("Warning: Using default SECRET_KEY for development. Change this in production!")
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

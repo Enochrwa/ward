@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import AddItemModal from './AddItemModal';
 import EditItemModal from './EditItemModal'; // Added EditItemModal import
-import apiClient from '@/lib/apiClient'; // Added apiClient
+import apiClient, { addItem, updateItem } from '@/lib/apiClient'; // Added apiClient and specific functions
 import { useAuth } from '@/hooks/useAuth'; // Added useAuth
 import { useToast } from "@/components/ui/use-toast"; // Added useToast
 import  LoadingSpinner  from '@/components/ui/loading'; // Added LoadingSpinner
@@ -121,7 +121,7 @@ const WardrobeManager = () => {
     }
     try {
       // Use the new addItem function from apiClient which handles FormData
-      const savedItem = await apiClient.addItem(newItemData, imageFile);
+      const savedItem = await addItem(newItemData, imageFile);
 
       fetchItems(); // Re-fetch to get the latest list
       setIsAddModalOpen(false);

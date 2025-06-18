@@ -261,7 +261,7 @@ const AIStyleInsights = () => {
       case 'color': return <BarChart3 size={18} className="mr-2 text-blue-500" />;
       case 'fit': return <Target size={18} className="mr-2 text-green-500" />;
       case 'occasion': return <Users size={18} className="mr-2 text-purple-500" />;
-      case 'trend': return <TrendingUp size={18} className="mr-2 text-yellow-500" />;
+      case 'trend': return <TrendingUp size={18} className="mr-2 text-orange-500" />;
       case 'wardrobe_balance': return <PieChart size={18} className="mr-2 text-indigo-500" />;
       default: return <Lightbulb size={18} className="mr-2 text-gray-500" />;
     }

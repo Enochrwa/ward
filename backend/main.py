@@ -21,6 +21,7 @@ from app.routers import (
     recommendations,
     user_profile,
     community,
+    model_cache,  # Added model cache router
 )
 
 # Disable oneDNN optimizations if desired
@@ -34,10 +35,33 @@ async def lifespan(app: FastAPI):
     """
     Use FastAPI lifespan event to manage app startup and shutdown.
     Execute DDL statements in development mode only.
+    Preload AI models for better performance.
     """
     if os.getenv("ENV") == "development" and os.getenv("RUN_MAIN") == "true":
         Base.metadata.drop_all(bind=database.engine)
         Base.metadata.create_all(bind=database.engine)
+    
+    # Preload AI models on startup
+    try:
+        from app.services.model_manager import get_model_manager
+        model_manager = get_model_manager()
+        logging.info("Preloading AI models...")
+        
+        # Preload models in background
+        for model_name in ["mobilenet_v2", "efficientdet_lite0"]:
+            try:
+                model = model_manager.get_model(model_name)
+                if model is not None:
+                    logging.info(f"Model {model_name} preloaded successfully")
+                else:
+                    logging.warning(f"Failed to preload model {model_name}")
+            except Exception as e:
+                logging.error(f"Error preloading model {model_name}: {e}")
+        
+        logging.info("AI models preloading completed")
+    except Exception as e:
+        logging.error(f"Error during model preloading: {e}")
+    
     yield
 
 app = FastAPI(lifespan=lifespan)
@@ -49,6 +73,7 @@ origins = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5713",
     "https://digital-wardrobe-system.vercel.app",
+    "*",  # Allow all origins for development
 ]
 
 app.add_middleware(
@@ -75,13 +100,20 @@ app.include_router(ai_analyzer.router, prefix="/api")
 app.include_router(recommendations.router, prefix="/api")
 app.include_router(user_profile.router, prefix="/api")
 app.include_router(community.router, prefix="/api")
+app.include_router(model_cache.router, prefix="/api")  # Added model cache router
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Digital Wardrobe System API", "status": "running"}
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for deployment monitoring"""
+    return {"status": "healthy", "service": "digital-wardrobe-backend"}
 
 # Entry point
 if __name__ == "__main__":
+    import uvicorn
     # In development, reload=True will set RUN_MAIN for our startup guard
     uvicorn.run(
         "main:app",
